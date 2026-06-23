@@ -81,9 +81,9 @@
             @endif
         </div>
 
-        @if(in_array($ticket->status, ['open','assigned','postponed','not_fixed','rejected']))
+        @if($ticket->status !== 'closed')
         <div class="card p-3">
-            <h6 class="fw-bold">الإسناد لفني</h6>
+            <h6 class="fw-bold">الإسناد / إعادة الإسناد لفني</h6>
             <form method="POST" action="{{ route('tickets.assign', $ticket) }}">
                 @csrf
                 <select name="employee_id" class="form-select form-select-sm mb-2" required>

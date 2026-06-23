@@ -21,7 +21,7 @@
                 <td class="text-center">{!! $u->is_department_manager ? '<i class="bi bi-check-circle-fill text-success"></i>' : '' !!}</td>
                 <td class="text-center">{!! $u->active ? '<span class="badge text-bg-success">Active</span>' : '<span class="badge text-bg-secondary">Off</span>' !!}</td>
                 <td class="text-end">
-                    <button class="btn btn-sm btn-link p-0 me-2 edit-user" data-u='@json($u)'>Edit</button>
+                    <button class="btn btn-sm btn-link p-0 me-2 edit-user" data-u='@json($u)' data-branches='@json($u->branches->pluck("id"))'>Edit</button>
                     <form method="POST" action="{{ route('users.destroy', $u) }}" class="d-inline" onsubmit="return confirm('Delete this user?')">
                         @csrf @method('DELETE')<button class="btn btn-sm btn-link text-danger p-0">Del</button>
                     </form>
@@ -62,11 +62,18 @@
                     </div>
                 </div>
                 <div class="mt-2">
-                    <label class="form-label small">Branch <span class="text-muted">(for Store Manager / branch users)</span></label>
+                    <label class="form-label small">Branch <span class="text-muted">(Store Manager's single branch)</span></label>
                     <select name="branch_id" id="uBranch" class="form-select">
                         <option value="">—</option>
                         @foreach($branches as $b)<option value="{{ $b->id }}">{{ $b->branch_name }}</option>@endforeach
                     </select>
+                </div>
+                <div class="mt-2">
+                    <label class="form-label small">Covered branches <span class="text-muted">(Area Manager region / Technician branches — multi)</span></label>
+                    <select name="branch_ids[]" id="uBranches" class="form-select" multiple size="6">
+                        @foreach($branches as $b)<option value="{{ $b->id }}">{{ $b->branch_name }}</option>@endforeach
+                    </select>
+                    <div class="form-text">للفني: المشاكل في الفروع دي بتتسند له تلقائياً. Ctrl/Cmd-click لاختيار أكتر من فرع.</div>
                 </div>
                 <div class="form-check mt-2"><input type="checkbox" name="is_department_manager" value="1" class="form-check-input" id="uMgr"><label class="form-check-label small" for="uMgr">Department manager</label></div>
                 <div class="form-check"><input type="checkbox" name="active" value="1" class="form-check-input" id="uActive" checked><label class="form-check-label small" for="uActive">Active</label></div>
@@ -88,6 +95,7 @@ function prepUser() {
     document.getElementById('uRole').value = '';
     document.getElementById('uDept').value = '';
     document.getElementById('uBranch').value = '';
+    Array.from(document.getElementById('uBranches').options).forEach(o => o.selected = false);
     document.getElementById('uMgr').checked = false;
     document.getElementById('uActive').checked = true;
     document.getElementById('uPwHint').textContent = '(required)';
@@ -106,6 +114,8 @@ document.querySelectorAll('.edit-user').forEach(btn => btn.addEventListener('cli
     document.getElementById('uRole').value = u.role_id || '';
     document.getElementById('uDept').value = u.department_id || '';
     document.getElementById('uBranch').value = u.branch_id || '';
+    const covered = (JSON.parse(btn.dataset.branches || '[]')).map(String);
+    Array.from(document.getElementById('uBranches').options).forEach(o => o.selected = covered.includes(o.value));
     document.getElementById('uMgr').checked = !!u.is_department_manager;
     document.getElementById('uActive').checked = !!u.active;
     new bootstrap.Modal(document.getElementById('userModal')).show();

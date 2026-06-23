@@ -15,7 +15,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with(['role', 'department', 'branch'])->orderBy('name')->get();
+        $users = User::with(['role', 'department', 'branch', 'branches'])->orderBy('name')->get();
         $roles = Role::orderBy('name')->get();
         $departments = Department::orderBy('name')->get();
         $branches = Branch::orderBy('branch_name')->get();
@@ -61,9 +61,14 @@ class UserController extends Controller
             'role_id' => ['nullable', 'exists:roles,id'],
             'department_id' => ['nullable', 'exists:departments,id'],
             'branch_id' => ['nullable', 'exists:branches,id'],
+            'branch_ids' => ['nullable', 'array'],
+            'branch_ids.*' => ['exists:branches,id'],
             'is_department_manager' => ['nullable', 'boolean'],
             'active' => ['nullable', 'boolean'],
         ]);
+
+        $branchIds = $data['branch_ids'] ?? [];
+        unset($data['branch_ids']);
 
         $data['is_department_manager'] = $request->boolean('is_department_manager');
         $data['active'] = $request->boolean('active');
@@ -75,6 +80,7 @@ class UserController extends Controller
         }
 
         $user->update($data);
+        $user->branches()->sync($branchIds);
 
         return back()->with('status', 'User updated.');
     }

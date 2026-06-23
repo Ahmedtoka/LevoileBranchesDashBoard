@@ -83,5 +83,23 @@ class UserSeeder extends Seeder
                 );
             }
         }
+
+        // Demo coverage: technicians responsible for branches (auto-assign), area manager region.
+        $byName = fn ($names) => Branch::whereIn('branch_name', $names)->pluck('id')->all();
+
+        $emp1 = User::where('email', 'maintenance.emp1@levoile.test')->first();
+        $emp2 = User::where('email', 'maintenance.emp2@levoile.test')->first();
+        $area = User::where('email', 'area@levoile.test')->first();
+
+        $emp1?->branches()->sync($byName([
+            'Maadi - Maadi 1', 'Maadi - Maadi 2', 'Alexandria - San Stefano Mall', 'Alexandria - Smouha',
+        ]));
+        $emp2?->branches()->sync($byName([
+            '6th of October - Mall of Egypt Store', '6th of October - Mall of Arabia',
+            'Nasr City - Abbas El Akkad', 'Mansoura - Mansoura Store',
+        ]));
+        $area?->branches()->sync($byName([
+            'Maadi - Maadi 1', 'Maadi - Maadi 2', 'Nasr City - Abbas El Akkad', 'Nasr City - Gnena Mall',
+        ]));
     }
 }
