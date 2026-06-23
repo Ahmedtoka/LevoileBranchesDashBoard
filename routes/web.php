@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\BranchController;
+use App\Http\Controllers\Web\CoverageController;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\DepartmentController;
 use App\Http\Controllers\Web\LoginController;
@@ -47,6 +48,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
     Route::post('/tickets/{ticket}/assign', [TicketController::class, 'assign'])->name('tickets.assign');
     Route::post('/tickets/{ticket}/transition', [TicketController::class, 'transition'])->name('tickets.transition');
+
+    // ---- Branch coverage ----
+    Route::get('/coverage', [CoverageController::class, 'index'])->name('coverage.index');
+    Route::post('/coverage/{user}', [CoverageController::class, 'update'])->name('coverage.update');
 
     // ---- Maintenance command center ----
     Route::get('/maintenance', [MaintenanceDashboardController::class, 'index'])->name('maintenance.index');
