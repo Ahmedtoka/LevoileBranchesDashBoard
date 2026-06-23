@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MaintenanceController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\VisitController;
 use Illuminate\Support\Facades\Route;
@@ -13,6 +14,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/profile/password', [ProfileController::class, 'changePassword']);
+    Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar']);
 
     // ---- Visits ----
     Route::get('/checklist/today', [VisitController::class, 'today']);
@@ -40,6 +43,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/departments/tickets', [TicketController::class, 'department']);
     Route::get('/departments/overview', [TicketController::class, 'departmentOverview']);
     Route::get('/departments/employees', [TicketController::class, 'departmentEmployees']);
+    Route::get('/departments/branches', [TicketController::class, 'departmentBranches']);
+    Route::get('/departments/branch-tickets', [TicketController::class, 'branchTickets']);
+    Route::get('/departments/technicians', [TicketController::class, 'technicians']);
+    Route::get('/departments/technician-tickets', [TicketController::class, 'technicianTickets']);
+    Route::post('/departments/assign-bulk', [TicketController::class, 'assignBulk']);
 
     // ---- Maintenance requests ----
     Route::get('/maintenance/items', [MaintenanceController::class, 'items']);

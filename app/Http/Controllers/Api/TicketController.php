@@ -86,7 +86,11 @@ class TicketController extends Controller
     public function departmentOverview(Request $request): JsonResponse
     {
         $deptId = $request->query('department_id', $request->user()->department_id);
-        $base = Ticket::where('department_id', $deptId);
+        $from = $request->query('from');
+        $to = $request->query('to');
+        $base = Ticket::where('department_id', $deptId)
+            ->when($from, fn ($x) => $x->where('created_at', '>=', $from))
+            ->when($to, fn ($x) => $x->where('created_at', '<=', $to));
 
         $openBase = (clone $base)->whereNotIn('status', ['closed', 'waiting_approval']);
 
@@ -232,6 +236,143 @@ class TicketController extends Controller
         return response()->json(['data' => $employees]);
     }
 
+    /** GET /api/departments/branches?from=&to= — per-branch summary for the department. */
+    public function departmentBranches(Request $request): JsonResponse
+    {
+        $deptId = $request->query('department_id', $request->user()->department_id);
+        $from = $request->query('from');
+        $to = $request->query('to');
+
+        $base = Ticket::where('department_id', $deptId);
+        if ($from) {
+            $base->where('created_at', '>=', $from);
+        }
+        if ($to) {
+            $base->where('created_at', '<=', $to);
+        }
+
+        $rows = (clone $base)->with('branch')->get()->groupBy('branch_id')->map(function ($group) {
+            $first = $group->first();
+
+            return [
+                'branch_id' => $first->branch_id,
+                'branch' => optional($first->branch)->branch_name ?? '—',
+                'total' => $group->count(),
+                'new' => $group->where('status', 'open')->count(),
+                'in_progress' => $group->whereIn('status', ['assigned', 'on_the_way', 'in_progress'])->count(),
+                'closed' => $group->where('status', 'closed')->count(),
+                'open' => $group->whereNotIn('status', ['closed'])->count(),
+                'unassigned' => $group->whereNull('assigned_to')->whereNotIn('status', ['closed'])->count(),
+            ];
+        })->values()->sortByDesc('open')->values();
+
+        return response()->json(['data' => $rows]);
+    }
+
+    /** GET /api/departments/branch-tickets?branch_id=&status=open&from=&to= */
+    public function branchTickets(Request $request): JsonResponse
+    {
+        $deptId = $request->query('department_id', $request->user()->department_id);
+        $branchId = $request->query('branch_id');
+        $status = $request->query('status', 'all'); // open | closed | all
+        $from = $request->query('from');
+        $to = $request->query('to');
+
+        $q = Ticket::with(['branch', 'assignee'])
+            ->where('department_id', $deptId)
+            ->when($branchId, fn ($x) => $x->where('branch_id', $branchId))
+            ->when($status === 'open', fn ($x) => $x->whereNotIn('status', ['closed']))
+            ->when($status === 'closed', fn ($x) => $x->where('status', 'closed'))
+            ->when($from, fn ($x) => $x->where('created_at', '>=', $from))
+            ->when($to, fn ($x) => $x->where('created_at', '<=', $to))
+            ->latest();
+
+        return response()->json(['data' => $q->get()->map(fn ($t) => $this->item($t))]);
+    }
+
+    /** GET /api/departments/technicians — technicians with workload + branches that still have open tickets. */
+    public function technicians(Request $request): JsonResponse
+    {
+        $deptId = $request->query('department_id', $request->user()->department_id);
+
+        $techs = User::where('department_id', $deptId)
+            ->where('is_department_manager', false)
+            ->get(['id', 'name']);
+
+        $openTickets = Ticket::with('branch')
+            ->where('department_id', $deptId)
+            ->whereNotIn('status', ['closed'])
+            ->get();
+
+        $data = $techs->map(function ($u) use ($openTickets) {
+            $mine = $openTickets->where('assigned_to', $u->id);
+            $branches = $mine->groupBy('branch_id')->map(fn ($g) => [
+                'branch_id' => $g->first()->branch_id,
+                'branch' => optional($g->first()->branch)->branch_name ?? '—',
+                'open' => $g->count(),
+            ])->values();
+
+            return [
+                'id' => $u->id,
+                'name' => $u->name,
+                'open' => $mine->whereIn('status', ['assigned', 'on_the_way'])->count(),
+                'working' => $mine->where('status', 'in_progress')->count(),
+                'total_open' => $mine->count(),
+                'branches' => $branches,
+            ];
+        });
+
+        return response()->json([
+            'count' => $techs->count(),
+            'unassigned' => $openTickets->whereNull('assigned_to')->count(),
+            'data' => $data,
+        ]);
+    }
+
+    /** GET /api/departments/technician-tickets?technician_id=&branch_id= */
+    public function technicianTickets(Request $request): JsonResponse
+    {
+        $deptId = $request->query('department_id', $request->user()->department_id);
+        $techId = $request->query('technician_id');
+        $branchId = $request->query('branch_id');
+
+        $q = Ticket::with(['branch', 'assignee'])
+            ->where('department_id', $deptId)
+            ->where('assigned_to', $techId)
+            ->whereNotIn('status', ['closed'])
+            ->when($branchId, fn ($x) => $x->where('branch_id', $branchId))
+            ->latest();
+
+        return response()->json(['data' => $q->get()->map(fn ($t) => $this->item($t))]);
+    }
+
+    /** POST /api/departments/assign-bulk { ticket_ids:[], employee_id, scheduled_at } */
+    public function assignBulk(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'ticket_ids' => ['required', 'array', 'min:1'],
+            'ticket_ids.*' => ['integer', 'exists:tickets,id'],
+            'employee_id' => ['required', 'exists:users,id'],
+            'scheduled_at' => ['nullable', 'date'],
+        ]);
+
+        $employee = User::findOrFail($data['employee_id']);
+        $count = 0;
+        foreach ($data['ticket_ids'] as $id) {
+            $ticket = Ticket::find($id);
+            if (! $ticket) {
+                continue;
+            }
+            if (! empty($data['scheduled_at'])) {
+                $ticket->update(['scheduled_at' => $data['scheduled_at']]);
+            }
+            $this->service->assign($ticket, $employee, $request->user());
+            $count++;
+        }
+
+        return response()->json(['message' => "تم تعيين {$count} مهمة.", 'count' => $count]);
+    }
+
     protected function item(Ticket $t, bool $full = false): array
     {
         $base = [
@@ -246,6 +387,7 @@ class TicketController extends Controller
             'branch_id' => $t->branch_id,
             'department' => optional($t->department)->name,
             'assignee' => optional($t->assignee)->name,
+            'assigned_to' => $t->assigned_to,
             'due_at' => optional($t->due_at)->toDateTimeString(),
             'scheduled_at' => optional($t->scheduled_at)->toDateTimeString(),
             'overdue' => $t->isOverdue(),

@@ -68,6 +68,7 @@ class AuthController extends Controller
             'branch_id' => $user->branch_id,
             'branch_name' => optional($user->branch)->branch_name,
             'is_department_manager' => (bool) $user->is_department_manager,
+            'avatar_url' => $user->avatar_path ? asset('storage/'.$user->avatar_path) : null,
         ];
     }
 }
