@@ -76,7 +76,7 @@
                         <td>@include('partials.status-badge', ['status' => $t->status])</td>
                         <td class="text-end text-nowrap">
                             <button class="btn btn-sm btn-outline-primary py-0" data-bs-toggle="modal" data-bs-target="#assignModal"
-                                data-ticket="{{ $t->id }}" data-ref="{{ $t->reference }}">Assign</button>
+                                data-ticket="{{ $t->id }}" data-ref="{{ $t->reference }}">تعيين</button>
                             <a href="{{ route('tickets.show', $t) }}" class="btn btn-sm btn-outline-secondary py-0">Open</a>
                         </td>
                     </tr>
@@ -94,7 +94,7 @@
     <div class="modal-dialog">
         <form class="modal-content" method="POST" id="assignForm">
             @csrf
-            <div class="modal-header"><h6 class="modal-title">Assign ticket <span id="assignRef"></span></h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header"><h6 class="modal-title">تعيين التذكرة <span id="assignRef"></span></h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label small">Employee</label>

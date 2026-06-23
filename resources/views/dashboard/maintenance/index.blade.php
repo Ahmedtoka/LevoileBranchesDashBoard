@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <h4 class="fw-bold mb-0">مركز الصيانة <span class="text-muted fs-6">Maintenance Center</span></h4>
+    <h4 class="fw-bold mb-0">الصيانة</h4>
     <div class="d-flex gap-2">
         <form method="POST" action="{{ route('maintenance.generate') }}" onsubmit="return confirm('سيتم مسح كل التذاكر/الزيارات وتوليد داتا الديمو من الشيت. متابعة؟')">
             @csrf <button class="btn btn-success btn-sm"><i class="bi bi-magic"></i> توليد داتا ديمو</button>
@@ -23,41 +23,56 @@
 
 @include('partials.filterbar', ['range' => $range, 'searchable' => false])
 
-{{-- KPI boxes (clickable) --}}
+{{-- KPI boxes (clickable, with description) --}}
 <div class="row g-3 mb-3">
     @php $boxes = [
-        ['إجمالي', $stats['total'], 'dark', $link()],
-        ['مفتوحة', $stats['open'], 'warning', $link(['status'=>'open_group'])],
-        ['جديدة', $stats['new'], 'info', $link(['status'=>'open'])],
-        ['جاري العمل', $stats['in_progress'], 'primary', $link(['status'=>'in_progress'])],
-        ['مؤجّلة', $stats['postponed'], 'secondary', $link(['status'=>'postponed'])],
-        ['لم تُحل', $stats['not_fixed'], 'danger', $link(['status'=>'not_fixed'])],
-        ['مقفولة', $stats['closed'], 'success', $link(['status'=>'closed'])],
-        ['بقالها +يوم', $stats['over_1_day'], 'danger', $link(['status'=>'over_1_day'])],
+        ['إجمالي', $stats['total'], 'dark', $link(), 'كل تذاكر الصيانة في الفترة'],
+        ['مفتوحة', $stats['open'], 'warning', $link(['status'=>'open_group']), 'لسه محتاجة شغل (غير مقفولة)'],
+        ['جديدة', $stats['new'], 'info', $link(['status'=>'open']), 'وصلت ولسه ماتعيّنتش'],
+        ['جاري العمل', $stats['in_progress'], 'primary', $link(['status'=>'in_progress']), 'الفني شغّال عليها دلوقتي'],
+        ['مؤجّلة', $stats['postponed'], 'secondary', $link(['status'=>'postponed']), 'اتأجّلت (قطع غيار/سبب)'],
+        ['لم تُحل', $stats['not_fixed'], 'danger', $link(['status'=>'not_fixed']), 'الفني تعذّر إصلاحها'],
+        ['مقفولة', $stats['closed'], 'success', $link(['status'=>'closed']), 'تمّت واتقفلت'],
+        ['بقالها +يوم', $stats['over_1_day'], 'danger', $link(['status'=>'over_1_day']), 'مفتوحة من أكتر من 24 ساعة'],
     ]; @endphp
-    @foreach($boxes as [$l,$v,$c,$href])
+    @foreach($boxes as [$l,$v,$c,$href,$desc])
         <div class="col-md-3 col-6">
             <a href="{{ $href }}" target="_blank" class="text-decoration-none">
-                <div class="card stat-card p-3" style="cursor:pointer"><div class="text-muted small">{{ $l }} <i class="bi bi-box-arrow-up-right" style="font-size:.7rem"></i></div><div class="value text-{{ $c }}">{{ $v }}</div></div>
+                <div class="card stat-card p-3 h-100" style="cursor:pointer">
+                    <div class="text-muted small">{{ $l }} <i class="bi bi-box-arrow-up-right" style="font-size:.7rem"></i></div>
+                    <div class="value text-{{ $c }}">{{ $v }}</div>
+                    <div class="text-muted" style="font-size:.72rem;line-height:1.2">{{ $desc }}</div>
+                </div>
             </a>
         </div>
     @endforeach
 </div>
 
-{{-- Cycle funnel --}}
-<div class="card p-3 mb-3">
-    <h6 class="fw-bold mb-3">دورة الحالة (Cycle)</h6>
-    <div class="d-flex flex-wrap gap-2">
-        @foreach($cycle as $st => $cnt)
-            <a href="{{ $link(['status'=>$st]) }}" target="_blank" class="text-decoration-none">
-                <div class="border rounded px-3 py-2 text-center" style="min-width:110px">
-                    <div class="small text-muted">{{ Ticket::STATUS_AR[$st] ?? $st }}</div>
-                    <div class="fw-bold fs-5 text-{{ $statusColors[$st] === 'purple' ? 'dark' : $statusColors[$st] }}">{{ $cnt }}</div>
-                </div>
-            </a>
-            @if(!$loop->last)<div class="align-self-center text-muted">→</div>@endif
-        @endforeach
+{{-- Last 5 overdue tickets --}}
+<div class="card p-0 mb-3">
+    <div class="d-flex justify-content-between align-items-center p-3 pb-2">
+        <h6 class="fw-bold mb-0 text-danger"><i class="bi bi-exclamation-triangle"></i> آخر 5 تذاكر متأخرة</h6>
+        <a href="{{ $link(['status'=>'over_1_day']) }}" target="_blank" class="btn btn-sm btn-outline-danger">عرض كل المتأخرة</a>
     </div>
+    <table class="table table-hover align-middle mb-0">
+        <thead><tr><th>الرقم</th><th>المشكلة</th><th>الفرع</th><th>النوع</th><th>الفني</th><th>الأولوية</th><th>متأخرة من</th><th>الحالة</th></tr></thead>
+        <tbody>
+        @forelse($overdue as $t)
+            <tr onclick="window.location='{{ route('tickets.show', $t) }}'" style="cursor:pointer" class="table-danger">
+                <td class="small fw-semibold">{{ $t->reference }}</td>
+                <td>{{ Str::limit($t->title, 40) }}</td>
+                <td class="small">{{ optional($t->branch)->branch_name }}</td>
+                <td class="small">{{ $t->category }}</td>
+                <td class="small">{{ optional($t->assignee)->name ?? '— غير معيّن' }}</td>
+                <td>@include('partials.priority-badge', ['priority' => $t->priority])</td>
+                <td class="small text-danger">{{ $t->ageInHours() }} ساعة</td>
+                <td>@include('partials.status-badge', ['status' => $t->status])</td>
+            </tr>
+        @empty
+            <tr><td colspan="8" class="text-muted small p-3">لا توجد تذاكر متأخرة 🎉</td></tr>
+        @endforelse
+        </tbody>
+    </table>
 </div>
 
 <div class="row g-3">

@@ -77,13 +77,13 @@
                     </form>
                 @endforeach
             @else
-                <p class="small text-muted mb-0">{{ $ticket->status === 'closed' ? 'التذكرة مقفولة.' : 'لا توجد إجراءات الآن — بانتظار الإسناد.' }}</p>
+                <p class="small text-muted mb-0">{{ $ticket->status === 'closed' ? 'التذكرة مقفولة.' : 'لا توجد إجراءات الآن — بانتظار التعيين.' }}</p>
             @endif
         </div>
 
         @if($ticket->status !== 'closed')
         <div class="card p-3">
-            <h6 class="fw-bold">الإسناد / إعادة الإسناد لفني</h6>
+            <h6 class="fw-bold">التعيين / إعادة التعيين لفني</h6>
             <form method="POST" action="{{ route('tickets.assign', $ticket) }}">
                 @csrf
                 <select name="employee_id" class="form-select form-select-sm mb-2" required>
@@ -98,7 +98,7 @@
                         </select>
                     </div>
                 </div>
-                <button class="btn btn-sm btn-primary w-100">إسناد</button>
+                <button class="btn btn-sm btn-primary w-100">تعيين</button>
             </form>
         </div>
         @endif

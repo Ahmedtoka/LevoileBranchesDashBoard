@@ -42,11 +42,11 @@ class MaintenanceDashboardController extends Controller
         $byCategory = (clone $base)->selectRaw('category, count(*) total, sum(case when status not in ("closed","waiting_approval") then 1 else 0 end) open')
             ->whereNotNull('category')->groupBy('category')->orderByDesc('total')->get();
 
-        // Cycle funnel — counts per stage in order.
-        $cycle = [];
-        foreach (['open', 'assigned', 'on_the_way', 'in_progress', 'waiting_approval', 'postponed', 'not_fixed', 'closed'] as $s) {
-            $cycle[$s] = (clone $base)->where('status', $s)->count();
-        }
+        // Last 5 overdue tickets (open + past due) with details.
+        $overdue = (clone $base)->with(['branch', 'assignee'])
+            ->whereNotIn('status', ['closed', 'waiting_approval'])
+            ->whereNotNull('due_at')->where('due_at', '<', now())
+            ->orderBy('due_at')->limit(5)->get();
 
         // By technician.
         $byEmployee = User::where('department_id', $deptId)->where('is_department_manager', false)
@@ -62,7 +62,7 @@ class MaintenanceDashboardController extends Controller
             ->when($q, fn ($x) => $x->where('title', 'like', "%{$q}%")->orWhere('reference', 'like', "%{$q}%"))
             ->latest()->limit(12)->get();
 
-        return view('dashboard.maintenance.index', compact('range', 'stats', 'byBranch', 'byCategory', 'cycle', 'byEmployee', 'latest'));
+        return view('dashboard.maintenance.index', compact('range', 'stats', 'byBranch', 'byCategory', 'overdue', 'byEmployee', 'latest'));
     }
 
     /** Wipe all operational data (tickets, visits, notifications) — keeps structure. */

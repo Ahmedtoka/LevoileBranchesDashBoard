@@ -8,9 +8,15 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
-        :root { --lv: #1f2937; --lv-accent: #4f46e5; }
-        body { background: #f4f5f7; }
-        .sidebar { width: 250px; min-height: 100vh; background: var(--lv); color: #cbd5e1; position: fixed; }
+        :root { --lv: #4a0f33; --lv-accent: #9c1e6e; --bs-primary: #9c1e6e; }
+        body { background: #f7f4f6; }
+        /* Brand (Le Voile magenta) overrides for Bootstrap primary */
+        .btn-primary { --bs-btn-bg:#9c1e6e; --bs-btn-border-color:#9c1e6e; --bs-btn-hover-bg:#7a1656; --bs-btn-hover-border-color:#7a1656; --bs-btn-active-bg:#7a1656; }
+        .btn-outline-primary { --bs-btn-color:#9c1e6e; --bs-btn-border-color:#9c1e6e; --bs-btn-hover-bg:#9c1e6e; --bs-btn-hover-border-color:#9c1e6e; --bs-btn-active-bg:#9c1e6e; }
+        .text-primary { color:#9c1e6e !important; }
+        .bg-primary, .text-bg-primary { background-color:#9c1e6e !important; }
+        a { color: #9c1e6e; }
+        .sidebar { width: 250px; min-height: 100vh; background: var(--lv); color: #e7d6e2; position: fixed; }
         .sidebar .brand { color: #fff; font-weight: 700; letter-spacing: .5px; }
         .sidebar a { color: #cbd5e1; text-decoration: none; display: block; padding: .55rem .9rem; border-radius: .4rem; font-size: .9rem; }
         .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,.08); color: #fff; }
