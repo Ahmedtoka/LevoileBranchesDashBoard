@@ -24,6 +24,39 @@ class TicketController extends Controller
         return response()->json(['data' => $tickets->map(fn ($t) => $this->item($t))]);
     }
 
+    /** GET /api/my/requests — store manager's own requests: stats + list, by date range. */
+    public function myRequests(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $from = $request->query('from');
+        $to = $request->query('to');
+        $status = $request->query('status', 'all'); // open | closed | all
+
+        $base = Ticket::where('created_by', $userId);
+        if ($from) {
+            $base->where('created_at', '>=', $from);
+        }
+        if ($to) {
+            $base->where('created_at', '<=', $to);
+        }
+
+        $stats = [
+            'total' => (clone $base)->count(),
+            'new' => (clone $base)->where('status', 'open')->count(),
+            'assigned' => (clone $base)->whereIn('status', ['assigned', 'on_the_way'])->count(),
+            'in_progress' => (clone $base)->where('status', 'in_progress')->count(),
+            'waiting_approval' => (clone $base)->where('status', 'waiting_approval')->count(),
+        ];
+
+        $list = (clone $base)->with(['branch', 'assignee'])
+            ->when($status === 'open', fn ($q) => $q->whereNotIn('status', ['closed']))
+            ->when($status === 'closed', fn ($q) => $q->where('status', 'closed'))
+            ->latest()->get()
+            ->map(fn ($t) => $this->item($t));
+
+        return response()->json(['stats' => $stats, 'data' => $list]);
+    }
+
     /** GET /api/tickets/raised — problems raised by the current user (their visits). */
     public function raised(Request $request): JsonResponse
     {

@@ -37,6 +37,44 @@ class VisitController extends Controller
         ]);
     }
 
+    /** GET /api/checklist/today — store manager's daily checklist (auto-create, no check-in). */
+    public function today(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $branchId = $user->branch_id;
+        if (! $branchId) {
+            return response()->json(['message' => 'لا يوجد فرع مرتبط بحسابك.'], 422);
+        }
+
+        $template = \App\Models\VisitTemplate::where('type', 'store_manager')->where('active', true)->orderBy('id')->first()
+            ?? \App\Models\VisitTemplate::where('active', true)->orderBy('id')->first();
+        if (! $template) {
+            return response()->json(['message' => 'لا يوجد قالب شيك ليست مهيّأ.'], 422);
+        }
+
+        // Reuse an open visit for today, otherwise start a fresh one (store manager is on-site → skip check-in).
+        $visit = Visit::where('user_id', $user->id)
+            ->where('branch_id', $branchId)
+            ->whereDate('scheduled_date', today())
+            ->whereIn('status', ['assigned', 'checked_in', 'in_progress'])
+            ->latest()->first();
+
+        if (! $visit) {
+            $visit = Visit::create([
+                'user_id' => $user->id,
+                'branch_id' => $branchId,
+                'visit_template_id' => $template->id,
+                'scheduled_date' => today(),
+                'status' => 'in_progress',
+                'checked_in_at' => now(),
+                'checkin_simulated' => true,
+                'started_at' => now(),
+            ]);
+        }
+
+        return $this->show($request, $visit);
+    }
+
     /** GET /api/visits/{visit} — full details (also used for old read-only visits) */
     public function show(Request $request, Visit $visit): JsonResponse
     {
@@ -355,6 +393,10 @@ class VisitController extends Controller
             'branch_radius' => optional($v->branch)->checkin_radius,
             'checked_in' => (bool) $v->checked_in_at,
             'read_only' => $v->isReadOnly(),
+            'positives' => $v->positives_count,
+            'problems' => $v->problems_count,
+            'tickets' => $v->tickets_count,
+            'completed_at' => optional($v->completed_at)->toDateTimeString(),
         ];
     }
 

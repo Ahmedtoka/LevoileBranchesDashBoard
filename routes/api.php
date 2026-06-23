@@ -15,6 +15,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // ---- Visits ----
+    Route::get('/checklist/today', [VisitController::class, 'today']);
     Route::get('/visits', [VisitController::class, 'index']);
     Route::get('/visits/{visit}', [VisitController::class, 'show']);
     Route::post('/visits/{visit}/checkin', [VisitController::class, 'checkin']);
@@ -26,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ---- Tickets ----
     Route::get('/tickets/mine', [TicketController::class, 'mine']);
     Route::get('/tickets/raised', [TicketController::class, 'raised']);
+    Route::get('/my/requests', [TicketController::class, 'myRequests']);
     Route::get('/tickets/{ticket}', [TicketController::class, 'show']);
     Route::patch('/tickets/{ticket}/status', [TicketController::class, 'updateStatus']);
     Route::post('/tickets/{ticket}/evidence', [TicketController::class, 'uploadEvidence']);
