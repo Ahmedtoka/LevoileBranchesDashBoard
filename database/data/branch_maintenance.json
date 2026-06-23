@@ -1,0 +1,3980 @@
+[
+{
+"branch": "Maadi - Maadi 2",
+"category": "نقاشة",
+"request": "يوجد العديد من الفتحات الصغيره بالسقف تحتاج إلي سد / يوجد عدد 2 خبطه صغيره بالفتينج روم تحتاج إلي معجون",
+"status": "open",
+"date": "2025-12-20",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نقاشة",
+"request": "‏دهان ‏ الاطار بتاع المرايا ‏و ‏بعض الاجزاء في الفرع و السقف",
+"status": "open",
+"date": "2026-01-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نقاشة",
+"request": "حائط خلف الويندو يحتاج الي دهان- حائط ف الاستوك الداخلي للفرع",
+"status": "open",
+"date": "2026-02-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نقاشة",
+"request": "دهان السقف كامل ودهان باب الاستوك ودهان جنب باب الفرع",
+"status": "open",
+"date": "2026-04-23",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نقاشة",
+"request": "الحروف القديمة باينة في اليافظة",
+"status": "open",
+"date": "2026-02-03",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نقاشة",
+"request": "معالجة ثقوب الحديد بالويندو",
+"status": "open",
+"date": "2026-05-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نقاشة",
+"request": "نزع مسامير السقف ومعالجتها",
+"status": "open",
+"date": "2026-05-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "نقاشة",
+"request": "الدهان الخشب خلف الكاش+ دهان باب الاستوك وباب الفيتنج +إخفاء مسامير حامل شمعات الفيتينج",
+"status": "open",
+"date": "2026-01-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "كهرباء",
+"request": "دهان الفيتنج روم و الاستوك رالكاش",
+"status": "open",
+"date": "2026-05-12",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نقاشة",
+"request": "دهان سقف المحل عند الويندو مكان الحديد الي اتشال",
+"status": "open",
+"date": "2026-05-24",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نقاشة",
+"request": "شيل الحروف عند كاشير ودهان مكانها",
+"status": "closed",
+"date": null,
+"tech": "بلال أحمد",
+"notes": null
+},
+{
+"branch": "5th Settlement - Point 90 Mall",
+"category": "نقاشة",
+"request": "يوجد بعض الصرف تحتاج الي طلاء",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "نقاشة",
+"request": "دهان باب الاستوك+ باب الفيتنج +دهان خلف الكاش كونتر.",
+"status": "open",
+"date": "2026-06-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Miami",
+"category": "نقاشة",
+"request": "دهان باب الفيتنج وباب الاستوك سقف المحل",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - El Ekbal",
+"category": "نقاشة",
+"request": "دهان باب الفيتنج وباب الاستوك سقف المحل",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Smouha",
+"category": "نقاشة",
+"request": "دهان باب الفيتنج وباب الاستوك سقف المحل وبعض الاجزاء عند الكاش",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نقاشة",
+"request": "بعد تركيب الشماعة عمل نقاشة حول الشماعة",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "نقاشة",
+"request": "بعد تركيب الشماعة عمل نقاشة حول الشماعة",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "كهرباء",
+"request": "تغيير كل اللوجو الموجود بالفرع",
+"status": "open",
+"date": "2026-02-03",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "كهرباء",
+"request": "تزويد ليد ليافطة العلامة التجارية الخارجية للفرع لانه فى حروف اضاءتها ضعيفة",
+"status": "open",
+"date": "2026-04-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "كهرباء",
+"request": "ليد الويندو لا يعمل",
+"status": "open",
+"date": "2026-02-23",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "كهرباء",
+"request": "........0...",
+"status": "open",
+"date": "2026-03-25",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "كهرباء",
+"request": "رفع وإلغاء كل المرايات القديمة",
+"status": "open",
+"date": "2026-02-03",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "كهرباء",
+"request": "ساوند يحتاج الي صيانه",
+"status": "open",
+"date": "2026-05-17",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "كهرباء",
+"request": "سكشن الملابس يحتاج الي Renovation وتغيير ادوات العرض",
+"status": "open",
+"date": "2026-02-03",
+"tech": null,
+"notes": "تم رفع المقاسات"
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "كهرباء",
+"request": "عمل يافطة جديدة امام السلم",
+"status": "open",
+"date": "2026-02-03",
+"tech": null,
+"notes": "تم رفع المقاسات"
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "كهرباء",
+"request": "يوجد عدد 2 كشاف فاصلين",
+"status": "open",
+"date": "2026-04-19",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "كهرباء",
+"request": "تغير لون كشاف من ابيض لورم وتم ارسال صوره الكشاف علي الجروب",
+"status": "open",
+"date": "2026-03-05",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "كهرباء",
+"request": "برجاء اضافه فيشه اضافيه في الستوك الخاص بالفرع لتمكنا من استلام البضاعه في الستوك في اقرب وقت",
+"status": "open",
+"date": "2026-03-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "كهرباء",
+"request": "يوجد حرف فى اليافطه يحتاج الى صيانه",
+"status": "open",
+"date": "2026-02-19",
+"tech": null,
+"notes": "تم ابلاغ م / محمود بضرورة تغير خشب حرف i"
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "كهرباء",
+"request": "يوجد ليد فاصل \\ مشكله متكرره",
+"status": "open",
+"date": "2026-05-19",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "كهرباء",
+"request": "يوجد كشاف مسطره بايظ",
+"status": "open",
+"date": "2026-02-05",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "كهرباء",
+"request": "تغير عدد ٢ كشاف",
+"status": "open",
+"date": "2026-05-23",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "كهرباء",
+"request": "عمل فيشه في المخزن",
+"status": "open",
+"date": null,
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "كهرباء",
+"request": "تزويد اضاءه نحيه الكاش و 10 كشاف مسطره لتزويد الاضاءه ويوجد ضعيف",
+"status": "open",
+"date": "2026-04-29",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "كهرباء",
+"request": "تزويد اضاءه ف الاستوك",
+"status": "open",
+"date": "2026-04-29",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "كهرباء",
+"request": "يوجد 4 كشاف ضعيف جدا",
+"status": "open",
+"date": "2026-03-25",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "كهرباء",
+"request": "إزالة كل الكلمات القديمة",
+"status": "open",
+"date": "2026-02-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "كهرباء",
+"request": "عمل مرايات بجانب سكشن الملابس",
+"status": "open",
+"date": "2026-02-04",
+"tech": null,
+"notes": "تم رفع المقاسات"
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "كهرباء",
+"request": "إزالة ورق الحائط",
+"status": "open",
+"date": "2026-02-04",
+"tech": null,
+"notes": "تم رفع المقاسات"
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "كهرباء",
+"request": "إزالة البوسترات القديمة",
+"status": "open",
+"date": "2026-02-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "كهرباء",
+"request": "ليد فاصل في الواجهه",
+"status": "open",
+"date": "2026-03-14",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "كهرباء",
+"request": "صوت عالي لما بنفتح الانوار",
+"status": "open",
+"date": "2026-03-14",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "كهرباء",
+"request": "يوجد ليد فاصل في الواجهه \\ مشكله متكرره",
+"status": "open",
+"date": "2026-05-21",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "كهرباء",
+"request": "يوجد ليد فاصل",
+"status": "open",
+"date": "2026-05-21",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "كهرباء",
+"request": "زيادة فيشة في المخزن",
+"status": "open",
+"date": "2026-12-05",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "كهرباء",
+"request": "المكوه تحتاج الى صيانه",
+"status": "open",
+"date": "2026-03-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Smouha",
+"category": "كهرباء",
+"request": "المكواه لا تعمل تحتاج لصيانه",
+"status": "open",
+"date": "2026-04-11",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - San Stefano Mall",
+"category": "كهرباء",
+"request": "يوجد كشاف فوق الكاش فصل",
+"status": "open",
+"date": "2026-02-05",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "كهرباء",
+"request": "تغير كشافات وأسبوتات الفرع",
+"status": "open",
+"date": "2026-05-24",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "كهرباء",
+"request": "كافر ابيض لليد",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - Point 90 Mall",
+"category": "كهرباء",
+"request": "يوجد ليدات تحتاج للتغيير",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - Galleria Mall",
+"category": "كهرباء",
+"request": "يوجد ليدات بحاجه الي تغير (3)",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - Galleria Mall",
+"category": "كهرباء",
+"request": "يوجد ليد فاصل (2)",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - Galleria Mall",
+"category": "كهرباء",
+"request": "ليد اطار المرايا",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "نجارة",
+"request": "شراء ستارة سوداء الي المخزن",
+"status": "open",
+"date": "2026-02-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "نجارة",
+"request": "ازاله المرايا بجوار السكشن الساده وعمل سيكشن هوكات بندانات",
+"status": "open",
+"date": "2026-02-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Marghany",
+"category": "نجارة",
+"request": "يوجد درج تم اخذه النجار لتصليحه وجميع الأدراج غير صالحه",
+"status": "open",
+"date": "2026-03-11",
+"tech": "أحمد حمدي",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "نزع جميع الكلمات والمندله القديمه",
+"status": "open",
+"date": "2026-02-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "رفع المرايا وعمل ارفف مكانها",
+"status": "open",
+"date": "2026-02-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "ونقل المرايا للسكن التالي امامها ولكن بالمرايا الجديده",
+"status": "open",
+"date": "2026-02-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "معالجة اثقاب اليافطه الخارجية",
+"status": "open",
+"date": "2026-02-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "عمل سيكشن بجوار الكاش به هوكات للبندانات",
+"status": "open",
+"date": "2026-02-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "عمل Fitting room ثانية بجوار الكاش",
+"status": "open",
+"date": "2026-02-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "تحريك سكشن الطرحة الي اخر ال wall وتزويد سكشن كبير للاسدالات .",
+"status": "open",
+"date": "2026-02-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "استغلال مكان المرايا الكبيرة بجوار المانيكان وعمل سكشن بندانات .",
+"status": "open",
+"date": "2026-02-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "يوجد 4 قوائم حديد يحتاج تغير",
+"status": "open",
+"date": "2026-04-03",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "يوجد فتحه ف اليافطه يدخل منها القطط",
+"status": "open",
+"date": "2026-03-30",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "يوجد درفه محتاجه صيانه )",
+"status": "open",
+"date": "2026-04-12",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "ليد الكاش فصل",
+"status": "open",
+"date": "2026-04-21",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "يوجد درج تحت الخزنه يحتاج مجره",
+"status": "open",
+"date": "2025-02-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "اليافطه تحتاج التغير بسبب الآثار القديمه",
+"status": "open",
+"date": "2026-02-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "الاتنين استاند يحتاج للربط كويس بسبب انه بيتحرك كتير اوي وممكن يقع",
+"status": "open",
+"date": "2026-03-14",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "اوكرة باب الفيتينج روم بتعلق",
+"status": "open",
+"date": "2026-03-14",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "حرف ال L ف اليافطه مكسور",
+"status": "open",
+"date": "2026-05-06",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "صيانة الباب",
+"status": "open",
+"date": "2026-05-11",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "ازالة الحروف الموجودة خلف الكاش او ازالة الWALL كاملة",
+"status": "open",
+"date": "2026-04-14",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "ازالة الحروف الموجودة في المرايات",
+"status": "open",
+"date": "2026-04-14",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "• إزالة كل الحروف القديمة والسلوجن القديم داخل الفرع وخلف الكاش",
+"status": "open",
+"date": "2026-05-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "معالجة قشرة الأخشاب الموجودة في السكاشن",
+"status": "open",
+"date": "2026-05-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "وجود درج يحتاج إلى تغيير مجراه",
+"status": "open",
+"date": "2026-05-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "وجود مسورة في سكشن الشيفون تحتاج الى تغيير مقاس 131 سم",
+"status": "open",
+"date": "2026-05-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "تغيير كل ادوات العرض في سكاشن الملابس",
+"status": "open",
+"date": "2026-02-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نجارة",
+"request": "تغير مجري درج - درج مش بيفتح",
+"status": "open",
+"date": "2026-03-05",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نجارة",
+"request": "معالجة الشريط اللاصق في الارفف",
+"status": "open",
+"date": "2026-02-03",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "نجارة",
+"request": "تثبيت الاستاند فالحائط.خشب بمسامير اكبر من ١٠ سم",
+"status": "open",
+"date": "2026-03-16",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نجارة",
+"request": "تعلية وحدة الارفف في ال tables, وعمل 6 وحدات اخري بجوار ال tables",
+"status": "open",
+"date": "2026-02-03",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نجارة",
+"request": "الويندو تحتاج الي تثبيت",
+"status": "open",
+"date": "2026-03-29",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نجارة",
+"request": "وزره في الاستوك الداخلي تحتاج الس تثبيت",
+"status": "open",
+"date": "2026-03-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نجارة",
+"request": "الشريط اللاصق في سنكشن الشيفون يحتاج الي تثبيت-يزجد درج المجري تحتاج إلي تغير",
+"status": "open",
+"date": "2026-02-19",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نجارة",
+"request": "تركيب الشريط اللاصق في درج الكاش",
+"status": "open",
+"date": "2026-02-09",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "نجارة",
+"request": "عمل سكشن للبندانات بجوار الكاش",
+"status": "open",
+"date": "2026-02-03",
+"tech": "محمود",
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "نجارة",
+"request": "درفه مخلوعه",
+"status": "open",
+"date": "2026-05-17",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "نجارة",
+"request": "لزق شريط الخشب",
+"status": "open",
+"date": "2026-06-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "نجارة",
+"request": "تركيب الخشب المطلوب (معوج)",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "نجارة",
+"request": "يوجد ضرف تحتاج الي صيانه",
+"status": "open",
+"date": "2026-05-12",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نجارة",
+"request": "يوجد اتنين اطار محتاجين الي صيانه في سكاشن الملابس",
+"status": "open",
+"date": "2025-03-26",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نجارة",
+"request": "معالجة الثقوب فى التيبول +تغير الماتريال التى تعرض عليها الملابس",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": "تم تسليم عدد 2 حرف u الى السائق بتاريخ 21/2/2026"
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نجارة",
+"request": "يوجد اطار سكشن مفكوك ويحتاج الى صيانه",
+"status": "open",
+"date": "2026-05-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نجارة",
+"request": "يوجد اطار ورا الكاش مفكوك ويحتاج الى صيانه",
+"status": "open",
+"date": "2026-05-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نجارة",
+"request": "عمل دولاب خشب صغير خلف الكاش",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نجارة",
+"request": "يوجد اتنين درج بحاجه الى الصيانه",
+"status": "open",
+"date": "2026-05-06",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نجارة",
+"request": "يوجد ضرفه محتاجه صيانه",
+"status": "open",
+"date": "2026-05-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نجارة",
+"request": "‏يوجد ‏درفة بحاجة إلى صيانة",
+"status": "open",
+"date": "2026-03-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نجارة",
+"request": "يوجد ثقوب مكان ازاله الحروف القديمه بحاجه الي صيانه هي باللون الابيض",
+"status": "open",
+"date": "2026-03-25",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "نجارة",
+"request": "اكره باب الاستوك تحتاج إلي تغير",
+"status": "open",
+"date": "2026-04-19",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "نجارة",
+"request": "أدرج الكاشير تحتاج إلي تعديل / اضافات عمل دولاب لأغراض العملاء بجوار الفيتنج روم /تغير شماعات الفيتنج روم / إضافة مرايه في ممر الفيتنج روم/عمل رف طائر علي الحائط/",
+"status": "open",
+"date": "2025-12-20",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "نجارة",
+"request": "‏جميع أدراج الفرع ‏بحاجة إلى صيانة ‏ ‏تغيير المجرة الادراج",
+"status": "open",
+"date": "2026-05-01",
+"tech": "محمود",
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "نجارة",
+"request": "‏تغيير الكالون بابا الاستوك",
+"status": "open",
+"date": "2026-06-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "نجارة",
+"request": "تركيب عتبه للحمام الخاص بالفرع",
+"status": "open",
+"date": "2025-03-26",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "نجارة",
+"request": "تقفيل الثقوب الموجوده في السكاشن مكان المسامير ولرق الديكور الخاص بالادراج وتصليح الثفوب الموجوده بمنطقه الكاشير وقك لرق الخشب بمنطقه الكاشير وتقل باب الحمام",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - Point 90 Mall",
+"category": "نجارة",
+"request": "ضرفه الاستوك اتخلعت",
+"status": "open",
+"date": "2026-03-16",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نجارة",
+"request": "تركيب حلقات في الويندو لتكون 3 وليس 2",
+"status": "open",
+"date": "2026-02-10",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نجارة",
+"request": "عمل استوكات فوق السيكشن حرف ال L والسيكشن الساده",
+"status": "open",
+"date": "2026-02-10",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نجارة",
+"request": "عمل ضرف بجوار الفيتنج رووم",
+"status": "open",
+"date": "2025-02-10",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نجارة",
+"request": "تغيير او صيانه فريم المرايا الفيتنج روم والتي بالفرع",
+"status": "open",
+"date": "2026-02-10",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نجارة",
+"request": "توسيع سكشن الطرح",
+"status": "open",
+"date": "2026-05-24",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نجارة",
+"request": "عمل خشب موسكي بالسكاشن لتوسيع المساحه",
+"status": "open",
+"date": "2026-12-03",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - Point 90 Mall",
+"category": "نجارة",
+"request": "يوجد ادراج تحتاج تصليح /عمل شيلفات بدل المواسير",
+"status": "open",
+"date": "2026-05-23",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "نجارة",
+"request": "تصليح ٢ضرفة وتركيب ٧ دراع باكم ل ٧ ضرف +تطويل استاند الملابس",
+"status": "open",
+"date": "2026-05-24",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نجارة",
+"request": "تصليح التيبول في منتصف الفرع-تصليح ادراج الكاش",
+"status": "not_fixed",
+"date": "2026-05-24",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - Galleria Mall",
+"category": "نجارة",
+"request": "تغير الكالون",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Nozha Street",
+"category": "نجارة",
+"request": "تركيب ارفف في درفه المرايه",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Nozha Street",
+"category": "نجارة",
+"request": "تقفيل البوكسات الخارجيه وتبديلها لستوكات فوق السكاشن بدل من بوكسات",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Nozha Street",
+"category": "نجارة",
+"request": "تزويد ارفف في الستوك ورا الباب",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Miami",
+"category": "نجارة",
+"request": "*ترميم اليافطه مكان حروف اليافطه القديمه وتكمله الجزء المفتوح",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Miami",
+"category": "نجارة",
+"request": "*صيانه ودهان التيبول وفتح اول غطاء في التيبول لاستخدامه في التخزين",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Miami",
+"category": "نجارة",
+"request": "*ازاله الدواليب الموجوده في دخله الفرع الموجوده تحت سكشن الملابس",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Miami",
+"category": "نجارة",
+"request": "*تزويد و عمل دولاب تخزين جمب باب الاستوك",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Miami",
+"category": "نجارة",
+"request": "*حذف الجزء الى جمب المرايا الموجوده امام الفيتنج وتقسيمه مربعات لوضع كياس العملاء",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Miami",
+"category": "نجارة",
+"request": "*عمل سكشن هوكات لعرض المكملات في جانب الفيتنج الشمال",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - El Ekbal",
+"category": "نجارة",
+"request": "*ازاله كل المانديلات والوجو و الكلمات الملونه من علي السكاشن",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - El Ekbal",
+"category": "نجارة",
+"request": "*ازاله المرايا من البوكس الفوشيا ولازقها علي الحيطه علطول",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - El Ekbal",
+"category": "نجارة",
+"request": "*ازاله الون الفوشيا وتغيره الى لون الخشب او الون الابيض من ادراج السكاشن",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - El Ekbal",
+"category": "نجارة",
+"request": "*عمل سكشن هوكات تحت التكيف لعرض المكملات",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - El Ekbal",
+"category": "نجارة",
+"request": "*عمل دواليب تخزين اضافيه في الاستوك",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - El Ekbal",
+"category": "نجارة",
+"request": "*نقل كلمه fitting room علي باب الفيتنج وليس في الجمب",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Smouha",
+"category": "نجارة",
+"request": "*ازاله كل المانديلات والوجو و الكلمات الملونه من علي السكاشن",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Smouha",
+"category": "نجارة",
+"request": "*دهان باب الفيتنج والاستوك",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - San Stefano Mall",
+"category": "نجارة",
+"request": "تقفيل ورا منطقة الكاش دولايب وليست مفتوحة",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - San Stefano Mall",
+"category": "نجارة",
+"request": "*تغير لون الوجو بتاع اليافطه بدل الذهبي يبقي فوشيا",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - San Stefano Mall",
+"category": "نجارة",
+"request": "*دهان الون الابيض الي في الكاش واعاده تركيب اليد",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - San Stefano Mall",
+"category": "نجارة",
+"request": "تثبيت وتركيب الاكوره لباب الفتينج وباب الاستوك لانهم مفكوكين",
+"status": "open",
+"date": "2026-04-18",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - San Stefano Mall",
+"category": "نجارة",
+"request": "يوجد درج وشه اتفك ومحتاج تثبيث",
+"status": "open",
+"date": "2026-02-05",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Smouha",
+"category": "نجارة",
+"request": "*ازاله الون الفوشيا وتغيره الى لون الخشب او الون الابيض من ادراج السكاشن",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Smouha",
+"category": "نجارة",
+"request": "*عمل سكشن هوكات جمب سكشن الشيفون لعرض المكملات",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Smouha",
+"category": "نجارة",
+"request": "*عمل دواليب تخزين اضافيه في الاستوك جمب الحمام",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Smouha",
+"category": "نجارة",
+"request": "*عمل سكشن طرح اضافي جمب الكاش",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Smouha",
+"category": "نجارة",
+"request": "*عمل مكان للتعليق في الاستوك",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "نجارة",
+"request": "تعليق شماعة فى ال fitting room",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "سباكة",
+"request": "حوض الحمام يحتاج إلي تسليك ونحتاج الي تركيب شطاف خارجي لسهولة تنظيف الحمام وبالفعل يوجد له محبس",
+"status": "open",
+"date": "2026-04-25",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Nozha Street",
+"category": "سباكة",
+"request": "السيراميك في مقدمة الفرع مكسورة وبتخبط في الباب وممكن يتكسر لانه مش بيفتح للاخر والعملا بتزوقه",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "سيكوريت وابواب",
+"request": "‏باب الفرع بحاجة إلى تزيد ￼",
+"status": "open",
+"date": "2026-05-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "سيكوريت وابواب",
+"request": "تغير اكرة باب الاستوك",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "سيكوريت وابواب",
+"request": "اصلاح ماكينة باب المخزن الخارجي \\ اصلاح او تغير كالون المخزن الخارجي \\ عمل وزره للمخزن الخارجي / تركيب باكم واحد  لدرفة N80",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "سيكوريت وابواب",
+"request": "العتبة عند الباب وسعه وبدخل مايه -الفواحة",
+"status": "not_fixed",
+"date": "2026-04-07",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Rehab - The Yard Mall",
+"category": "سيكوريت وابواب",
+"request": "باب الفرع بيعمل صوت عند الفتح والغلق",
+"status": "open",
+"date": null,
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "يفط",
+"request": "‏يوجد حرف هو ‏وقع حرف v ‏",
+"status": "open",
+"date": "2026-06-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "يفط",
+"request": "تغير اليافطة الخارجيه",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "يفط",
+"request": "فك حروف اليافطة وتنظيفها من الداخل",
+"status": "open",
+"date": "2026-05-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "يفط",
+"request": "معالجة الأكريلك بحرف الـ E",
+"status": "open",
+"date": "2026-05-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "يفط",
+"request": "معالجة مكان الحروف القديمة باليافطة",
+"status": "open",
+"date": "2026-05-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "يفط",
+"request": "تغير لوجو اليافطة وخلف الكاش",
+"status": "open",
+"date": "2026-05-24",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "تكييف",
+"request": "الاتنين تكييف جوده التبريد منخفضه برجاء تزويد تكييف",
+"status": "open",
+"date": "2026-03-14",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "تكييف",
+"request": "تزويد فتحتين تكييف ف ال 2 فيتينج روم بسبب شكاوي العملاء من الحر",
+"status": "open",
+"date": null,
+"tech": null,
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "تكييف",
+"request": "تكييف مش شغال وفصل لوحدوا برجاء تزويد تكييف ومعالجه اللي فصل",
+"status": "open",
+"date": "2025-12-06",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "تكييف",
+"request": "التكيف بطي جدا والعملا بيشتكوا",
+"status": "open",
+"date": "2026-12-03",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "تكييف",
+"request": "التكيف لا يعمل يحتاج الي غسيل",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "تكييف",
+"request": "تنظيف التكيف",
+"status": "open",
+"date": "2026-05-15",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "تكييف",
+"request": "التكيف مش بيسقع خالص",
+"status": "open",
+"date": "2026-04-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "تكييف",
+"request": "التكيف بيطلع ريحه وحشه ومش بيسقع خالص",
+"status": "open",
+"date": "2026-05-15",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "تكييف",
+"request": "التكيف يحتاج الى صيانه",
+"status": "open",
+"date": "2026-06-03",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "تكييف",
+"request": "تنظيف الوحدة الداخلية والخارجية للتكييفات",
+"status": "open",
+"date": "2026-04-01",
+"tech": "أحمد حسن, أحمد حمدي",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "تكييف",
+"request": "تبريد التكيف منخفض جدا و العملاء بيشتكوا",
+"status": "closed",
+"date": "2026-04-06",
+"tech": "أحمد حسن, أحمد حمدي",
+"notes": "تم الصيانة ولكن يوجد صوت صادر من التكييف"
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "أخري",
+"request": "تنجيد البف",
+"status": "open",
+"date": "2026-04-10",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "أخري",
+"request": "يوجد يده مانيكان ‏بحاجة إلى التركيب ‏ ￼￼",
+"status": "open",
+"date": "2026-05-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "أخري",
+"request": "الفرع يحتاج إلي شركة لرش الفرع ضروري لوجود حشرات",
+"status": "open",
+"date": "2026-05-15",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "أخري",
+"request": "تغير اكرة باب الاستوك",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "أخري",
+"request": "المكواة مش شغالة",
+"status": "open",
+"date": "2026-04-12",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "أخري",
+"request": "اصلاح ماكينة باب المخزن الخارجي \\ اصلاح او تغير كالون المخزن الخارجي \\ عمل وزره للمخزن الخارجي",
+"status": "open",
+"date": null,
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "أخري",
+"request": "تصليح المكوه",
+"status": "open",
+"date": "2026-05-23",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 2",
+"category": "أخري",
+"request": "تثبيت حامل الفيزا \\ تركيب المروحة بالمخزن",
+"status": "open",
+"date": null,
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "أخري",
+"request": "المانيكان مش ثابت و بيقع",
+"status": "open",
+"date": "2026-03-30",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "أخري",
+"request": "تركيب ستاره من ناحيه الويندو",
+"status": "open",
+"date": "2026-04-07",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "أخري",
+"request": "فك حروف اليافطة وتنظيفها من الداخل",
+"status": "open",
+"date": "2026-05-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "أخري",
+"request": "معالجة الأكريلك بحرف الـ E",
+"status": "open",
+"date": "2026-05-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "أخري",
+"request": "معالجة مكان الحروف القديمة باليافطة",
+"status": "open",
+"date": "2026-05-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "أخري",
+"request": "العتبة عند الباب وسعه وبدخل مايه -الفواحة",
+"status": "open",
+"date": "2026-04-07",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - Point 90 Mall",
+"category": "أخري",
+"request": "نحتاج كافر للبارتشن عليه اسم الماركة/تغير لوجو البارتشن",
+"status": "open",
+"date": "2026-05-23",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "أخري",
+"request": "تغير لوجو اليافطة وخلف الكاش",
+"status": "open",
+"date": "2026-05-24",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "أخري",
+"request": "الساوند فاصل",
+"status": "open",
+"date": "2026-05-27",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "أخري",
+"request": "مصورتين يتغيرو",
+"status": "not_fixed",
+"date": "2026-05-31",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "أخري",
+"request": "مكوة الزرار بتاعها بيقع",
+"status": "open",
+"date": "2026-05-31",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "أخري",
+"request": "مرايا متاخده من رمضان ولسه مرجعتش",
+"status": "in_progress",
+"date": "2026-06-01",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Marghany",
+"category": "أخري",
+"request": "الحديد الخاص بالويندو كله محتاج تغير + تشحيم باب الفرع لسهولة رفعه",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Nozha Street",
+"category": "أخري",
+"request": "تغير قطاعات الحديد وارسال ادوات vm",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Nozha Street",
+"category": "أخري",
+"request": "السيراميك في مقدمة الفرع مكسورة وبتخبط في الباب وممكن يتكسر لانه مش بيفتح للاخر والعملا بتزوقه",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "أخري",
+"request": "حوض الحمام يحتاج إلي تسليك ونحتاج الي تركيب شطاف خارجي لسهولة تنظيف الحمام وبالفعل يوجد له محبس",
+"status": "open",
+"date": "2026-04-25",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "أخري",
+"request": "شماعة الفتينج",
+"status": "closed",
+"date": "2026-06-03",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "El Rehab - The Yard Mall",
+"category": "تركيبات",
+"request": "تركيب شماعة فيتنج روم",
+"status": "open",
+"date": "2026-06-04",
+"tech": "أحمد حمدي",
+"notes": null
+},
+{
+"branch": "El Rehab - The Yard Mall",
+"category": "نقاشة",
+"request": "غرفة الكشف مبصمه تحتاج الى دهان",
+"status": "open",
+"date": "2026-02-18",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Rehab - The Yard Mall",
+"category": "كهرباء",
+"request": "كشاف فاصل/ 13 كشاف بحاجة لتغيير (لونهم اصفر)",
+"status": "open",
+"date": "2026-06-05",
+"tech": "أحمد حمدي, أحمد مصطفى",
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "كهرباء",
+"request": "ليد الويندو ورم يحتاج لتغيير",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نجارة",
+"request": "اخد مقاسات دولاب خلف الكاش",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نجارة",
+"request": "ازالة الديكور خاف الكاش",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نجارة",
+"request": "يوجد مفصله مخلوعه",
+"status": "open",
+"date": "2026-06-06",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نجارة",
+"request": "يوجد درجين بحاجه الى الصيانه",
+"status": "open",
+"date": "2026-06-06",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "أخري",
+"request": "تغير المرايا القديمه",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "أخري",
+"request": "تغير المرايا الفوشيا القديمه",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "أخري",
+"request": "يوجد رخامه مكسورة نحتاج الى تثبيت",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "أخري",
+"request": "تصنيع ترولى للبضاعة بمواصفات معينة وتم ارسالها عالجروب",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "سباكة",
+"request": "حوض الحمام يحتاج إلي تسليك",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "سيكوريت وابواب",
+"request": "تثبيت مصد للباب السيكوريت",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "سباكة",
+"request": "تغيير محبس التواليت",
+"status": "open",
+"date": "2026-06-07",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "أخري",
+"request": "‏يوجد حديد في ديكور بحاجة صيانة ￼",
+"status": "open",
+"date": "2026-06-07",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "يفط",
+"request": "فك حروف اليافطه و تنظيفها من الداخل",
+"status": "open",
+"date": "2026-06-07",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "تكييف",
+"request": "التكيف ضعيف مش بيبرد",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "كهرباء",
+"request": "لم يتم تركيب غطاء لوحه الكهرباء جديد",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "ازالة جميع باقي الحروف خلف الكاش",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نجارة",
+"request": "ادراج البندانات تقيلة",
+"status": "not_fixed",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "كهرباء",
+"request": "تغير عدد 11كشاف+ليد السيكشن+يوجد سماعه سقف واقعه",
+"status": "open",
+"date": "2026-06-08",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "يفط",
+"request": "يوجد حرف L مكسور",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - City Stars Mall",
+"category": "نجارة",
+"request": "يوجد بعض الادراج تحتاج لزياره فني نجاره لرفع مقاسات الخشب لتغييره لانه متهالك",
+"status": "open",
+"date": "2026-08-06",
+"tech": "مصطفى عباس, ادهم احمد",
+"notes": null
+},
+{
+"branch": "Nasr City - City Stars Mall",
+"category": "أخري",
+"request": "شراء سلم للمخزن الداخلي للفرع للوصول الي البضاعه",
+"status": "in_progress",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "نجارة",
+"request": "*",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "كهرباء",
+"request": "تغير ٢٣ كشاف+يوجد ٣ أسبوطات  فاصله",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "نقاشة",
+"request": "دهان فيتنج روم وباب الفيتنج والاستوك +دهان تقشير خلف الكاشير",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "مكوة",
+"request": "تم إرسال المكوه من الصيانه ناقصه حامل",
+"status": "in_progress",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "سباكة",
+"request": "تغير حنفيه التواليت",
+"status": "in_progress",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "كهرباء",
+"request": "الليد الويندو فاصل مش",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "كهرباء",
+"request": "الليد الويندو فاصل مشكله متكرره",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "كهرباء",
+"request": "الليد العلوي فاصل",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "كهرباء",
+"request": "اخفاء السلك",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "أخري",
+"request": "اكمل الشريط",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "أخري",
+"request": "تغير الشريط",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نجارة",
+"request": "تثبيت الخشبه",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نقاشة",
+"request": "دهان حائط الويندو",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نقاشة",
+"request": "دهان حائط الاستوك",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نقاشة",
+"request": "دهان الاستوك",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نقاشة",
+"request": "اخفاء مكان اللوجو",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نجارة",
+"request": "درج الكاش مش بيقفل",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Marghany",
+"category": "نقاشة",
+"request": "يوجد بعض الدهانات للفرع وو دهان السقف",
+"status": "open",
+"date": "2026-06-08",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "تكييف",
+"request": "لا يعمل بحاله جيده والتبريد ضعيف جدا",
+"status": "open",
+"date": "2026-06-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "نقاشة",
+"request": "دهان للكاش والاستوك",
+"status": "open",
+"date": "2026-05-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "تكييف",
+"request": "التكيف بينقط",
+"status": "open",
+"date": "2026-06-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "تركيبات",
+"request": "تركيب مروحه حائط وتركيب الساوند",
+"status": "open",
+"date": "2026-06-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نجارة",
+"request": "تعليق شماعة فى ال fitting room",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نجارة",
+"request": "تعليق شماعة فى ال fitting room",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "يفط",
+"request": "نظافة اليافطه",
+"status": "open",
+"date": "2026-05-24",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "يفط",
+"request": "نضافه اليافطه",
+"status": "open",
+"date": "2026-05-30",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "تكييف",
+"request": "التكيف يحتاج الي تنظيف الوحده الداخلية والخارجية",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "أخري",
+"request": "المكوي بطىئه اوي ومش بتكوي",
+"status": "open",
+"date": "2026-05-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "أخري",
+"request": "المكواه مش شغاله",
+"status": "open",
+"date": "2026-05-16",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Marghany",
+"category": "أخري",
+"request": "يوجد اربع ضلف تحتاج الي تغير مفصله",
+"status": "open",
+"date": "2026-05-24",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "أخري",
+"request": "نظافة اليافطه",
+"status": "open",
+"date": "2026-05-24",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "أخري",
+"request": "نضافه اليافطه",
+"status": "open",
+"date": "2026-05-30",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "أخري",
+"request": "الباب بيصدر صوت قوي محتاج صيانه",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "أخري",
+"request": "فك حروف اليافطه وتنظيفها من الداخل + عمل صيانة لمحبس التواليت",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - City Stars Mall",
+"category": "أخري",
+"request": "لزق زجاج درج الكاش",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "ازاله الاكليرك خلف الكاش",
+"status": "open",
+"date": "2026-06-05",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نقاشة",
+"request": "معالجة السكاشن من الثقوب +يوجد عند الويندو صدّا بالأرض يجب ازالتها+ المرايا تحتاج الي دهان + الوزيره تحتاج الي الدهان",
+"status": "open",
+"date": "2026-02-10",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Marghany",
+"category": "كهرباء",
+"request": "لوحه الكهرباء غير امانه والأسلاك ممكن اي حد يتعرض للاذي بسبب أنها غير محميه",
+"status": "open",
+"date": "2026-02-01",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - Nozha Street",
+"category": "نجارة",
+"request": "تلركيب ارفف ورا باب المخزن / رف في المخزن مكسور /ادراج البندنات بتقع / 2 درج تحت السكشن بهم مشكله / ظبط الفواصل الخشبيه اعلي السكشن /تركيب ارفف في درفة المرايه / حروف الباب المخزن مكسورة وملزوقه/ ستوك الملابس الارفف محتاجه مساحتها تضيق",
+"status": "open",
+"date": "2026-02-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نجارة",
+"request": "تركيب حلقات الويندو لانها بتقع كل شويه",
+"status": "open",
+"date": "2024-02-23",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "نجارة",
+"request": "درفه مخلوعه",
+"status": "open",
+"date": "2026-05-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "نجارة",
+"request": "يوجد ضرفه مخلوعه",
+"status": "open",
+"date": "2026-05-24",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نجارة",
+"request": "1 درفه",
+"status": "open",
+"date": "2026-05-31",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نجارة",
+"request": "الاستوك محتاجله عاتبه",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "نجارة",
+"request": "شريط ابيض للادراج",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "إزالة كل الحروف القديمة خلف الكاش",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - City Stars Mall",
+"category": "نجارة",
+"request": "يوجد ضرفه تحتاج الي ربط مفصلات+صيانه بعض الادراج",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "كهرباء",
+"request": "حروف اليافطه تحتاج الي الفك والتنظيف+ تركيب باب للوحه المفاتيح. الكهرباء مقاس ٣٢*٣٢",
+"status": "open",
+"date": "2026-02-10",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "كهرباء",
+"request": "ليد السيكشن فاصل يحتاج لتغير",
+"status": "open",
+"date": "2026-05-31",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Nozha Street",
+"category": "كهرباء",
+"request": "يوجد لليد فاصل + كشاف بيرعش في الستوك",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "نجارة",
+"request": "نظافه اليافطه الخارجيه وازاله البقع",
+"status": "open",
+"date": "2026-02-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Marghany",
+"category": "نجارة",
+"request": "يوجد لوحه خشب مثبته بالحيطه بالوحه الكهرباء وقعه وتم تثبيت من قبل ويوجد درج تم اخذه النجار ولم يأتي حتي الآن",
+"status": "open",
+"date": "2026-04-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - City Stars Mall",
+"category": "نجارة",
+"request": "يوجد ٣ سيراميك تحتاج الي لزق ف الاستوك + لزق درج الكاش الزجاج",
+"status": "open",
+"date": "2026-02-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - City Stars Mall",
+"category": "نجارة",
+"request": "شماعه بتعليق ملابس الموظفين في الاستوك",
+"status": "open",
+"date": "2026-02-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "يوجد حرف واقع باب الاستوك يحتاج الي تثبيت +يوجد ضرفه داخل المرايا تحتاج الي التثبيت",
+"status": "open",
+"date": "2026-03-29",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "تكييف",
+"request": "تبريد التكيف منخفض والعملاء بيشتكو",
+"status": "open",
+"date": "2026-04-22",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "تكييف",
+"request": "التكيف العمومي مش بيسقع والعملاء بتشتكي",
+"status": "open",
+"date": "2026-05-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "يفط",
+"request": "فك حروف اليافطه وتنظيفها من الداخل + عمل صيانة لمحبس التواليت",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "سباكة",
+"request": "عمل صيانه لمحبس التواليت",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "تعليق شماعة فى ال fitting room",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "يوجد خشب يحتاج الي تثبيت",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "كهرباء",
+"request": "لمبه الفيتينج تحتاج الي تثبيت",
+"status": "open",
+"date": "2026-06-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "كهرباء",
+"request": "ليد سكشن الشيفون لا يعمل (مشكله متكرره)",
+"status": "open",
+"date": "2026-02-09",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "كهرباء",
+"request": "تغير الكشافات",
+"status": "open",
+"date": null,
+"tech": null,
+"notes": "تم ابلاغ م / محمود بضرورة تغير خشب حرف i"
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نقاشة",
+"request": "بعد تركيب الشماعة عمل نقاشة حول الشماعة",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نقاشة",
+"request": "بعد تركيب الشماعة عمل نقاشة حول الشماعة",
+"status": "open",
+"date": "2026-06-04",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "نقاشة",
+"request": "دهان منطقة الفيتنج روم وباب الاستوك من الداخل",
+"status": "open",
+"date": "2026-04-03",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نقاشة",
+"request": "‏دهان ‏ باب ‏الاستوك و ‏بعض الاجزاء في الفرع و السقف",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Rehab - The Yard Mall",
+"category": "نقاشة",
+"request": "غرفة الكشف مبصمه",
+"status": "open",
+"date": "2026-02-18",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "نقاشة",
+"request": "السقف يحتاج الي دهان",
+"status": "open",
+"date": "2026-03-24",
+"tech": null,
+"notes": "تم ارسال الدهنات"
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نقاشة",
+"request": "دهان الفيتينج روم",
+"status": "open",
+"date": "2026-03-25",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - Point 90 Mall",
+"category": "نقاشة",
+"request": "دهان البرتشن",
+"status": "open",
+"date": null,
+"tech": "بلال أحمد",
+"notes": null
+},
+{
+"branch": "Nasr City - City Stars Mall",
+"category": "نقاشة",
+"request": "الكاش يحتاج الي دهان + باب الاستوك يحتاج الي دهان وحلق باب الفيتينج رووم يحتاج دهان وبعض القشور في الرييل والاستندات باللون الذهبي تحتاج دهان",
+"status": "open",
+"date": "2026-01-30",
+"tech": "بلال أحمد",
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نقاشة",
+"request": "دهان باب المخزن",
+"status": "open",
+"date": "2026-02-04",
+"tech": "بلال أحمد",
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نقاشة",
+"request": "دهان سقف المحل و الفيتنج روم و مدخل الفيتنج روم و الويندو",
+"status": "open",
+"date": "2026-02-05",
+"tech": "بلال أحمد",
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نقاشة",
+"request": "دهاب باب الفيتنج روم و دهان عدد 2 باب استوك",
+"status": "open",
+"date": "2026-02-07",
+"tech": "بلال أحمد",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نقاشة",
+"request": "دهان الفتينج",
+"status": "open",
+"date": "2026-02-21",
+"tech": "بلال أحمد",
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "نقاشة",
+"request": "دهان للكاشير من الامام (لون رمادى )/دهان ذهبى للحديد الخاص بالسكاشن/ دهان للسقف ابيض عند فتحة التكييف",
+"status": "closed",
+"date": "2026-02-02",
+"tech": "بلال أحمد",
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "نقاشة",
+"request": "يوجد حائط يحتاج الي دهان",
+"status": "closed",
+"date": "2026-02-01",
+"tech": "بلال أحمد",
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "نقاشة",
+"request": "معالجة البرور داخل الفتينج",
+"status": "closed",
+"date": "2026-02-03",
+"tech": "بلال أحمد",
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "نقاشة",
+"request": "دهان منطقه الفيتينج وداخله المخزن وداخله الفرع اعلي الستاره الهواثيه وازاله ورق الحيطه في داخله الفرع ودهان السقف في منتصف الفرع",
+"status": "closed",
+"date": "2026-02-01",
+"tech": "بلال أحمد",
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "كهرباء",
+"request": "‏يوجد لمبه فاصل في التويلات",
+"status": "open",
+"date": "2026-06-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "كهرباء",
+"request": "تصليح بروفايل ليد فى الحائط +تثبيت الغطاء الخاص بالبروفايل ليد ل3 سكشن",
+"status": "open",
+"date": "2026-01-20",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "كهرباء",
+"request": "تصليح بروفايل ليد وتم زيارة الفنى احمد حسن وابلغنا بأنه لازم يرفع وحدة تخزين خشب علشان الترانس وراها",
+"status": "open",
+"date": "2026-01-20",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "كهرباء",
+"request": "ازلة الواير في الويندو لتعليق",
+"status": "open",
+"date": "2026-02-03",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "كهرباء",
+"request": "يوجد سلك ظاهر في الويندو واسفل سكشن الملابس يتاج للاخفاء",
+"status": "open",
+"date": "2026-02-03",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "كهرباء",
+"request": "ليد الويندو فاصل - تغير مكان dvr في الاستوك الخارجي والفرع- ليد سكشن القطن لايعمل",
+"status": "postponed",
+"date": "2026-02-02",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "كهرباء",
+"request": "ليد المرايا يحتاج الي صيانة",
+"status": "closed",
+"date": "2026-02-03",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "كهرباء",
+"request": "ليد الفواصل يحتاج للصيانة",
+"status": "closed",
+"date": "2026-02-03",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "كهرباء",
+"request": "نقل الشهادة والضريبة المضافة علي جانب الكاش",
+"status": "closed",
+"date": "2026-02-03",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "كهرباء",
+"request": "رفع اللمبات الدلاية الصفراء",
+"status": "closed",
+"date": "2026-02-03",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "كهرباء",
+"request": "تركيب استاند فيزا",
+"status": "open",
+"date": "2026-02-03",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "كهرباء",
+"request": "ليدات السقف فاصله/ و كشاف فاصل / و يوجد 3 كشافات تحتاج صيانه / حروف اليافطه الخارجيه اضائتها ضعيفه/ليد المرايه",
+"status": "open",
+"date": "2026-02-01",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "كهرباء",
+"request": "يوجد عدد 3 سكشن ليد يحتاجو الي تصليح ( الليد فاصل) اضافات(تزويد اضائه في اول سكشن)",
+"status": "open",
+"date": "2026-01-10",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "كهرباء",
+"request": "يوجد عدد 5 سكشن فاصل ليد وتم التبليغ",
+"status": "in_progress",
+"date": "2026-02-20",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "كهرباء",
+"request": "يوجد كڤر ليد واقع",
+"status": "open",
+"date": "2026-03-14",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "كهرباء",
+"request": "يوجد ليد فاصل & عزل سلك اعلى السكشن",
+"status": "open",
+"date": "2026-03-14",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "كهرباء",
+"request": "كشفات ضعيفه12 كشاف",
+"status": "open",
+"date": "2026-05-16",
+"tech": "أحمد حمدي, أحمد حسن",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "كهرباء",
+"request": "يوجد كشاف ضعيف",
+"status": "open",
+"date": "2026-04-13",
+"tech": "أحمد حمدي, أحمد حسن",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "كهرباء",
+"request": "لمبه الفيتينج تحتاج الي التثبيت+ يوجد عدد 10 كشافات ضعيفه تحتاج الي تغير",
+"status": "open",
+"date": "2026-04-22",
+"tech": "أحمد حمدي, أحمد حسن",
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "كهرباء",
+"request": "تشغيل ليد السقف",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "كهرباء",
+"request": "ليد سكشن فاصل + تغير شطاف الحمام",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "كهرباء",
+"request": "يوجد2 كشاف فاصل",
+"status": "open",
+"date": "2026-03-25",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "كهرباء",
+"request": "يوجد ليدا فاصل",
+"status": "open",
+"date": "2026-02-01",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "كهرباء",
+"request": "حرف L مكسور في اليافطة",
+"status": "open",
+"date": "2026-02-11",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "كهرباء",
+"request": "‏يوجد كشاف فاصل بحاجة إلى التغيير",
+"status": "open",
+"date": "2026-02-16",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "كهرباء",
+"request": "اصلاح لمبه الحمام",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 2",
+"category": "كهرباء",
+"request": "يوجد كشاف واقع يحتاج الي تثبيت",
+"status": "open",
+"date": null,
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "كهرباء",
+"request": "يوجد سلوك ظاهره عند منطقه الكاش وتصليح مكواه الفرع وتصليح يافته الفرع الخارجيه وتركيب ماطور لحمام الفرع والليد الي في الاستوك محتاج تغير",
+"status": "open",
+"date": "2026-02-01",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "كهرباء",
+"request": "تغير لمبه حمام",
+"status": "open",
+"date": "2026-02-28",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "كهرباء",
+"request": "اضافه مفتاح كهرباء ف الاستوك+تركيب قعدة الحمام+لمبه في الحمام فاصله",
+"status": "open",
+"date": "2026-02-02",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "El Rehab - The Yard Mall",
+"category": "كهرباء",
+"request": "10 كشافات باللون الاصفر بحاجه لتغييرiì",
+"status": "in_progress",
+"date": "2026-02-05",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "كهرباء",
+"request": "يوجد 1 كشاف بيرعش",
+"status": "open",
+"date": "2026-04-03",
+"tech": "أحمد حسن, أحمد حمدي",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "كهرباء",
+"request": "ليد 2 سيكشن فاصل -3كشافات محروقين وي واحد فاصل -كشاف اليافطه فاصل -الكاميرا تحتاج لتركيب",
+"status": "open",
+"date": "2026-04-07",
+"tech": "أحمد حسن, أحمد مصطفى, علي",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "كهرباء",
+"request": "كشاف اليافطة مكسور",
+"status": "open",
+"date": null,
+"tech": "أحمد حمدي, أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "كهرباء",
+"request": "يوجد كشاف فاصل",
+"status": "open",
+"date": "2026-05-12",
+"tech": "أحمد حسن, أحمد حمدي",
+"notes": null
+},
+{
+"branch": "Alexandria - El Ekbal",
+"category": "كهرباء",
+"request": "يوجد ٢ كشاف باظوا من السخونيه",
+"status": "open",
+"date": "2026-04-06",
+"tech": "أحمد حسن, مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "كهرباء",
+"request": "زياده إضاءة فى سكشن الشيفون + تغير لوجو خلف الكاش واليافطه الخارجيه وتكبير حجم الوجو +تغير ليد خلف الكاش +تركيب حرف من اليافطه الخارجيه",
+"status": "in_progress",
+"date": "2026-02-01",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - City Stars Mall",
+"category": "كهرباء",
+"request": "تركيب ليد في اول سيكشن صغير ف الفرع لعدم وجود اضاءه فيه ولجعله واضح اكثر للعملاء خصوصا انه ف واجهه المحل + تزويد اضاءه في الاستوك الداخلي + اصلاح ليد السكاشن",
+"status": "open",
+"date": "2026-01-30",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "كهرباء",
+"request": "تعليق الفواحه",
+"status": "closed",
+"date": "2026-03-02",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "كهرباء",
+"request": "تغيير كشاف و يالفعل تم ارساله بس لسه منركبش",
+"status": "closed",
+"date": "2026-02-06",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "كهرباء",
+"request": "مشكلة فى ترانس الكاش كونتر",
+"status": "open",
+"date": "2026-02-07",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "كهرباء",
+"request": "تغير عدد 2 كشاف اليوس متحرك و تغير 1 كشاف على مسطرة و ليد المرايا فاصل و سكشن الملابس لا يعمل",
+"status": "open",
+"date": "2026-02-04",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - City Stars Mall",
+"category": "كهرباء",
+"request": "لزق ليد سيكشن سفلي واقع + تركيب غطاء ليد بسيكشن اخر",
+"status": "open",
+"date": "2026-02-16",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "كهرباء",
+"request": "تغير كشاف اليوس متحرك / تغير مرايه الفرع المكسورة",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "كهرباء",
+"request": "تغير عدد 3 كشاف اليوس متحرك / تركيب غطاء ليد المرايا",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "كهرباء",
+"request": "يوجد كشاف ١ في اليافطه فاصل + اليافطه جزء منها فاصل + ليد سكشن فاصل",
+"status": "open",
+"date": "2026-02-21",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Nasr City - Nozha Street",
+"category": "كهرباء",
+"request": "اليفطه بتنزل مايه اثر المطره + 2 كشاف فاصلين",
+"status": "open",
+"date": "2026-02-23",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "5th Settlement - Point 90 Mall",
+"category": "كهرباء",
+"request": "تصليح ليد المرايه وليد سكشن ملابس - وربط وتثبيت الكاميرا",
+"status": "open",
+"date": "2026-03-01",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "5th Settlement - Galleria Mall",
+"category": "كهرباء",
+"request": "يوجد كشاف يحتاج لصيانه",
+"status": "open",
+"date": "2026-03-03",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "كهرباء",
+"request": "تغير كشاف على مسطرة & استعدال عدد 2 باكم",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "5th Settlement - Point 90 Mall",
+"category": "كهرباء",
+"request": "ليد سكشن ملابس فاصل",
+"status": "open",
+"date": "2026-03-16",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "5th Settlement - Galleria Mall",
+"category": "كهرباء",
+"request": "تم سقوط كشاف ويحتاج للصيانه والتركيب",
+"status": "open",
+"date": "2026-03-22",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "5th Settlement - Galleria Mall",
+"category": "كهرباء",
+"request": "يوجد كشاف مربع فاصل يحتاج لصيانه",
+"status": "open",
+"date": "2026-03-24",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "كهرباء",
+"request": "يوجد كشاف فاصل",
+"status": "open",
+"date": "2026-04-24",
+"tech": "أحمد حسن, أحمد مصطفى, أحمد حمدي",
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "أخري",
+"request": "تغير قطاعات الحديد & تركيب شماعه الفيتنج",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "أخري",
+"request": "الساوند سيستم يوجد مشكلة بها",
+"status": "open",
+"date": null,
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "يوجد استند ملابس يهتز ويحتاج الي تثبيت + يوجد خشبه في الديكور تحتاج الي التثبيت",
+"status": "open",
+"date": "2026-01-02",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نجارة",
+"request": "كالون باب التويلت مكسور & اصلاح درج تيبول منتصف الفرع",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "نجارة",
+"request": "باب الفرع عند الغلق يتم اهتزازو بشكل قوي",
+"status": "open",
+"date": null,
+"tech": "فنى سيكوريت",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Marghany",
+"category": "نجارة",
+"request": "يوجد عدد ٦ درج يحتاج الي خشب ويوج درفه تحتاجه الي مجنتك",
+"status": "open",
+"date": null,
+"tech": "م/محمود",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "درج محتاج الي مجري",
+"status": "open",
+"date": "2026-05-13",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نجارة",
+"request": "ازاله اليافطه خلف الكاش",
+"status": "open",
+"date": "2026-03-15",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "يوجد استاند ملابس يهتز ومايل ويحتاج الي تثبيت+ حرف في الديكور يحتاج الي لزق",
+"status": "open",
+"date": "2026-04-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "يوجد استاند ملابس يهتز ومايل ويحتاج الي تثبيت",
+"status": "open",
+"date": "2026-04-22",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - Galleria Mall",
+"category": "نجارة",
+"request": "وتعديل المقاسات بتاعت المواسير",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "نجارة",
+"request": "رفوف الاستوك تحتاج صيانه/ سكشن الشيفون يحتاج صبانه ضروري// ترتيب الاخشاب اعلي سكشن الشيفون السادة/ ماتيريال العرض تحتاج الي تغير و صيانه / يوجد حرف L في التيبل مفقود و يوجد جزء فالديكور التيبل ناقص/ تركيب ستاره للويندو الخارجي/ يوجد شريط في",
+"status": "open",
+"date": "2026-02-01",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "تغير اكلريلك مكسور / اضافه عدد 7 مواسير / لصق خشب الديكور / اصلاح الادراج / تثبيت حامل الفيزا",
+"status": "open",
+"date": "2026-01-31",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "ازاله الحديد المتعلق في الويندو / تغيير جميع الماتريال الداخلية و الخارجية اللي متعلق عليها الهدوم",
+"status": "postponed",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "نجارة",
+"request": "يوجدعدد 8 ضلف تحتاج تغير مفصله",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - City Stars Mall",
+"category": "نجارة",
+"request": "يوجد 4 سيكشن يحتاج الي تدعيم عمود خشبي زياده بعدد 15 عمود وسيتم اخذ ٨ عمود من ٢ سيكشن ونحتاج الي 7 عمود اخر بموافقه مستر عبد الصبور + ربط مفصلات بعض الضلف وصيانه بعض الادراج",
+"status": "open",
+"date": "2026-01-30",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نجارة",
+"request": "اوكره الفيتينج تحتاج الي تركيب",
+"status": "open",
+"date": null,
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Alexandria - San Stefano Mall",
+"category": "نجارة",
+"request": "*عمل تعليه للارفف الخشب الموجوده علي السكاشن",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Marghany",
+"category": "نجارة",
+"request": "يوجد اكثر من خمس ادراج تحتاج الي تغير خشب لا تصلح ويوجد اتنين ضلفه تحتاج الي تغير مفصله ويوجد ضلفه تحتاج الي مجنتك",
+"status": "open",
+"date": "2026-02-01",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "نجارة",
+"request": "نقل شهادة الضريبة القيمه المضافة + تركيب أعلى باب الاستوك كلمة staff onliy + زياده تيبول أمام باب الفرع + تركيب وظر للفيتنج + رفع استند الملابس عن الأرض + درج الاكسسوارات يحتاج إلى تغير مفصله بدون تاتش ( بصمه )",
+"status": "open",
+"date": "2026-02-01",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Alexandria - Smouha",
+"category": "نجارة",
+"request": "*ازاله المرايا من البوكس الفوشيا ولازقها علي الحيطه علطول",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Heliopolis - El Marghany",
+"category": "نجارة",
+"request": "الزجاج يحتاج الي صيانه في اسرع وقت",
+"status": "open",
+"date": "2026-02-02",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Marghany",
+"category": "نجارة",
+"request": "الادراج تحتاج الي صيانه تركيب مجري",
+"status": "open",
+"date": "2026-02-02",
+"tech": "م/محمود",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "نجارة",
+"request": "لصق شريط الادراج",
+"status": "open",
+"date": "2026-02-02",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "الماتريال اللي بيتحط عليها الهدوم واقعه",
+"status": "postponed",
+"date": "2026-02-03",
+"tech": null,
+"notes": "تم ارسال 2 حرف U جديدة لحين تغير كل اداوات العرض"
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "ازالة الحديد الموجود في الويندو",
+"status": "in_progress",
+"date": "2026-02-03",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "يوجد 2 سيكشن طرح المواسير بتقع",
+"status": "postponed",
+"date": "2026-02-03",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "يوجد سكشن يحتاج الي تغيير وحل سريع",
+"status": "postponed",
+"date": "2026-02-04",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نجارة",
+"request": "تركيب ستارة و اصلاح الدرج",
+"status": "open",
+"date": "2026-02-04",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "يوجد درج مفكوك من بعد لجنه الجرد + درج معلق",
+"status": "open",
+"date": "2026-02-11",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - Gnena Mall",
+"category": "نجارة",
+"request": "اوكره الفيتينج روم مكسوره",
+"status": "closed",
+"date": "2026-11-02",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "يوجد واحد سيكشن طرح الخشب متفكك",
+"status": "open",
+"date": "2026-02-15",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "5th Settlement - Galleria Mall",
+"category": "نجارة",
+"request": "يوجد درج يحتاج إلى صيانه",
+"status": "open",
+"date": "2016-02-26",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نجارة",
+"request": "باب الفتينج يقفل بصعوبة - يوكد كسر عند الفتينج -يوجد مفصل استوك مكسور",
+"status": "open",
+"date": "2026-02-21",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "تغير عدد 2 مجرة درج",
+"status": "open",
+"date": "2026-02-23",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نجارة",
+"request": "مشكله فى اوكرة باب الحمام",
+"status": "open",
+"date": "2026-02-26",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "نجارة",
+"request": "لاصق عدد 2 شريط & اصلاح درج الكاش & لاصق شريط المرايا & تغير عدد 2 مفصله & اصلاح درفه",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad / Ezzat Salama",
+"category": "نجارة",
+"request": "تغير عدد 2 شريط ابيض",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Marghany",
+"category": "نجارة",
+"request": "وجود أخشاب تحتاج الي تثبيت وهي موصله بالوجه المفاتيح الكهربائيه",
+"status": "open",
+"date": "2026-03-11",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Heliopolis - El Hegaz",
+"category": "نجارة",
+"request": "يوجد شيلف يحتاج الي تركيب وتثبيت المسمار + يوجد ليد يحتاج الي تثبيت + لمبه الفيتنج تحتاج الي تثبيت+ يوجد شيلف يحتاج الي تثبيت في الفيتنج",
+"status": "open",
+"date": "2026-03-12",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Zagazig - Zagazig Store 1",
+"category": "نجارة",
+"request": "استاند الملابس مفكوك من بعضه",
+"status": "open",
+"date": "2026-03-14",
+"tech": null,
+"notes": "تم ارسال استند و سحب الاسندات الموجود بالفرع للصيانه"
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نجارة",
+"request": "المليكان مش ثابت وي وقع مرتين",
+"status": "open",
+"date": "2026-03-23",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Nasr City - Abbas El Akkad",
+"category": "نجارة",
+"request": "ربط و تثبيت وحد ادراج تيبول منتصف الفرع و اصلاح الدرج & تثبيت درفه و اصلاح قائم خشب",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Mansoura - Mansoura Store",
+"category": "نجارة",
+"request": "يوجد 2 u bar تحتاج للتغير عشان هتتقطم",
+"status": "open",
+"date": "2026-04-03",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "نجارة",
+"request": "تصليح كل ادراج وضرف الفرع لازق خشبه من الكاش كونتر",
+"status": "open",
+"date": "2026-02-02",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "نجارة",
+"request": "لازق حشب من الكاش كونتر+تصليح الادراج",
+"status": "open",
+"date": null,
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "نجارة",
+"request": "تغير مفصله للضرفه٢ درفه تغير مفصل -مفصل استوك-ادراج الكاشير -غلق فاتحة ف الاستوك الخارجي -باب الحمام وباب الفتينج-عتبة الباب -درج بندانات -مراياك تم اخذها ولم يتم تركبيها حتي الان",
+"status": "open",
+"date": "2026-04-04",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نجارة",
+"request": "تركيب مجره لدرج",
+"status": "open",
+"date": "2026-02-03",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نجارة",
+"request": "مافصلت الدرفه بحاجه الي تثبيت",
+"status": "open",
+"date": "2026-03-25",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نجارة",
+"request": "رفع مقاسات مواسير الطرحة",
+"status": "open",
+"date": "2026-04-02",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نجارة",
+"request": "صيانه سكشن",
+"status": "open",
+"date": "2026-04-03",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "نجارة",
+"request": "تغير محبس زاوية",
+"status": "open",
+"date": "2026-02-17",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "نجارة",
+"request": "اوكرة باب الاستوك مفكوكة",
+"status": "open",
+"date": "2026-01-26",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "نجارة",
+"request": "تثبيت شماعات جديده بدل القديمه",
+"status": "open",
+"date": "2026-03-27",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "نجارة",
+"request": "اكره باب الاستوك تحتاج اللي تظبيط لصعوبة الفتح",
+"status": "open",
+"date": "2026-03-29",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "نجارة",
+"request": "تركيب ٦ باكم للدرف N80 +مفصلات",
+"status": "open",
+"date": "2026-05-06",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "نجارة",
+"request": "تغيير درفة صغيرة لوجود شرخ بها /ترميم درفة خشب +تركيب مفصلات لدرفة +تثبيت درفة بمسامير",
+"status": "open",
+"date": "2026-02-02",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Egypt Store",
+"category": "نجارة",
+"request": "لازق خشبه سكشن الشيفون والوحده في مقدمه الفرع -مجري درج تحتاج الي تغير - يوجد مفصلات تحتاج الي ربط- يوجد مواسير تحتاج الي التركيب في سكشن القطن والشيفون",
+"status": "open",
+"date": null,
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نجارة",
+"request": "اصلاح درج الدبابيس & تركيب حامل الفيزا",
+"status": "open",
+"date": "2026-02-17",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "نجارة",
+"request": "درج الاكسسوارات ع الكاش يحتاج الي صيانة",
+"status": "open",
+"date": "2026-02-03",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "El Rehab - The Yard Mall",
+"category": "نجارة",
+"request": "مفصلة ضلفه محتاجه تركيب/رف في الاستوك يحتاج تثبيت",
+"status": "open",
+"date": "2026-01-22",
+"tech": "مصطفى عباس",
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "نجارة",
+"request": "حديد القطاع محتاج تغير",
+"status": "postponed",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نجارة",
+"request": "بحاجه الي شريط خشب و إضافة أربع مواسير ‏و تم اخذ المقاسات من فني الصيانة",
+"status": "postponed",
+"date": "2025-01-27",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نجارة",
+"request": "‏بحاجة إلى 4 أربع مواسير",
+"status": "in_progress",
+"date": "2025-02-01",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نجارة",
+"request": "ازاله كل الحروف و المندلة القديمه",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نجارة",
+"request": "تغير قلب كالون باب الفرع & لاصق شريت ابيض",
+"status": "open",
+"date": null,
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نجارة",
+"request": "‏يوجد مشكلة في كالون الباب ‏الباب مش بيقفل",
+"status": "open",
+"date": "2026-02-24",
+"tech": "فنى سيكوريت",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "نجارة",
+"request": "‏الكرسي اتكسر وتم إرساله إلى الصيانة",
+"status": "open",
+"date": "2026-02-26",
+"tech": "أحمد حسن",
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "تكييف",
+"request": "التكيف يحتاج اللي تنظيف فلاتر وصوته عالي ومكتوم بيعمل صفاره ومش بيخرج هوا",
+"status": "open",
+"date": "2026-02-23",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 2",
+"category": "تكييف",
+"request": "التكيف يحتاج الي نظافه فلاتر في اقرب وقت",
+"status": "open",
+"date": "2026-03-13",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Sheikh Zayed - Saraya Mall",
+"category": "تكييف",
+"request": "شوية بيسقع و شوية بيكون سخن و بيخلي الجو مكتوم",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Mokattam - Mokattam 1",
+"category": "تكييف",
+"request": "التكيف عندى مطلع ريحه وحشه جدا ومش جايب هوا",
+"status": "open",
+"date": null,
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "تكييف",
+"request": "تبريد التكيف منخفض جدا و العملاء بيشتكوا",
+"status": "open",
+"date": "2026-03-25",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Maadi - Maadi 1",
+"category": "تكييف",
+"request": "يحتاج تنظيف فلاتر",
+"status": "open",
+"date": null,
+"tech": null,
+"notes": null
+},
+{
+"branch": "6th of October - Mall of Arabia",
+"category": "تكييف",
+"request": "يحتاج الي صيانه لوجود تنقيط كل يوم بجوار الكاميرا فى السقف ولايوجد تبريد",
+"status": "open",
+"date": "2026-01-20",
+"tech": null,
+"notes": null
+},
+{
+"branch": "El Rehab - The Yard Mall",
+"category": "تكييف",
+"request": "يحتاج الى صيانه بسبب جودة تبريد منخفضه",
+"status": "open",
+"date": "2026-11-24",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Miami",
+"category": "تكييف",
+"request": "يحتاج الى صيانه بسبب جودة تبريد منخفضه",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - El Ekbal",
+"category": "تكييف",
+"request": "يحتاج الى صيانه بسبب جودة تبريد منخفضه",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Alexandria - Smouha",
+"category": "تكييف",
+"request": "يحتاج الى غسيل",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Madinaty - Open Air Mall",
+"category": "تكييف",
+"request": "يحتاج تنظيف فلاتر",
+"status": "open",
+"date": "2026-02-01",
+"tech": null,
+"notes": null
+},
+{
+"branch": "Nasr City - Nozha Street",
+"category": "تكييف",
+"request": "التكيف بحاجة إلي صيانة",
+"status": "open",
+"date": "2026-08-02",
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - Galleria Mall",
+"category": "تكييف",
+"request": "التكيف بحاجة إلي صيانة",
+"status": "open",
+"date": null,
+"tech": null,
+"notes": null
+},
+{
+"branch": "5th Settlement - El Rebat Mall",
+"category": "يفط",
+"request": "حرف وقع محتاج صيانه عند (الكاشير)",
+"status": "open",
+"date": "2026-05-10",
+"tech": "محمود",
+"notes": null
+}
+]
