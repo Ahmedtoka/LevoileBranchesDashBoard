@@ -54,7 +54,7 @@
 
 {{-- Technicians --}}
 <div class="card p-3">
-    <h6 class="fw-bold mb-3"><i class="bi bi-tools me-1"></i> فنيو الصيانة <span class="text-muted small">(فروع متعددة — إسناد تلقائي)</span></h6>
+    <h6 class="fw-bold mb-3"><i class="bi bi-tools me-1"></i> فنيو الصيانة <span class="text-muted small">(فروع متعددة — تعيين تلقائي)</span></h6>
     @forelse($technicians as $u)
         @php $cov = $u->branches->pluck('id')->all(); @endphp
         <form method="POST" action="{{ route('coverage.update', $u) }}" class="border-bottom py-3">

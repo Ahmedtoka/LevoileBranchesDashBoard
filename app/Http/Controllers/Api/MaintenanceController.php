@@ -91,6 +91,7 @@ class MaintenanceController extends Controller
     {
         $data = $request->validate([
             'branch_id' => ['required', 'exists:branches,id'],
+            'lang' => ['nullable', 'in:ar,en'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.label' => ['required', 'string'],
             'items.*.note' => ['nullable', 'string'],
@@ -102,12 +103,20 @@ class MaintenanceController extends Controller
         $deptId = optional(Department::where('slug', 'maintenance')->first())->id;
         $groupCode = 'MR-'.str_pad((string) ((Ticket::max('id') ?? 0) + 1), 5, '0', STR_PAD_LEFT);
         $userId = $request->user()->id;
+        $lang = $data['lang'] ?? 'ar';
+        $arNames = MaintenanceItem::pluck('label_ar', 'label'); // English label -> Arabic name
 
         $created = [];
         foreach ($data['items'] as $item) {
+            $labelAr = $arNames[$item['label']] ?? $item['label'];
+            $title = $lang === 'en'
+                ? 'Maintenance — '.$item['label']
+                : 'صيانة — '.$labelAr;
+
             $ticket = $this->tickets->createManual([
+                'reference' => Ticket::nextReference('MTN'),
                 'group_code' => $groupCode,
-                'title' => 'Maintenance — '.$item['label'],
+                'title' => $title,
                 'description' => $item['note'] ?? null,
                 'branch_id' => $data['branch_id'],
                 'department_id' => $deptId,

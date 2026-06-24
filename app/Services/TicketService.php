@@ -54,7 +54,7 @@ class TicketService
 
         foreach ($deptIds as $deptId) {
             $ticket = Ticket::create([
-                'reference' => Ticket::nextReference(),
+                'reference' => Ticket::nextReference('CHK'),
                 'title' => str($question->question_text)->limit(120),
                 'description' => $answer->comment,
                 'branch_id' => $visit->branch_id,
@@ -82,7 +82,7 @@ class TicketService
     /** Create a ticket manually (e.g. a maintenance request item). */
     public function createManual(array $attrs, ?int $actorId = null): Ticket
     {
-        $attrs['reference'] = Ticket::nextReference();
+        $attrs['reference'] = $attrs['reference'] ?? Ticket::nextReference();
         $attrs['status'] = $attrs['status'] ?? 'open';
         $ticket = Ticket::create($attrs);
 

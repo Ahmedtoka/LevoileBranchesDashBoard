@@ -17,7 +17,7 @@ class Ticket extends Model
 
     /** Arabic status labels. */
     public const STATUS_AR = [
-        'open' => 'جديدة', 'assigned' => 'مُسندة', 'on_the_way' => 'في الطريق', 'in_progress' => 'جاري العمل',
+        'open' => 'جديدة', 'assigned' => 'معيّنة', 'on_the_way' => 'في الطريق', 'in_progress' => 'جاري العمل',
         'waiting_approval' => 'بانتظار المراجعة', 'postponed' => 'مؤجّلة', 'not_fixed' => 'لم تُحل',
         'rejected' => 'مرفوضة', 'closed' => 'مقفولة',
     ];
@@ -125,10 +125,16 @@ class Ticket extends Model
             && ! in_array($this->status, ['closed', 'waiting_approval'], true);
     }
 
-    public static function nextReference(): string
+    /**
+     * Next reference for a given prefix, with its own running sequence.
+     * MTN- for maintenance requests, CHK- for checklist-generated tickets.
+     */
+    public static function nextReference(string $prefix = 'TK'): string
     {
-        $last = static::max('id') ?? 0;
+        $last = static::where('reference', 'like', $prefix.'-%')
+            ->orderByDesc('id')->value('reference');
+        $n = $last ? (int) preg_replace('/\D/', '', substr($last, strlen($prefix) + 1)) : 0;
 
-        return 'TK-'.str_pad($last + 1, 4, '0', STR_PAD_LEFT);
+        return $prefix.'-'.str_pad($n + 1, 4, '0', STR_PAD_LEFT);
     }
 }
