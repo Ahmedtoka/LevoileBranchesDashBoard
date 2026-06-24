@@ -73,7 +73,7 @@
                     <select name="branch_ids[]" id="uBranches" class="form-select" multiple size="6">
                         @foreach($branches as $b)<option value="{{ $b->id }}">{{ $b->branch_name }}</option>@endforeach
                     </select>
-                    <div class="form-text">للفني: المشاكل في الفروع دي بتتسند له تلقائياً. Ctrl/Cmd-click لاختيار أكتر من فرع.</div>
+                    <div class="form-text">للفني: الطلبات في الفروع دي بتتسند له تلقائياً. Ctrl/Cmd-click لاختيار أكتر من فرع.</div>
                 </div>
                 <div class="form-check mt-2"><input type="checkbox" name="is_department_manager" value="1" class="form-check-input" id="uMgr"><label class="form-check-label small" for="uMgr">Department manager</label></div>
                 <div class="form-check"><input type="checkbox" name="active" value="1" class="form-check-input" id="uActive" checked><label class="form-check-label small" for="uActive">Active</label></div>

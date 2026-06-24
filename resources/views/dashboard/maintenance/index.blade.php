@@ -55,7 +55,7 @@
         <a href="{{ $link(['status'=>'over_1_day']) }}" target="_blank" class="btn btn-sm btn-outline-danger">عرض كل المتأخرة</a>
     </div>
     <table class="table table-hover align-middle mb-0">
-        <thead><tr><th>الرقم</th><th>المشكلة</th><th>الفرع</th><th>النوع</th><th>الفني</th><th>الأولوية</th><th>متأخرة من</th><th>الحالة</th></tr></thead>
+        <thead><tr><th>الرقم</th><th>الطلب</th><th>الفرع</th><th>النوع</th><th>الفني</th><th>الأولوية</th><th>متأخرة من</th><th>الحالة</th></tr></thead>
         <tbody>
         @forelse($overdue as $t)
             <tr onclick="window.location='{{ route('tickets.show', $t) }}'" style="cursor:pointer" class="table-danger">
@@ -143,7 +143,7 @@
                 <a href="{{ $link() }}" target="_blank" class="btn btn-sm btn-outline-primary">عرض الكل <i class="bi bi-arrow-left"></i></a>
             </div>
             <table class="table table-hover align-middle mb-0">
-                <thead><tr><th>الرقم</th><th>المشكلة</th><th>الفرع</th><th>النوع</th><th>الفني</th><th>التاريخ</th><th>الحالة</th></tr></thead>
+                <thead><tr><th>الرقم</th><th>الطلب</th><th>الفرع</th><th>النوع</th><th>الفني</th><th>التاريخ</th><th>الحالة</th></tr></thead>
                 <tbody>
                 @forelse($latest as $t)
                     <tr onclick="window.location='{{ route('tickets.show', $t) }}'" style="cursor:pointer" class="{{ $t->isOverdue() ? 'table-danger' : '' }}">
