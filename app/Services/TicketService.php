@@ -137,6 +137,17 @@ class TicketService
         return $ticket;
     }
 
+    /** Technician declines an assigned task: back to the manager (rejected, unassigned). */
+    public function declineByTechnician(Ticket $ticket, User $tech, string $note): Ticket
+    {
+        $from = $ticket->status;
+        $ticket->update(['status' => 'rejected', 'assigned_to' => null]);
+        $this->log($ticket, $tech->id, 'declined', $from, 'rejected', 'رفض الفني: '.$note);
+        $this->notifyDepartmentManager($ticket);
+
+        return $ticket;
+    }
+
     public function changeStatus(Ticket $ticket, string $status, ?User $actor = null, ?string $note = null): Ticket
     {
         $from = $ticket->status;

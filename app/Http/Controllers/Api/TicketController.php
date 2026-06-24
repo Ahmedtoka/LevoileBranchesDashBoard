@@ -101,6 +101,7 @@ class TicketController extends Controller
             'over_1_day' => (clone $openBase)->where('created_at', '<', now()->subDay())->count(),
             'postponed' => (clone $base)->where('status', 'postponed')->count(),
             'not_fixed' => (clone $base)->where('status', 'not_fixed')->count(),
+            'rejected' => (clone $base)->where('status', 'rejected')->count(),
         ];
 
         $employees = User::where('department_id', $deptId)
@@ -145,13 +146,21 @@ class TicketController extends Controller
         $data = $request->validate([
             'status' => ['required', 'in:'.implode(',', Ticket::STATUSES)],
             'note' => ['nullable', 'string'],
+            'latitude' => ['nullable', 'numeric'],
+            'longitude' => ['nullable', 'numeric'],
         ]);
 
         if (! Ticket::canTransition($ticket->status, $data['status'])) {
             return response()->json(['message' => 'انتقال غير مسموح في دورة الحالة.'], 422);
         }
 
-        $this->service->changeStatus($ticket, $data['status'], $request->user(), $data['note'] ?? null);
+        $note = $data['note'] ?? null;
+        if (isset($data['latitude'], $data['longitude'])) {
+            $loc = 'الموقع: '.round($data['latitude'], 6).','.round($data['longitude'], 6);
+            $note = $note ? $note.' · '.$loc : $loc;
+        }
+
+        $this->service->changeStatus($ticket, $data['status'], $request->user(), $note);
 
         return response()->json(['message' => 'Ticket updated.', 'ticket' => $this->item($ticket->fresh())]);
     }
@@ -168,6 +177,15 @@ class TicketController extends Controller
         $this->service->addEvidence($ticket, $path, $data['kind'] ?? 'after', $request->user());
 
         return response()->json(['message' => 'Evidence uploaded.', 'url' => asset('storage/'.$path)]);
+    }
+
+    /** POST /api/tickets/{ticket}/decline — technician rejects an assigned task (note required). */
+    public function decline(Request $request, Ticket $ticket): JsonResponse
+    {
+        $data = $request->validate(['note' => ['required', 'string']]);
+        $this->service->declineByTechnician($ticket, $request->user(), $data['note']);
+
+        return response()->json(['message' => 'تم رفض المهمة وإعادتها للمدير.']);
     }
 
     /** POST /api/tickets/{ticket}/send-for-approval */
@@ -278,11 +296,13 @@ class TicketController extends Controller
         $from = $request->query('from');
         $to = $request->query('to');
 
+        $exact = in_array($status, Ticket::STATUSES, true);
         $q = Ticket::with(['branch', 'assignee'])
             ->where('department_id', $deptId)
             ->when($branchId, fn ($x) => $x->where('branch_id', $branchId))
             ->when($status === 'open', fn ($x) => $x->whereNotIn('status', ['closed']))
             ->when($status === 'closed', fn ($x) => $x->where('status', 'closed'))
+            ->when($exact, fn ($x) => $x->where('status', $status))
             ->when($from, fn ($x) => $x->where('created_at', '>=', $from))
             ->when($to, fn ($x) => $x->where('created_at', '<=', $to))
             ->latest();

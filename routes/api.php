@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tickets/{ticket}', [TicketController::class, 'show']);
     Route::patch('/tickets/{ticket}/status', [TicketController::class, 'updateStatus']);
     Route::post('/tickets/{ticket}/evidence', [TicketController::class, 'uploadEvidence']);
+    Route::post('/tickets/{ticket}/decline', [TicketController::class, 'decline']);
     Route::post('/tickets/{ticket}/send-for-approval', [TicketController::class, 'sendForApproval']);
     Route::post('/tickets/{ticket}/approve', [TicketController::class, 'approve']);
     Route::post('/tickets/{ticket}/reject', [TicketController::class, 'reject']);
