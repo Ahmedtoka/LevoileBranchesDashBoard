@@ -16,21 +16,28 @@ class UserSeeder extends Seeder
         $roles = Role::pluck('id', 'slug');
         $departments = Department::all();
 
-        // Store Manager tied to a specific branch (the branch's responsible user).
-        $branch = Branch::where('branch_name', 'Maadi - Maadi 1')->first()
-            ?? Branch::first();
-        if ($branch) {
-            User::updateOrCreate(
-                ['email' => 'nesma@levoile.test'],
+        // Store managers, each tied to a different branch (for testing 3 branches).
+        $storeManagers = [
+            ['name' => 'Nesma — Maadi 1', 'email' => 'nesma@levoile.test', 'branch' => 'Maadi - Maadi 1'],
+            ['name' => 'Store Mgr — Mall of Egypt', 'email' => 'store2@levoile.test', 'branch' => '6th of October - Mall of Egypt Store'],
+            ['name' => 'Store Mgr — San Stefano', 'email' => 'store3@levoile.test', 'branch' => 'Alexandria - San Stefano Mall'],
+        ];
+        foreach ($storeManagers as $sm) {
+            $b = Branch::where('branch_name', $sm['branch'])->first() ?? Branch::first();
+            if (! $b) {
+                continue;
+            }
+            $u = User::updateOrCreate(
+                ['email' => $sm['email']],
                 [
-                    'name' => 'Nesma (Store Manager)',
+                    'name' => $sm['name'],
                     'password' => Hash::make('password'),
                     'role_id' => $roles['store_manager'] ?? null,
-                    'branch_id' => $branch->id,
+                    'branch_id' => $b->id,
                     'active' => true,
                 ]
             );
-            $branch->update(['manager_id' => User::where('email', 'nesma@levoile.test')->value('id')]);
+            $b->update(['manager_id' => $u->id]);
         }
 
         // Core role users (all share password: "password")
