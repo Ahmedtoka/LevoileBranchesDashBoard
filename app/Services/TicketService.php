@@ -54,7 +54,7 @@ class TicketService
 
         foreach ($deptIds as $deptId) {
             $ticket = Ticket::create([
-                'reference' => Ticket::nextReference('CHK'),
+                'reference' => $this->referenceForDept($deptId),
                 'title' => str($question->question_text)->limit(120),
                 'description' => $answer->comment,
                 'branch_id' => $visit->branch_id,
@@ -80,9 +80,17 @@ class TicketService
     }
 
     /** Create a ticket manually (e.g. a maintenance request item). */
+    /** Reference using the responsible department's 3-letter prefix (own running serial). */
+    public function referenceForDept(?int $deptId): string
+    {
+        $prefix = $deptId ? \App\Models\Department::where('id', $deptId)->value('ticket_prefix') : null;
+
+        return Ticket::nextReference($prefix ?: 'GEN');
+    }
+
     public function createManual(array $attrs, ?int $actorId = null): Ticket
     {
-        $attrs['reference'] = $attrs['reference'] ?? Ticket::nextReference();
+        $attrs['reference'] = $attrs['reference'] ?? $this->referenceForDept($attrs['department_id'] ?? null);
         $attrs['status'] = $attrs['status'] ?? 'open';
         $ticket = Ticket::create($attrs);
 

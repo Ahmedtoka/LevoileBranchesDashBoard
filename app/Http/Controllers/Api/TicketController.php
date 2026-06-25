@@ -378,6 +378,24 @@ class TicketController extends Controller
         return response()->json(['data' => $q->get()->map(fn ($t) => $this->item($t))]);
     }
 
+    /** POST /api/departments/ticket/{ticket}/status — a department manager progresses their own ticket. */
+    public function deptSetStatus(Request $request, Ticket $ticket): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user->is_department_manager || $user->department_id !== $ticket->department_id) {
+            return response()->json(['message' => 'غير مسموح.'], 403);
+        }
+
+        $data = $request->validate([
+            'status' => ['required', 'in:in_progress,waiting_approval,closed,rejected'],
+            'note' => ['nullable', 'string'],
+        ]);
+
+        $this->service->changeStatus($ticket, $data['status'], $user, $data['note'] ?? null);
+
+        return response()->json(['message' => 'تم التحديث.', 'ticket' => $this->item($ticket->fresh())]);
+    }
+
     /** POST /api/departments/assign-bulk { ticket_ids:[], employee_id, scheduled_at } */
     public function assignBulk(Request $request): JsonResponse
     {

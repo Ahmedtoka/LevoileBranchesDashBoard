@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/departments/technicians', [TicketController::class, 'technicians']);
     Route::get('/departments/technician-tickets', [TicketController::class, 'technicianTickets']);
     Route::post('/departments/assign-bulk', [TicketController::class, 'assignBulk']);
+    Route::post('/departments/ticket/{ticket}/status', [TicketController::class, 'deptSetStatus']);
 
     // ---- Maintenance requests ----
     Route::get('/maintenance/items', [MaintenanceController::class, 'items']);

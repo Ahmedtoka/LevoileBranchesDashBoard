@@ -114,7 +114,6 @@ class MaintenanceController extends Controller
                 : 'صيانة — '.$labelAr;
 
             $ticket = $this->tickets->createManual([
-                'reference' => Ticket::nextReference('MTN'),
                 'group_code' => $groupCode,
                 'title' => $title,
                 'description' => $item['note'] ?? null,
