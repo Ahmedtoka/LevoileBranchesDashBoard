@@ -70,7 +70,7 @@ class TicketService
                 'category' => $this->guessCategory($question->question_text),
             ]);
 
-            $this->log($ticket, $visit->user_id, 'created', null, 'open', 'Ticket auto-created from checklist.');
+            $this->log($ticket, $visit->user_id, 'created', null, 'open', 'طلب من الشيك ليست.');
             $this->notifyDepartmentManager($ticket);
             $this->autoAssign($ticket);
             $created++;
@@ -86,7 +86,7 @@ class TicketService
         $attrs['status'] = $attrs['status'] ?? 'open';
         $ticket = Ticket::create($attrs);
 
-        $this->log($ticket, $actorId, 'created', null, $ticket->status, 'Ticket created.');
+        $this->log($ticket, $actorId, 'created', null, $ticket->status, 'تم إنشاء الطلب.');
         $this->notifyDepartmentManager($ticket);
         $this->autoAssign($ticket);
 
@@ -129,7 +129,7 @@ class TicketService
         ]);
 
         $this->log($ticket, optional($actor)->id, 'assignment', $from, 'assigned',
-            'Assigned to '.$employee->name);
+            'تعيين للفني: '.$employee->name);
 
         $this->notify($employee->id, 'ticket_assigned', 'New ticket assigned',
             $ticket->reference.' — '.$ticket->title, $ticket->id);

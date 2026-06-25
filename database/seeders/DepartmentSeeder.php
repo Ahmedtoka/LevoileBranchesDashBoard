@@ -18,6 +18,15 @@ class DepartmentSeeder extends Seeder
             ['slug' => 'purchasing', 'name' => 'Purchasing', 'color' => '#8b5cf6'],
             ['slug' => 'it', 'name' => 'IT', 'color' => '#0ea5e9'],
             ['slug' => 'cctv', 'name' => 'CCTV', 'color' => '#64748b'],
+            // referenced by the real store/area checklists
+            ['slug' => 'vm', 'name' => 'VM', 'color' => '#d946ef'],
+            ['slug' => 'hr', 'name' => 'HR', 'color' => '#14b8a6'],
+            ['slug' => 'warehouse', 'name' => 'Warehouse', 'color' => '#a16207'],
+            ['slug' => 'lp', 'name' => 'Loss Prevention', 'color' => '#dc2626'],
+            ['slug' => 'finance', 'name' => 'Finance', 'color' => '#059669'],
+            ['slug' => 'cleaning', 'name' => 'Cleaning', 'color' => '#22c55e'],
+            ['slug' => 'marketing', 'name' => 'Marketing', 'color' => '#f97316'],
+            ['slug' => 'designer', 'name' => 'Designer', 'color' => '#7c3aed'],
         ];
 
         foreach ($departments as $dept) {

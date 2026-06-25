@@ -1,0 +1,249 @@
+{
+ "name": "Area Manager Visit",
+ "slug": "area-manager",
+ "type": "area_manager",
+ "role": "area_manager",
+ "sections": [
+  {
+   "title": "Operations",
+   "title_ar": "Operations",
+   "questions": [
+    {
+     "text": "Music",
+     "text_ar": null,
+     "depts": [
+      "it",
+      "maintenance"
+     ]
+    },
+    {
+     "text": "Store Cleaning & Outside sign / Bascket",
+     "text_ar": null,
+     "depts": [
+      "cleaning"
+     ]
+    },
+    {
+     "text": "Air Fresher.",
+     "text_ar": null,
+     "depts": [
+      "maintenance"
+     ]
+    },
+    {
+     "text": "Section Handling.",
+     "text_ar": null,
+     "depts": []
+    },
+    {
+     "text": "Marketing materials are implemented in the right position.",
+     "text_ar": null,
+     "depts": [
+      "vm"
+     ]
+    },
+    {
+     "text": "All Rolls of(Visa - Cash - Barcode- Prices) are available",
+     "text_ar": null,
+     "depts": [
+      "finance"
+     ]
+    },
+    {
+     "text": "All sizes of Carrier bags are available",
+     "text_ar": null,
+     "depts": [
+      "warehouse"
+     ]
+    },
+    {
+     "text": "All Team wearing the uniform & Scarf",
+     "text_ar": null,
+     "depts": [
+      "warehouse"
+     ]
+    },
+    {
+     "text": "The manager follow the weekly sch or there is any different without approval",
+     "text_ar": null,
+     "depts": []
+    },
+    {
+     "text": "The manager Compelet the Store checklist and the team work on",
+     "text_ar": null,
+     "depts": []
+    },
+    {
+     "text": "All Products with the correct prices and in the right position",
+     "text_ar": null,
+     "depts": []
+    },
+    {
+     "text": "All Products with a good steaming",
+     "text_ar": null,
+     "depts": [
+      "vm"
+     ]
+    },
+    {
+     "text": "The free stands & Rails are organized and handing.",
+     "text_ar": null,
+     "depts": [
+      "vm"
+     ]
+    },
+    {
+     "text": "All accessories are displayed with a good way on the cash counter.",
+     "text_ar": null,
+     "depts": [
+      "vm"
+     ]
+    },
+    {
+     "text": "QR code & Return policy on a good position and Visible to customers.",
+     "text_ar": null,
+     "depts": [
+      "marketing"
+     ]
+    },
+    {
+     "text": "All VM Tools with a good storage",
+     "text_ar": null,
+     "depts": [
+      "vm"
+     ]
+    },
+    {
+     "text": "All Required maintanace is Done",
+     "text_ar": null,
+     "depts": [
+      "maintenance"
+     ]
+    },
+    {
+     "text": "Follow and implemented VM Guidelines and standards .",
+     "text_ar": null,
+     "depts": [
+      "vm"
+     ]
+    },
+    {
+     "text": "Stockroom is organized and cleaned .",
+     "text_ar": null,
+     "depts": []
+    },
+    {
+     "text": "Damage items check , as per the Brand standards .",
+     "text_ar": null,
+     "depts": []
+    },
+    {
+     "text": "Follow the transfer between stores .",
+     "text_ar": null,
+     "depts": []
+    }
+   ]
+  },
+  {
+   "title": "People",
+   "title_ar": "People",
+   "questions": [
+    {
+     "text": "Customer service Training file is available and implemented",
+     "text_ar": null,
+     "depts": []
+    },
+    {
+     "text": "Brand induction for the new hire .",
+     "text_ar": null,
+     "depts": [
+      "hr"
+     ]
+    },
+    {
+     "text": "Follow the new hire Training and probation period evaluation.",
+     "text_ar": null,
+     "depts": [
+      "hr"
+     ]
+    },
+    {
+     "text": "Review the evaluation with the Manager and Staff",
+     "text_ar": null,
+     "depts": []
+    },
+    {
+     "text": "Review & Fllow the products knowledge with the team",
+     "text_ar": null,
+     "depts": [
+      "vm",
+      "designer"
+     ]
+    },
+    {
+     "text": "Review & Follow the 6 steps .",
+     "text_ar": null,
+     "depts": []
+    },
+    {
+     "text": "Review & Follow ROZ and schedule . ( choose the right one to be a leader shift )",
+     "text_ar": null,
+     "depts": []
+    }
+   ]
+  },
+  {
+   "title": "Commercial",
+   "title_ar": "Commercial",
+   "questions": [
+    {
+     "text": "The windows are clean and with a sufficient depth.",
+     "text_ar": null,
+     "depts": [
+      "vm"
+     ]
+    },
+    {
+     "text": "The outfit on Mannequin is matched and attractive as per the last update",
+     "text_ar": null,
+     "depts": [
+      "vm"
+     ]
+    },
+    {
+     "text": "The new collection items are dispalyed in the primary area .",
+     "text_ar": null,
+     "depts": [
+      "vm"
+     ]
+    },
+    {
+     "text": "Follow the toplist",
+     "text_ar": null,
+     "depts": []
+    },
+    {
+     "text": "New Collection Feedback",
+     "text_ar": null,
+     "depts": [
+      "merchandise"
+     ]
+    },
+    {
+     "text": "Missed Opportunity",
+     "text_ar": null,
+     "depts": [
+      "merchandise"
+     ]
+    },
+    {
+     "text": "Custmer Needs",
+     "text_ar": null,
+     "depts": [
+      "merchandise"
+     ]
+    }
+   ]
+  }
+ ]
+}

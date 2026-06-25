@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             TemplateTypeSeeder::class,
             MaintenanceItemSeeder::class,
             TemplateSeeder::class,
+            RealChecklistSeeder::class,
             DemoVisitSeeder::class,
             BranchMaintenanceSeeder::class,
         ]);

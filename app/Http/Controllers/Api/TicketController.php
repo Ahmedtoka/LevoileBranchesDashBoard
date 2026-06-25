@@ -93,15 +93,23 @@ class TicketController extends Controller
             ->when($to, fn ($x) => $x->where('created_at', '<=', $to));
 
         $openBase = (clone $base)->whereNotIn('status', ['closed', 'waiting_approval']);
+        $countIn = fn (array $st) => (clone $base)->whereIn('status', $st)->count();
 
         $stats = [
+            // matrix the maintenance manager monitors
+            'all' => (clone $base)->count(),
+            'new_group' => $countIn(['open', 'assigned']),        // assigned/unassigned, not yet accepted
+            'accepted' => $countIn(['on_the_way', 'in_progress', 'waiting_approval']),
+            'rejected' => $countIn(['rejected']),
+            'not_started' => $countIn(['on_the_way']),            // accepted, work not started
+            'started' => $countIn(['in_progress']),               // work started
+            'postponed' => $countIn(['postponed']),
+            'not_fixed' => $countIn(['not_fixed']),
+            // kept for compatibility
             'branches_with_problems' => (clone $openBase)->distinct('branch_id')->count('branch_id'),
             'new' => (clone $base)->where('status', 'open')->count(),
             'open' => (clone $openBase)->count(),
             'over_1_day' => (clone $openBase)->where('created_at', '<', now()->subDay())->count(),
-            'postponed' => (clone $base)->where('status', 'postponed')->count(),
-            'not_fixed' => (clone $base)->where('status', 'not_fixed')->count(),
-            'rejected' => (clone $base)->where('status', 'rejected')->count(),
         ];
 
         $employees = User::where('department_id', $deptId)
@@ -296,13 +304,17 @@ class TicketController extends Controller
         $from = $request->query('from');
         $to = $request->query('to');
 
-        $exact = in_array($status, Ticket::STATUSES, true);
+        // status can be: open | closed | all | a single status | comma-separated statuses
+        $list = ($status !== 'open' && $status !== 'closed' && $status !== 'all')
+            ? array_values(array_intersect(explode(',', $status), Ticket::STATUSES))
+            : [];
+
         $q = Ticket::with(['branch', 'assignee'])
             ->where('department_id', $deptId)
             ->when($branchId, fn ($x) => $x->where('branch_id', $branchId))
             ->when($status === 'open', fn ($x) => $x->whereNotIn('status', ['closed']))
             ->when($status === 'closed', fn ($x) => $x->where('status', 'closed'))
-            ->when($exact, fn ($x) => $x->where('status', $status))
+            ->when(! empty($list), fn ($x) => $x->whereIn('status', $list))
             ->when($from, fn ($x) => $x->where('created_at', '>=', $from))
             ->when($to, fn ($x) => $x->where('created_at', '<=', $to))
             ->latest();

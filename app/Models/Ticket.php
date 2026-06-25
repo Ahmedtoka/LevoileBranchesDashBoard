@@ -17,8 +17,8 @@ class Ticket extends Model
 
     /** Arabic status labels. */
     public const STATUS_AR = [
-        'open' => 'جديدة', 'assigned' => 'معيّنة', 'on_the_way' => 'في الطريق', 'in_progress' => 'جاري العمل',
-        'waiting_approval' => 'بانتظار المراجعة', 'postponed' => 'مؤجّلة', 'not_fixed' => 'لم تُحل',
+        'open' => 'جديدة', 'assigned' => 'معيّنة', 'on_the_way' => 'مقبولة', 'in_progress' => 'جاري التنفيذ',
+        'waiting_approval' => 'بانتظار الموافقة', 'postponed' => 'مؤجّلة', 'not_fixed' => 'لم يتم التصليح',
         'rejected' => 'مرفوضة', 'closed' => 'مقفولة',
     ];
 
@@ -29,7 +29,7 @@ class Ticket extends Model
     public static function nextActions(string $status): array
     {
         return match ($status) {
-            'assigned' => ['on_the_way' => ['label' => 'قبول المهمة', 'color' => 'primary']],
+            'assigned' => ['on_the_way' => ['label' => 'قبول الطلب', 'color' => 'primary']],
             'on_the_way' => ['in_progress' => ['label' => 'بدء العمل', 'color' => 'warning']],
             'in_progress' => [
                 'waiting_approval' => ['label' => 'تم الإصلاح', 'color' => 'success'],
