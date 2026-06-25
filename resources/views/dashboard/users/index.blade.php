@@ -1,29 +1,56 @@
 @extends('layouts.app')
-@section('title', 'Users')
+@section('title', 'المستخدمون')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="fw-bold mb-0">Users <span class="text-muted fs-6">({{ $users->count() }})</span></h4>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal" onclick="prepUser()"><i class="bi bi-plus-lg"></i> New user</button>
+    <h4 class="fw-bold mb-0">المستخدمون <span class="text-muted fs-6">({{ $users->count() }})</span></h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal" onclick="prepUser()"><i class="bi bi-plus-lg"></i> مستخدم جديد</button>
 </div>
+
+{{-- role quick chips --}}
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="{{ route('users.index') }}" class="btn btn-sm {{ request('role') ? 'btn-outline-secondary' : 'btn-primary' }}">الكل</a>
+    @foreach($roles as $r)
+        <a href="{{ route('users.index', ['role' => $r->slug]) }}"
+           class="btn btn-sm {{ request('role')===$r->slug ? 'btn-primary' : 'btn-outline-secondary' }}">
+           {{ $r->name }} <span class="badge text-bg-light">{{ $roleCounts[$r->id] ?? 0 }}</span>
+        </a>
+    @endforeach
+</div>
+
+{{-- filters --}}
+<form class="card p-2 mb-3" method="GET">
+    <div class="row g-2 align-items-end">
+        @if(request('role'))<input type="hidden" name="role" value="{{ request('role') }}">@endif
+        <div class="col-md-4"><label class="form-label small mb-1">الإدارة</label>
+            <select name="department" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">كل الإدارات</option>
+                @foreach($departments as $d)<option value="{{ $d->slug }}" @selected(request('department')===$d->slug)>{{ $d->name }}</option>@endforeach
+            </select></div>
+        <div class="col-md-5"><label class="form-label small mb-1">بحث</label>
+            <input name="q" value="{{ request('q') }}" class="form-control form-control-sm" placeholder="اسم أو بريد…"></div>
+        <div class="col-md-3"><button class="btn btn-sm btn-primary">بحث</button>
+            <a href="{{ route('users.index') }}" class="btn btn-sm btn-outline-secondary">مسح</a></div>
+    </div>
+</form>
 
 <div class="card p-0">
     <table class="table table-hover align-middle mb-0">
-        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Branch</th><th class="text-center">Manager</th><th class="text-center">Active</th><th></th></tr></thead>
+        <thead><tr><th>الاسم</th><th>البريد</th><th>الدور</th><th>الإدارة</th><th>الفرع</th><th class="text-center">مدير</th><th class="text-center">نشط</th><th></th></tr></thead>
         <tbody>
         @foreach($users as $u)
             <tr>
                 <td class="fw-semibold">{{ $u->name }}</td>
-                <td class="small">{{ $u->email }}</td>
-                <td>{{ optional($u->role)->name ?? '—' }}</td>
+                <td class="small text-muted">{{ $u->email }}</td>
+                <td><span class="badge text-bg-light">{{ optional($u->role)->name ?? '—' }}</span></td>
                 <td>{{ optional($u->department)->name ?? '—' }}</td>
                 <td class="small">{{ optional($u->branch)->branch_name ?? '—' }}</td>
                 <td class="text-center">{!! $u->is_department_manager ? '<i class="bi bi-check-circle-fill text-success"></i>' : '' !!}</td>
-                <td class="text-center">{!! $u->active ? '<span class="badge text-bg-success">Active</span>' : '<span class="badge text-bg-secondary">Off</span>' !!}</td>
+                <td class="text-center">{!! $u->active ? '<span class="badge text-bg-success">نشط</span>' : '<span class="badge text-bg-secondary">موقوف</span>' !!}</td>
                 <td class="text-end">
-                    <button class="btn btn-sm btn-link p-0 me-2 edit-user" data-u='@json($u)' data-branches='@json($u->branches->pluck("id"))'>Edit</button>
-                    <form method="POST" action="{{ route('users.destroy', $u) }}" class="d-inline" onsubmit="return confirm('Delete this user?')">
-                        @csrf @method('DELETE')<button class="btn btn-sm btn-link text-danger p-0">Del</button>
+                    <button class="btn btn-sm btn-link p-0 me-2 edit-user" data-u='@json($u)' data-branches='@json($u->branches->pluck("id"))'>تعديل</button>
+                    <form method="POST" action="{{ route('users.destroy', $u) }}" class="d-inline" onsubmit="return confirm('حذف المستخدم؟')">
+                        @csrf @method('DELETE')<button class="btn btn-sm btn-link text-danger p-0">حذف</button>
                     </form>
                 </td>
             </tr>

@@ -34,19 +34,22 @@
 @auth
 <nav class="sidebar p-3">
     <div class="brand fs-5 mb-3"><i class="bi bi-shop"></i> LeVoile</div>
-    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="bi bi-grid me-2"></i>Overview</a>
-    <a href="{{ route('branches.index') }}" class="{{ request()->routeIs('branches.*') ? 'active' : '' }}"><i class="bi bi-geo-alt me-2"></i>Branches</a>
-    <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="bi bi-people me-2"></i>Users</a>
-    <a href="{{ route('coverage.index') }}" class="{{ request()->routeIs('coverage.*') ? 'active' : '' }}"><i class="bi bi-geo me-2"></i>تغطية الفروع</a>
-    <a href="{{ route('templates.index') }}" class="{{ request()->routeIs('templates.*') || request()->routeIs('types.*') ? 'active' : '' }}"><i class="bi bi-ui-checks me-2"></i>Checklist Builder</a>
-    <a href="{{ route('visits.schedule') }}" class="{{ request()->routeIs('visits.schedule') ? 'active' : '' }}"><i class="bi bi-calendar-plus me-2"></i>Schedule Visit</a>
-    <a href="{{ route('visits.index') }}" class="{{ request()->routeIs('visits.index') || request()->routeIs('visits.show') ? 'active' : '' }}"><i class="bi bi-clipboard-check me-2"></i>Visits</a>
-    <a href="{{ route('tickets.index') }}" class="{{ request()->routeIs('tickets.index') ? 'active' : '' }}"><i class="bi bi-ticket-detailed me-2"></i>Tickets</a>
-    <a href="{{ route('departments.index') }}" class="{{ request()->routeIs('departments.*') ? 'active' : '' }}"><i class="bi bi-diagram-3 me-2"></i>Departments</a>
-    <a href="{{ route('maintenance.index') }}" class="{{ request()->routeIs('maintenance.*') ? 'active' : '' }}"><i class="bi bi-tools me-2"></i>Maintenance Center</a>
+    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="bi bi-grid me-2"></i>نظرة عامة</a>
+    <a href="{{ route('tickets.index') }}" class="{{ request()->routeIs('tickets.index') ? 'active' : '' }}"><i class="bi bi-ticket-detailed me-2"></i>التذاكر</a>
+    <a href="{{ route('visits.index') }}" class="{{ request()->routeIs('visits.index') || request()->routeIs('visits.show') ? 'active' : '' }}"><i class="bi bi-clipboard-check me-2"></i>الزيارات</a>
+    <a href="{{ route('visits.schedule') }}" class="{{ request()->routeIs('visits.schedule') ? 'active' : '' }}"><i class="bi bi-calendar-plus me-2"></i>جدولة زيارة</a>
 
-    <div class="nav-label">Insights</div>
-    <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-bar-chart me-2"></i>Reports</a>
+    <div class="nav-label">الإدارة</div>
+    <a href="{{ route('departments.index') }}" class="{{ request()->routeIs('departments.*') ? 'active' : '' }}"><i class="bi bi-diagram-3 me-2"></i>الإدارات</a>
+    <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="bi bi-people me-2"></i>المستخدمون</a>
+    <a href="{{ route('roles.index') }}" class="{{ request()->routeIs('roles.*') ? 'active' : '' }}"><i class="bi bi-person-badge me-2"></i>الأدوار</a>
+    <a href="{{ route('branches.index') }}" class="{{ request()->routeIs('branches.*') ? 'active' : '' }}"><i class="bi bi-geo-alt me-2"></i>الفروع</a>
+    <a href="{{ route('coverage.index') }}" class="{{ request()->routeIs('coverage.*') ? 'active' : '' }}"><i class="bi bi-geo me-2"></i>تغطية الفروع</a>
+    <a href="{{ route('templates.index') }}" class="{{ request()->routeIs('templates.*') || request()->routeIs('types.*') ? 'active' : '' }}"><i class="bi bi-ui-checks me-2"></i>محرّر الشيك ليست</a>
+    <a href="{{ route('maintenance.index') }}" class="{{ request()->routeIs('maintenance.*') ? 'active' : '' }}"><i class="bi bi-tools me-2"></i>مركز الصيانة</a>
+
+    <div class="nav-label">التقارير</div>
+    <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-bar-chart me-2"></i>التقارير</a>
 
     <hr class="text-secondary">
     <div class="small text-secondary px-2">

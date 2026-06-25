@@ -13,14 +13,21 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with(['role', 'department', 'branch', 'branches'])->orderBy('name')->get();
+        $users = User::with(['role', 'department', 'branch', 'branches'])
+            ->when($request->filled('role'), fn ($q) => $q->whereHas('role', fn ($r) => $r->where('slug', $request->role)))
+            ->when($request->filled('department'), fn ($q) => $q->whereHas('department', fn ($d) => $d->where('slug', $request->department)))
+            ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', "%{$request->q}%")->orWhere('email', 'like', "%{$request->q}%")))
+            ->orderBy('role_id')->orderByDesc('is_department_manager')->orderBy('name')
+            ->get();
+
         $roles = Role::orderBy('name')->get();
         $departments = Department::orderBy('name')->get();
         $branches = Branch::orderBy('branch_name')->get();
+        $roleCounts = User::selectRaw('role_id, count(*) as total')->groupBy('role_id')->pluck('total', 'role_id');
 
-        return view('dashboard.users.index', compact('users', 'roles', 'departments', 'branches'));
+        return view('dashboard.users.index', compact('users', 'roles', 'departments', 'branches', 'roleCounts'));
     }
 
     public function store(Request $request)

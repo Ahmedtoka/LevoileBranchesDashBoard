@@ -75,6 +75,7 @@ class DepartmentController extends Controller
                 $d->overdue = (clone $base)->whereNotNull('due_at')->where('due_at', '<', now())
                     ->whereNotIn('status', ['closed', 'waiting_approval'])->count();
                 $d->employees_count = User::where('department_id', $d->id)->where('is_department_manager', false)->count();
+                $d->manager_name = User::where('department_id', $d->id)->where('is_department_manager', true)->value('name');
 
                 return $d;
             });
