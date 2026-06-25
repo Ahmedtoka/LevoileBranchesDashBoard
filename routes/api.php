@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MaintenanceController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\OpsController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\VisitController;
@@ -56,6 +57,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/maintenance/upload', [MaintenanceController::class, 'upload']);
     Route::post('/maintenance/requests', [MaintenanceController::class, 'store']);
     Route::get('/branch/overview', [MaintenanceController::class, 'branchOverview']);
+
+    // ---- Operations manager ----
+    Route::get('/ops/overview', [OpsController::class, 'overview']);
+    Route::get('/ops/teams', [OpsController::class, 'teams']);
+    Route::get('/ops/pickers', [OpsController::class, 'pickers']);
+    Route::post('/ops/schedule', [OpsController::class, 'schedule']);
+    Route::get('/ops/visits', [OpsController::class, 'visits']);
+    Route::get('/ops/tickets', [OpsController::class, 'tickets']);
 
     // ---- Notifications ----
     Route::get('/notifications', [NotificationController::class, 'index']);
