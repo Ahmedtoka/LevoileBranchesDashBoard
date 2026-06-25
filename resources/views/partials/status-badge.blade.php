@@ -5,8 +5,14 @@
         'postponed' => 'warning', 'not_fixed' => 'danger',
         'closed' => 'success', 'completed' => 'success', 'checked_in' => 'info', 'cancelled' => 'dark',
     ];
+    $ar = [
+        'open' => 'جديدة', 'assigned' => 'معيّنة', 'on_the_way' => 'مقبولة', 'in_progress' => 'جاري التنفيذ',
+        'waiting_approval' => 'بانتظار الموافقة', 'postponed' => 'مؤجّلة', 'not_fixed' => 'لم يتم التصليح',
+        'rejected' => 'مرفوضة', 'closed' => 'مقفولة', 'completed' => 'مكتملة', 'checked_in' => 'تم الحضور',
+        'cancelled' => 'ملغاة',
+    ];
     $color = $map[$status] ?? 'secondary';
-    $label = ucwords(str_replace('_', ' ', $status));
+    $label = $ar[$status] ?? ucwords(str_replace('_', ' ', $status));
 @endphp
 @if($color === 'purple')
     <span class="badge badge-status" style="background:#7c3aed">{{ $label }}</span>

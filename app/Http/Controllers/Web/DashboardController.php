@@ -36,7 +36,19 @@ class DashboardController extends Controller
         $ticketsByDept = Department::withCount([
             'tickets as open_count' => fn ($q) => $q->whereNotIn('status', ['closed'])->whereBetween('created_at', [$from, $to]),
             'tickets as closed_count' => fn ($q) => $q->where('status', 'closed')->whereBetween('created_at', [$from, $to]),
-        ])->get();
+            'tickets as total_count' => fn ($q) => $q->whereBetween('created_at', [$from, $to]),
+        ])->orderByDesc('open_count')->get();
+
+        // tickets by source (store checklist / area visit / maintenance request)
+        $bySource = [
+            'store' => (clone $ticketsInRange)->whereHas('visit.template', fn ($q) => $q->where('type', 'store_manager'))->count(),
+            'area' => (clone $ticketsInRange)->whereHas('visit.template', fn ($q) => $q->where('type', 'area_manager'))->count(),
+            'maintenance' => (clone $ticketsInRange)->whereNull('visit_id')->count(),
+        ];
+
+        // tickets by status (Arabic)
+        $byStatus = (clone $ticketsInRange)->selectRaw('status, count(*) as total')
+            ->groupBy('status')->pluck('total', 'status')->toArray();
 
         $repeated = Ticket::selectRaw('category, branch_id, count(*) as total')
             ->whereNotNull('category')
@@ -52,6 +64,6 @@ class DashboardController extends Controller
             ->whereBetween('created_at', [$from, $to])
             ->latest()->limit(8)->get();
 
-        return view('dashboard.overview', compact('stats', 'ticketsByDept', 'repeated', 'recentTickets', 'range'));
+        return view('dashboard.overview', compact('stats', 'ticketsByDept', 'bySource', 'byStatus', 'repeated', 'recentTickets', 'range'));
     }
 }

@@ -31,9 +31,19 @@ class TicketController extends Controller
         if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
+        if ($request->filled('source')) {
+            $src = $request->source;
+            if ($src === 'maintenance') {
+                $query->whereNull('visit_id');
+            } elseif ($src === 'store') {
+                $query->whereHas('visit.template', fn ($t) => $t->where('type', 'store_manager'));
+            } elseif ($src === 'area') {
+                $query->whereHas('visit.template', fn ($t) => $t->where('type', 'area_manager'));
+            }
+        }
         if ($request->filled('status')) {
-            if ($request->status === 'open_group') {
-                $query->whereNotIn('status', ['closed', 'waiting_approval']);
+            if ($request->status === 'open_group' || $request->status === 'open') {
+                $query->whereNotIn('status', ['closed']);
             } elseif ($request->status === 'over_1_day') {
                 $query->whereNotIn('status', ['closed', 'waiting_approval'])->where('created_at', '<', now()->subDay());
             } else {
