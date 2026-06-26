@@ -114,7 +114,7 @@
                     <input type="datetime-local" name="scheduled_at" class="form-control">
                 </div>
             </div>
-            <div class="modal-footer"><button class="btn btn-primary">Save assignment</button></div>
+            <div class="modal-footer"><button class="btn btn-primary">{{ t('tk.save_assignment','حفظ التعيين') }}</button></div>
         </form>
     </div>
 </div>

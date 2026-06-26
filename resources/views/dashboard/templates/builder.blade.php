@@ -94,7 +94,7 @@
                 <div class="form-check"><input type="checkbox" name="scored" value="1" class="form-check-input" id="s1" @checked($template->scored)><label class="form-check-label small" for="s1">Scored</label></div>
                 <div class="form-check"><input type="checkbox" name="active" value="1" class="form-check-input" id="a1" @checked($template->active)><label class="form-check-label small" for="a1">Active</label></div>
             </div>
-            <div class="modal-footer"><button class="btn btn-primary">Save settings</button></div>
+            <div class="modal-footer"><button class="btn btn-primary">{{ t('tpl.save_settings','حفظ الإعدادات') }}</button></div>
         </form>
     </div>
 </div>
@@ -111,7 +111,7 @@
                 <div class="mb-2"><label class="form-label small">Title (AR)</label><input name="title_ar" id="sTitleAr" class="form-control" dir="rtl"></div>
                 @if($template->scored)<div class="mb-2"><label class="form-label small">Weight</label><input name="weight" id="sWeight" type="number" min="0" class="form-control"></div>@endif
             </div>
-            <div class="modal-footer"><button class="btn btn-primary">Save section</button></div>
+            <div class="modal-footer"><button class="btn btn-primary">{{ t('tpl.save_section','حفظ القسم') }}</button></div>
         </form>
     </div>
 </div>
@@ -200,7 +200,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer"><button class="btn btn-primary">Save question</button></div>
+            <div class="modal-footer"><button class="btn btn-primary">{{ t('tpl.save_question','حفظ السؤال') }}</button></div>
         </form>
     </div>
 </div>

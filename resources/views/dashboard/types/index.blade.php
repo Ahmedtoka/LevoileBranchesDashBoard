@@ -8,7 +8,7 @@
 <div class="row g-3">
     <div class="col-lg-5">
         <div class="card p-3">
-            <h6 class="fw-bold">Add a type</h6>
+            <h6 class="fw-bold">{{ t('tpl.add_type','إضافة نوع') }}</h6>
             <form method="POST" action="{{ route('types.store') }}" class="d-flex gap-2">
                 @csrf
                 <input name="name" class="form-control" placeholder="e.g. Loss Prevention" required>

@@ -65,7 +65,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary">Save assignment</button>
+                <button class="btn btn-primary">{{ t('tk.save_assignment','حفظ التعيين') }}</button>
             </div>
         </form>
     </div>

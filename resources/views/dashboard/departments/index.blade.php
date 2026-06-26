@@ -50,7 +50,7 @@
             </div>
         </div>
     @empty
-        <div class="col-12"><div class="card p-4 text-center text-muted">No departments. Add one.</div></div>
+        <div class="col-12"><div class="card p-4 text-center text-muted">{{ t('dept.empty','لا توجد إدارات. أضف واحدة.') }}</div></div>
     @endforelse
 </div>
 
@@ -60,13 +60,13 @@
         <form class="modal-content" method="POST" id="deptForm">
             @csrf
             <input type="hidden" name="_method" id="deptMethod" value="POST">
-            <div class="modal-header"><h6 class="modal-title" id="deptTitle">New department</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header"><h6 class="modal-title" id="deptTitle">{{ t('dept.new','إدارة جديدة') }}</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
-                <div class="mb-2"><label class="form-label small">Name</label><input name="name" id="deptName" class="form-control" required></div>
-                <div class="mb-2"><label class="form-label small">Color</label><input name="color" id="deptColor" type="color" class="form-control form-control-color" value="#64748b"></div>
-                <div class="form-check" id="deptActiveWrap"><input type="checkbox" name="active" value="1" class="form-check-input" id="deptActive" checked><label class="form-check-label small" for="deptActive">Active</label></div>
+                <div class="mb-2"><label class="form-label small">{{ t('common.name','الاسم') }}</label><input name="name" id="deptName" class="form-control" required></div>
+                <div class="mb-2"><label class="form-label small">{{ t('dept.color','اللون') }}</label><input name="color" id="deptColor" type="color" class="form-control form-control-color" value="#64748b"></div>
+                <div class="form-check" id="deptActiveWrap"><input type="checkbox" name="active" value="1" class="form-check-input" id="deptActive" checked><label class="form-check-label small" for="deptActive">{{ t('common.active','نشط') }}</label></div>
             </div>
-            <div class="modal-footer"><button class="btn btn-primary">Save department</button></div>
+            <div class="modal-footer"><button class="btn btn-primary">{{ t('dept.save','حفظ الإدارة') }}</button></div>
         </form>
     </div>
 </div>
@@ -78,7 +78,7 @@ function prepDept() {
     const f = document.getElementById('deptForm');
     f.action = '{{ route('departments.store') }}';
     document.getElementById('deptMethod').value = 'POST';
-    document.getElementById('deptTitle').textContent = 'New department';
+    document.getElementById('deptTitle').textContent = @json(t('dept.new','إدارة جديدة'));
     document.getElementById('deptName').value = '';
     document.getElementById('deptColor').value = '#64748b';
     document.getElementById('deptActive').checked = true;
@@ -89,7 +89,7 @@ document.querySelectorAll('.edit-dept').forEach(btn => btn.addEventListener('cli
     const f = document.getElementById('deptForm');
     f.action = '/departments/' + d.id;
     document.getElementById('deptMethod').value = 'PUT';
-    document.getElementById('deptTitle').textContent = 'Edit department';
+    document.getElementById('deptTitle').textContent = @json(t('dept.edit','تعديل إدارة'));
     document.getElementById('deptName').value = d.name || '';
     document.getElementById('deptColor').value = d.color || '#64748b';
     document.getElementById('deptActive').checked = !!d.active;

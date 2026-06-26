@@ -22,7 +22,7 @@
 
 <form class="mb-3" method="GET">
     <div class="input-group input-group-sm" style="max-width:320px">
-        <input name="q" value="{{ request('q') }}" class="form-control" placeholder="Search templates…">
+        <input name="q" value="{{ request('q') }}" class="form-control" placeholder="{{ t('tpl.search','بحث في القوالب…') }}">
         <button class="btn btn-outline-secondary"><i class="bi bi-search"></i></button>
     </div>
 </form>
@@ -62,7 +62,7 @@
     <div class="modal-dialog">
         <form class="modal-content" method="POST" action="{{ route('templates.store') }}">
             @csrf
-            <div class="modal-header"><h6 class="modal-title">New checklist template</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header"><h6 class="modal-title">{{ t('tpl.new','قالب شيك ليست جديد') }}</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label small">Template name</label>

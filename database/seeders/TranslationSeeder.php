@@ -64,6 +64,9 @@ class TranslationSeeder extends Seeder
             ['common', 'common.filter_rows', 'فلترة صفوف الصفحة…', 'Filter rows on this page…'],
             ['common', 'common.logout', 'تسجيل الخروج', 'Logout'],
             ['common', 'common.no_data', 'لا توجد بيانات.', 'No data.'],
+            ['common', 'common.phone', 'الهاتف', 'Phone'],
+            ['common', 'common.password', 'كلمة المرور', 'Password'],
+            ['common', 'common.cancel', 'إلغاء', 'Cancel'],
             ['tickets', 'tk.search', 'بحث بالعنوان / الكود…', 'Search title / reference…'],
 
             // dashboard
@@ -95,6 +98,15 @@ class TranslationSeeder extends Seeder
             ['tickets', 'tk.status', 'الحالة', 'Status'],
             ['tickets', 'tk.closed', 'مقفولة', 'Closed'],
             ['tickets', 'tk.open', 'مفتوحة', 'Open'],
+            ['tickets', 'tk.save_assignment', 'حفظ التعيين', 'Save assignment'],
+
+            // templates / builder
+            ['templates', 'tpl.new', 'قالب شيك ليست جديد', 'New checklist template'],
+            ['templates', 'tpl.search', 'بحث في القوالب…', 'Search templates…'],
+            ['templates', 'tpl.save_settings', 'حفظ الإعدادات', 'Save settings'],
+            ['templates', 'tpl.save_section', 'حفظ القسم', 'Save section'],
+            ['templates', 'tpl.save_question', 'حفظ السؤال', 'Save question'],
+            ['templates', 'tpl.add_type', 'إضافة نوع', 'Add a type'],
 
             // statuses
             ['status', 'status.open', 'جديدة', 'New'],
@@ -129,6 +141,16 @@ class TranslationSeeder extends Seeder
             ['users', 'users.search_ph', 'اسم أو بريد…', 'Name or email…'],
             ['users', 'users.inactive', 'موقوف', 'Off'],
             ['users', 'users.confirm_delete', 'حذف المستخدم؟', 'Delete this user?'],
+            ['users', 'users.edit', 'تعديل مستخدم', 'Edit user'],
+            ['users', 'users.save', 'حفظ المستخدم', 'Save user'],
+            ['users', 'users.pw_required', '(مطلوبة)', '(required)'],
+            ['users', 'users.pw_keep', '(اتركها فارغة للإبقاء)', '(leave blank to keep)'],
+            ['users', 'users.branch_single', 'الفرع', 'Branch'],
+            ['users', 'users.branch_single_hint', 'فرع مدير الفرع الواحد', "Store Manager's single branch"],
+            ['users', 'users.covered', 'الفروع المغطّاة', 'Covered branches'],
+            ['users', 'users.covered_hint', 'منطقة الأريا مانجر / فروع الفني — متعدّد', 'Area Manager region / Technician branches — multi'],
+            ['users', 'users.tech_auto', 'للفني: الطلبات في الفروع دي بتتسند له تلقائيًا. Ctrl/Cmd-click لاختيار أكتر من فرع.', 'For technicians: requests in these branches are auto-assigned. Ctrl/Cmd-click to pick more than one.'],
+            ['users', 'users.is_manager', 'مدير إدارة', 'Department manager'],
             ['departments', 'dept.title', 'الإدارات', 'Departments'],
             ['departments', 'dept.new', 'إدارة جديدة', 'New department'],
             ['departments', 'dept.staff', 'موظفين', 'Staff'],
@@ -137,6 +159,10 @@ class TranslationSeeder extends Seeder
             ['departments', 'dept.inactive', 'موقوفة', 'Inactive'],
             ['departments', 'dept.no_manager', '— لا يوجد', '— none'],
             ['departments', 'dept.confirm_delete', 'حذف الإدارة؟', 'Delete this department?'],
+            ['departments', 'dept.edit', 'تعديل إدارة', 'Edit department'],
+            ['departments', 'dept.save', 'حفظ الإدارة', 'Save department'],
+            ['departments', 'dept.color', 'اللون', 'Color'],
+            ['departments', 'dept.empty', 'لا توجد إدارات. أضف واحدة.', 'No departments. Add one.'],
 
             // reports
             ['reports', 'rep.title', 'التقارير', 'Reports'],
