@@ -35,25 +35,37 @@
 </head>
 <body>
 @auth
+@php
+    $dm = auth()->user()->is_department_manager && auth()->user()->department_id;
+@endphp
 <nav class="sidebar p-3">
     <div class="brand fs-5 mb-3"><i class="bi bi-shop"></i> LeVoile</div>
     <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="bi bi-grid me-2"></i>{{ t('nav.overview','نظرة عامة') }}</a>
     <a href="{{ route('tickets.index') }}" class="{{ request()->routeIs('tickets.index') ? 'active' : '' }}"><i class="bi bi-ticket-detailed me-2"></i>{{ t('nav.tickets','التذاكر') }}</a>
-    <a href="{{ route('visits.index') }}" class="{{ request()->routeIs('visits.index') || request()->routeIs('visits.show') ? 'active' : '' }}"><i class="bi bi-clipboard-check me-2"></i>{{ t('nav.visits','الزيارات') }}</a>
-    <a href="{{ route('visits.schedule') }}" class="{{ request()->routeIs('visits.schedule') ? 'active' : '' }}"><i class="bi bi-calendar-plus me-2"></i>{{ t('nav.schedule','جدولة زيارة') }}</a>
 
-    <div class="nav-label">{{ t('nav.management','الإدارة') }}</div>
-    <a href="{{ route('departments.index') }}" class="{{ request()->routeIs('departments.*') ? 'active' : '' }}"><i class="bi bi-diagram-3 me-2"></i>{{ t('nav.departments','الإدارات') }}</a>
-    <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="bi bi-people me-2"></i>{{ t('nav.users','المستخدمون') }}</a>
-    <a href="{{ route('roles.index') }}" class="{{ request()->routeIs('roles.*') ? 'active' : '' }}"><i class="bi bi-person-badge me-2"></i>{{ t('nav.roles','الأدوار') }}</a>
-    <a href="{{ route('branches.index') }}" class="{{ request()->routeIs('branches.*') ? 'active' : '' }}"><i class="bi bi-geo-alt me-2"></i>{{ t('nav.branches','الفروع') }}</a>
-    <a href="{{ route('coverage.index') }}" class="{{ request()->routeIs('coverage.*') ? 'active' : '' }}"><i class="bi bi-geo me-2"></i>{{ t('nav.coverage','تغطية الفروع') }}</a>
-    <a href="{{ route('templates.index') }}" class="{{ request()->routeIs('templates.*') || request()->routeIs('types.*') ? 'active' : '' }}"><i class="bi bi-ui-checks me-2"></i>{{ t('nav.builder','محرّر الشيك ليست') }}</a>
-    <a href="{{ route('maintenance.index') }}" class="{{ request()->routeIs('maintenance.*') ? 'active' : '' }}"><i class="bi bi-tools me-2"></i>{{ t('nav.maintenance','مركز الصيانة') }}</a>
-    <a href="{{ route('translations.index') }}" class="{{ request()->routeIs('translations.*') ? 'active' : '' }}"><i class="bi bi-translate me-2"></i>{{ t('nav.strings','النصوص') }}</a>
+    @if($dm)
+        {{-- Department manager: scoped view of their own department only --}}
+        <a href="{{ route('departments.board', auth()->user()->department_id) }}" class="{{ request()->routeIs('departments.board') ? 'active' : '' }}"><i class="bi bi-kanban me-2"></i>{{ dt('لوحة إدارتي','My department board') }}</a>
 
-    <div class="nav-label">{{ t('nav.reports','التقارير') }}</div>
-    <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-bar-chart me-2"></i>{{ t('nav.reports','التقارير') }}</a>
+        <div class="nav-label">{{ t('nav.reports','التقارير') }}</div>
+        <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-bar-chart me-2"></i>{{ t('nav.reports','التقارير') }}</a>
+    @else
+        <a href="{{ route('visits.index') }}" class="{{ request()->routeIs('visits.index') || request()->routeIs('visits.show') ? 'active' : '' }}"><i class="bi bi-clipboard-check me-2"></i>{{ t('nav.visits','الزيارات') }}</a>
+        <a href="{{ route('visits.schedule') }}" class="{{ request()->routeIs('visits.schedule') ? 'active' : '' }}"><i class="bi bi-calendar-plus me-2"></i>{{ t('nav.schedule','جدولة زيارة') }}</a>
+
+        <div class="nav-label">{{ t('nav.management','الإدارة') }}</div>
+        <a href="{{ route('departments.index') }}" class="{{ request()->routeIs('departments.*') ? 'active' : '' }}"><i class="bi bi-diagram-3 me-2"></i>{{ t('nav.departments','الإدارات') }}</a>
+        <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="bi bi-people me-2"></i>{{ t('nav.users','المستخدمون') }}</a>
+        <a href="{{ route('roles.index') }}" class="{{ request()->routeIs('roles.*') ? 'active' : '' }}"><i class="bi bi-person-badge me-2"></i>{{ t('nav.roles','الأدوار') }}</a>
+        <a href="{{ route('branches.index') }}" class="{{ request()->routeIs('branches.*') ? 'active' : '' }}"><i class="bi bi-geo-alt me-2"></i>{{ t('nav.branches','الفروع') }}</a>
+        <a href="{{ route('coverage.index') }}" class="{{ request()->routeIs('coverage.*') ? 'active' : '' }}"><i class="bi bi-geo me-2"></i>{{ t('nav.coverage','تغطية الفروع') }}</a>
+        <a href="{{ route('templates.index') }}" class="{{ request()->routeIs('templates.*') || request()->routeIs('types.*') ? 'active' : '' }}"><i class="bi bi-ui-checks me-2"></i>{{ t('nav.builder','محرّر الشيك ليست') }}</a>
+        <a href="{{ route('maintenance.index') }}" class="{{ request()->routeIs('maintenance.*') ? 'active' : '' }}"><i class="bi bi-tools me-2"></i>{{ t('nav.maintenance','مركز الصيانة') }}</a>
+        <a href="{{ route('translations.index') }}" class="{{ request()->routeIs('translations.*') ? 'active' : '' }}"><i class="bi bi-translate me-2"></i>{{ t('nav.strings','النصوص') }}</a>
+
+        <div class="nav-label">{{ t('nav.reports','التقارير') }}</div>
+        <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-bar-chart me-2"></i>{{ t('nav.reports','التقارير') }}</a>
+    @endif
 
     <hr class="text-secondary">
     <div class="small text-secondary px-2">

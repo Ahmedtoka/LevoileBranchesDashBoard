@@ -2,7 +2,49 @@
 @section('title', t('rep.title','التقارير'))
 
 @section('content')
-<h4 class="fw-bold mb-3">{{ t('rep.title','التقارير') }}</h4>
+<h4 class="fw-bold mb-3">
+    {{ t('rep.title','التقارير') }}
+    @if($scopeDept)<span class="badge align-middle ms-1" style="background:{{ $scopeDept->color ?? '#9c1e6e' }}">{{ $scopeDept->name }}</span>@endif
+</h4>
+
+@include('partials.filterbar', ['range' => $range])
+
+{{-- SLA summary --}}
+<div class="row g-3 mb-3">
+    @php
+        $slaCards = [
+            [dt('متوسط زمن الحل','Avg resolution'), $sla['avg_resolution'] !== null ? $sla['avg_resolution'].' '.dt('س','h') : '—', 'stopwatch', '#0ea5e9'],
+            [dt('الالتزام بالـ SLA','SLA compliance'), $sla['sla_pct'] !== null ? $sla['sla_pct'].'%' : '—', 'shield-check', ($sla['sla_pct'] !== null && $sla['sla_pct'] >= 80 ? '#16a34a' : '#f59e0b')],
+            [t('tk.closed','مقفولة'), $sla['closed'], 'check2-circle', '#16a34a'],
+            [t('rep.overdue','التذاكر المتأخرة'), $overdue->count(), 'exclamation-triangle', '#dc2626'],
+        ];
+    @endphp
+    @foreach($slaCards as [$label, $val, $icon, $clr])
+        <div class="col-md-3 col-6">
+            <div class="card p-3 h-100 d-flex flex-row align-items-center">
+                <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                     style="width:42px;height:42px;background:{{ $clr }}1a;color:{{ $clr }}"><i class="bi bi-{{ $icon }} fs-5"></i></div>
+                <div><div class="text-muted small">{{ $label }}</div><div class="fw-bold fs-5 text-dark">{{ $val }}</div></div>
+            </div>
+        </div>
+    @endforeach
+</div>
+
+{{-- tickets by status chart --}}
+<div class="row g-3 mb-3">
+    <div class="col-lg-5">
+        <div class="card p-3 h-100">
+            <h6 class="fw-bold mb-3">{{ dt('التذاكر حسب الحالة','Tickets by status') }} <span class="text-muted small">({{ $range->label }})</span></h6>
+            <canvas id="repStatusChart" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card p-3 h-100">
+            <h6 class="fw-bold mb-3">{{ t('dash.by_source','التذاكر حسب المصدر') }}</h6>
+            <canvas id="repSourceChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
 
 {{-- tickets by source --}}
 <div class="row g-3 mb-3">
@@ -27,6 +69,7 @@
 </div>
 
 <div class="row g-3">
+    @unless($scopeDept)
     <div class="col-lg-6">
         <div class="card p-3 h-100">
             <h6 class="fw-bold">{{ t('rep.visits_per_branch','الزيارات حسب الفرع') }}</h6>
@@ -56,6 +99,7 @@
             </table>
         </div>
     </div>
+    @endunless
 
     <div class="col-lg-6">
         <div class="card p-3 h-100">
@@ -129,3 +173,38 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+@php
+    $statusMeta = [
+        'open' => '#f59e0b', 'assigned' => '#6366f1', 'on_the_way' => '#0ea5e9', 'in_progress' => '#3b82f6',
+        'waiting_approval' => '#a855f7', 'postponed' => '#f97316', 'not_fixed' => '#ef4444', 'rejected' => '#dc2626', 'closed' => '#16a34a',
+    ];
+    $stLabels = []; $stValues = []; $stColors = [];
+    foreach ($statusMeta as $k => $clr) {
+        if (($byStatus[$k] ?? 0) > 0) { $stLabels[] = t('status.'.$k, $k); $stValues[] = $byStatus[$k]; $stColors[] = $clr; }
+    }
+@endphp
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof Chart === 'undefined') return;
+    const stVals = @json($stValues);
+    if (stVals.length) new Chart(document.getElementById('repStatusChart'), {
+        type: 'doughnut',
+        data: { labels: @json($stLabels), datasets: [{ data: stVals, backgroundColor: @json($stColors), borderWidth: 1 }] },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } },
+    });
+
+    new Chart(document.getElementById('repSourceChart'), {
+        type: 'bar',
+        data: {
+            labels: [@json(t('dash.src_store','شيك ليست مدير الفرع')), @json(t('dash.src_area','زيارات الأريا مانجر')), @json(t('dash.src_maintenance','طلبات الصيانة'))],
+            datasets: [{ label: @json(t('nav.tickets','التذاكر')), data: [{{ $bySource['store'] ?? 0 }}, {{ $bySource['area'] ?? 0 }}, {{ $bySource['maintenance'] ?? 0 }}],
+                backgroundColor: ['#6366f1', '#0d9488', '#9C1E6E'] }],
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
+    });
+});
+</script>
+@endpush

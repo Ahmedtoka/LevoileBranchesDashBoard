@@ -19,8 +19,13 @@ class TicketController extends Controller
         $range = DateRange::fromRequest($request);
         $q = $request->query('q');
 
+        // Department managers only ever see their own department's tickets.
+        $user = $request->user();
+        $scopeDeptId = ($user->is_department_manager && $user->department_id) ? $user->department_id : null;
+
         $query = Ticket::with(['branch', 'department', 'assignee'])
-            ->whereBetween('created_at', [$range->from, $range->to]);
+            ->whereBetween('created_at', [$range->from, $range->to])
+            ->when($scopeDeptId, fn ($x) => $x->where('department_id', $scopeDeptId));
 
         if ($request->filled('department')) {
             $query->whereHas('department', fn ($d) => $d->where('slug', $request->department));
@@ -60,7 +65,8 @@ class TicketController extends Controller
             $query->where(fn ($w) => $w->where('title', 'like', "%{$q}%")->orWhere('reference', 'like', "%{$q}%"));
         }
 
-        $base = Ticket::whereBetween('created_at', [$range->from, $range->to]);
+        $base = Ticket::whereBetween('created_at', [$range->from, $range->to])
+            ->when($scopeDeptId, fn ($x) => $x->where('department_id', $scopeDeptId));
         $stats = [
             'total' => (clone $base)->count(),
             'open' => (clone $base)->whereNotIn('status', ['closed'])->count(),

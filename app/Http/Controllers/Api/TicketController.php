@@ -136,7 +136,8 @@ class TicketController extends Controller
         return response()->json([
             'ticket' => $this->item($ticket, true),
             'evidence' => optional($ticket->answer)->evidence?->map(fn ($e) => ['url' => $e->url, 'kind' => $e->kind]) ?? [],
-            'timeline' => $ticket->updates->map(fn ($u) => [
+            'timeline' => $ticket->updates->sortByDesc('id')->values()->map(fn ($u) => [
+                'id' => $u->id,
                 'action' => $u->action,
                 'from_status' => $u->from_status,
                 'to_status' => $u->to_status,
