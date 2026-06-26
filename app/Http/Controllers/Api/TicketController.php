@@ -396,6 +396,28 @@ class TicketController extends Controller
         return response()->json(['message' => 'تم التحديث.', 'ticket' => $this->item($ticket->fresh())]);
     }
 
+    /** POST /api/tickets/{ticket}/priority — department manager changes a ticket's priority. */
+    public function updatePriority(Request $request, Ticket $ticket): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user->is_department_manager || $user->department_id !== $ticket->department_id) {
+            return response()->json(['message' => 'غير مسموح.'], 403);
+        }
+
+        $data = $request->validate([
+            'priority' => ['required', 'in:'.implode(',', Ticket::PRIORITIES)],
+        ]);
+
+        $old = $ticket->priority;
+        $ticket->update(['priority' => $data['priority']]);
+
+        $labels = ['low' => 'منخفضة', 'medium' => 'متوسطة', 'high' => 'عالية', 'critical' => 'حرجة'];
+        $this->service->log($ticket, $user->id, 'priority', null, null,
+            'تغيير الأولوية: '.($labels[$old] ?? $old).' ← '.($labels[$data['priority']] ?? $data['priority']));
+
+        return response()->json(['message' => 'تم تحديث الأولوية.', 'ticket' => $this->item($ticket->fresh())]);
+    }
+
     /** POST /api/departments/assign-bulk { ticket_ids:[], employee_id, scheduled_at } */
     public function assignBulk(Request $request): JsonResponse
     {

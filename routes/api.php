@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tickets/{ticket}/approve', [TicketController::class, 'approve']);
     Route::post('/tickets/{ticket}/reject', [TicketController::class, 'reject']);
     Route::post('/tickets/{ticket}/assign', [TicketController::class, 'assign']);
+    Route::post('/tickets/{ticket}/priority', [TicketController::class, 'updatePriority']);
 
     // ---- Departments ----
     Route::get('/departments/tickets', [TicketController::class, 'department']);
