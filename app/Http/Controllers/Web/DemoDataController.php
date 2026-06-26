@@ -134,6 +134,34 @@ class DemoDataController extends Controller
                     $created++;
                 }
             }
+
+            // 4) FULL-CYCLE TODAY showcase — every reviewer sees the complete flow on the default (today) view.
+            $cycle = ['open', 'assigned', 'on_the_way', 'in_progress', 'waiting_approval', 'closed', 'postponed', 'not_fixed', 'rejected'];
+
+            // Each technician in the heavy depts gets one ticket of every status, today.
+            foreach (array_filter([$maintId, $opsId]) as $dId) {
+                $techList = $empByDept[$dId] ?? [];
+                foreach (($techList ?: [null]) as $techId) {
+                    foreach ($cycle as $st) {
+                        $branchId = $pickBranch();
+                        $createdBy = optional($smByBranch->get($branchId))->id;
+                        $this->makeTicket($deptList, $empByDept, $titles, $statusPool, $this->todayAt(), $branchId, null, false, $dId, $createdBy, $st, $techId);
+                        $created++;
+                    }
+                }
+            }
+
+            // Each store manager gets one of every status today → their "my requests" shows the full flow.
+            $firstMaintTech = $empByDept[$maintId][0] ?? null;
+            foreach ($storeManagers as $sm) {
+                if (! $sm->branch_id) {
+                    continue;
+                }
+                foreach ($cycle as $st) {
+                    $this->makeTicket($deptList, $empByDept, $titles, $statusPool, $this->todayAt(), $sm->branch_id, null, false, $maintId, $sm->id, $st, $firstMaintTech);
+                    $created++;
+                }
+            }
         });
 
         return back()->with('status', "تم توليد بيانات ديمو كاملة لكل الأدوار — {$created} تذكرة + زيارات (مركّزة على آخر أيام).");
@@ -199,7 +227,7 @@ class DemoDataController extends Controller
         return Carbon::today()->addMinutes(mt_rand(0, $minutes));
     }
 
-    private function makeTicket($deptList, $empByDept, $titles, $statusPool, Carbon $date, int $branchId, ?int $visitId, bool $fromVisit, int $deptId, ?int $createdBy, ?string $forceStatus = null): void
+    private function makeTicket($deptList, $empByDept, $titles, $statusPool, Carbon $date, int $branchId, ?int $visitId, bool $fromVisit, int $deptId, ?int $createdBy, ?string $forceStatus = null, ?int $forceTech = null): void
     {
         $dept = $deptList->firstWhere('id', $deptId);
         $prefix = $dept->ticket_prefix ?? 'GEN';
@@ -249,7 +277,7 @@ class DemoDataController extends Controller
         $this->addUpdate($ticket, 'created', null, 'open', $fromVisit ? 'طلب من الشيك ليست.' : 'تم إنشاء الطلب.', $cursor);
 
         $techs = $empByDept[$deptId] ?? [];
-        $tech = ! empty($techs) ? $techs[array_rand($techs)] : null;
+        $tech = $forceTech ?? (! empty($techs) ? $techs[array_rand($techs)] : null);
 
         $path = $this->pathTo($status);
         $assignedTo = null;
