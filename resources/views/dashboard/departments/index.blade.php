@@ -1,16 +1,16 @@
 @extends('layouts.app')
-@section('title', 'الإدارات')
+@section('title', t('dept.title','الإدارات'))
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="fw-bold mb-0">الإدارات</h4>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deptModal" onclick="prepDept()"><i class="bi bi-plus-lg"></i> إدارة جديدة</button>
+    <h4 class="fw-bold mb-0">{{ t('dept.title','الإدارات') }}</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deptModal" onclick="prepDept()"><i class="bi bi-plus-lg"></i> {{ t('dept.new','إدارة جديدة') }}</button>
 </div>
 
-@include('partials.filterbar', ['range' => $range, 'searchable' => true, 'searchPlaceholder' => 'بحث عن إدارة…'])
+@include('partials.filterbar', ['range' => $range, 'searchable' => true, 'searchPlaceholder' => t('dept.search','بحث عن إدارة…')])
 
 <div class="row g-3 mb-3">
-    @php $boxes = [['الإدارات',$summary['departments'],'primary'],['التذاكر',$summary['total'],'dark'],['مفتوحة',$summary['open'],'warning'],['مقفولة',$summary['closed'],'success'],['متأخرة',$summary['overdue'],'danger']]; @endphp
+    @php $boxes = [[t('dept.title','الإدارات'),$summary['departments'],'primary'],[t('tk.title','التذاكر'),$summary['total'],'dark'],[t('tk.open','مفتوحة'),$summary['open'],'warning'],[t('tk.closed','مقفولة'),$summary['closed'],'success'],[t('dash.overdue','متأخرة'),$summary['overdue'],'danger']]; @endphp
     @foreach($boxes as [$l,$v,$c])
         <div class="col"><div class="card stat-card p-3"><div class="text-muted small">{{ $l }}</div><div class="value text-{{ $c }}">{{ $v }}</div></div></div>
     @endforeach
@@ -27,23 +27,23 @@
                         @if($d->ticket_prefix)<code class="small text-muted">· {{ $d->ticket_prefix }}</code>@endif
                     </h6>
                     <div class="d-flex gap-1 align-items-center">
-                        @if(!$d->active)<span class="badge text-bg-secondary">موقوفة</span>@endif
-                        @if($d->overdue > 0)<span class="badge text-bg-danger">{{ $d->overdue }} متأخرة</span>@endif
+                        @if(!$d->active)<span class="badge text-bg-secondary">{{ t('dept.inactive','موقوفة') }}</span>@endif
+                        @if($d->overdue > 0)<span class="badge text-bg-danger">{{ $d->overdue }} {{ t('dash.overdue','متأخرة') }}</span>@endif
                     </div>
                 </div>
-                <div class="small text-muted mb-2"><i class="bi bi-person-badge me-1"></i>المدير: {{ $d->manager_name ?? '— لا يوجد' }}</div>
+                <div class="small text-muted mb-2"><i class="bi bi-person-badge me-1"></i>{{ t('common.manager','المدير') }}: {{ $d->manager_name ?? t('dept.no_manager','— لا يوجد') }}</div>
                 <a href="{{ route('departments.board', $d) }}" class="text-decoration-none">
                     <div class="d-flex gap-3">
-                        <div><div class="fw-bold text-dark">{{ $d->total }}</div><div class="text-muted" style="font-size:.72rem">تذاكر</div></div>
-                        <div><div class="fw-bold text-warning">{{ $d->open }}</div><div class="text-muted" style="font-size:.72rem">مفتوحة</div></div>
-                        <div><div class="fw-bold text-success">{{ $d->closed }}</div><div class="text-muted" style="font-size:.72rem">مقفولة</div></div>
-                        <div><div class="fw-bold text-dark">{{ $d->employees_count }}</div><div class="text-muted" style="font-size:.72rem">موظفين</div></div>
+                        <div><div class="fw-bold text-dark">{{ $d->total }}</div><div class="text-muted" style="font-size:.72rem">{{ t('visit.tickets','تذاكر') }}</div></div>
+                        <div><div class="fw-bold text-warning">{{ $d->open }}</div><div class="text-muted" style="font-size:.72rem">{{ t('tk.open','مفتوحة') }}</div></div>
+                        <div><div class="fw-bold text-success">{{ $d->closed }}</div><div class="text-muted" style="font-size:.72rem">{{ t('tk.closed','مقفولة') }}</div></div>
+                        <div><div class="fw-bold text-dark">{{ $d->employees_count }}</div><div class="text-muted" style="font-size:.72rem">{{ t('dept.staff','موظفين') }}</div></div>
                     </div>
                 </a>
                 <div class="d-flex gap-2 mt-2">
-                    <a href="{{ route('departments.board', $d) }}" class="btn btn-sm btn-outline-primary flex-fill">فتح اللوحة</a>
-                    <button class="btn btn-sm btn-outline-secondary edit-dept" data-d='@json($d)'>تعديل</button>
-                    <form method="POST" action="{{ route('departments.destroy', $d) }}" onsubmit="return confirm('حذف الإدارة؟')">
+                    <a href="{{ route('departments.board', $d) }}" class="btn btn-sm btn-outline-primary flex-fill">{{ t('dept.board','فتح اللوحة') }}</a>
+                    <button class="btn btn-sm btn-outline-secondary edit-dept" data-d='@json($d)'>{{ t('common.edit','تعديل') }}</button>
+                    <form method="POST" action="{{ route('departments.destroy', $d) }}" onsubmit="return confirm('{{ t('dept.confirm_delete','حذف الإدارة؟') }}')">
                         @csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                     </form>
                 </div>

@@ -7,10 +7,10 @@
     <div class="btn-group btn-group-sm">
         @foreach(\App\Support\DateRange::$presets as $key => $label)
             @if($key === 'custom')
-                <button class="btn {{ $range->key==='custom' ? 'btn-primary' : 'btn-outline-secondary' }}" data-bs-toggle="collapse" data-bs-target="#customRange">{{ $label }}</button>
+                <button class="btn {{ $range->key==='custom' ? 'btn-primary' : 'btn-outline-secondary' }}" data-bs-toggle="collapse" data-bs-target="#customRange">{{ t('range.'.$key, $label) }}</button>
             @else
                 <a href="{{ request()->fullUrlWithQuery(['range'=>$key,'from'=>null,'to'=>null]) }}"
-                   class="btn {{ $range->key===$key ? 'btn-primary' : 'btn-outline-secondary' }}">{{ $label }}</a>
+                   class="btn {{ $range->key===$key ? 'btn-primary' : 'btn-outline-secondary' }}">{{ t('range.'.$key, $label) }}</a>
             @endif
         @endforeach
     </div>
@@ -37,9 +37,9 @@
         <input type="hidden" name="range" value="custom">
         @if($searchable && request('q'))<input type="hidden" name="q" value="{{ request('q') }}">@endif
         <div class="d-flex gap-2 align-items-end flex-wrap">
-            <div><label class="form-label small mb-0">From</label><input type="date" name="from" value="{{ $range->customFrom }}" class="form-control form-control-sm"></div>
-            <div><label class="form-label small mb-0">To</label><input type="date" name="to" value="{{ $range->customTo }}" class="form-control form-control-sm"></div>
-            <button class="btn btn-sm btn-primary">Apply</button>
+            <div><label class="form-label small mb-0">{{ t('range.from','من') }}</label><input type="date" name="from" value="{{ $range->customFrom }}" class="form-control form-control-sm"></div>
+            <div><label class="form-label small mb-0">{{ t('range.to','إلى') }}</label><input type="date" name="to" value="{{ $range->customTo }}" class="form-control form-control-sm"></div>
+            <button class="btn btn-sm btn-primary">{{ t('common.apply','تطبيق') }}</button>
         </div>
     </form>
 </div>

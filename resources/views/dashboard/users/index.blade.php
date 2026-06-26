@@ -1,15 +1,15 @@
 @extends('layouts.app')
-@section('title', 'المستخدمون')
+@section('title', t('users.title','المستخدمون'))
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="fw-bold mb-0">المستخدمون <span class="text-muted fs-6">({{ $users->count() }})</span></h4>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal" onclick="prepUser()"><i class="bi bi-plus-lg"></i> مستخدم جديد</button>
+    <h4 class="fw-bold mb-0">{{ t('users.title','المستخدمون') }} <span class="text-muted fs-6">({{ $users->count() }})</span></h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal" onclick="prepUser()"><i class="bi bi-plus-lg"></i> {{ t('users.new','مستخدم جديد') }}</button>
 </div>
 
 {{-- role quick chips --}}
 <div class="d-flex flex-wrap gap-2 mb-3">
-    <a href="{{ route('users.index') }}" class="btn btn-sm {{ request('role') ? 'btn-outline-secondary' : 'btn-primary' }}">الكل</a>
+    <a href="{{ route('users.index') }}" class="btn btn-sm {{ request('role') ? 'btn-outline-secondary' : 'btn-primary' }}">{{ t('common.all','الكل') }}</a>
     @foreach($roles as $r)
         <a href="{{ route('users.index', ['role' => $r->slug]) }}"
            class="btn btn-sm {{ request('role')===$r->slug ? 'btn-primary' : 'btn-outline-secondary' }}">
@@ -22,21 +22,21 @@
 <form class="card p-2 mb-3" method="GET">
     <div class="row g-2 align-items-end">
         @if(request('role'))<input type="hidden" name="role" value="{{ request('role') }}">@endif
-        <div class="col-md-4"><label class="form-label small mb-1">الإدارة</label>
+        <div class="col-md-4"><label class="form-label small mb-1">{{ t('common.department','الإدارة') }}</label>
             <select name="department" class="form-select form-select-sm" onchange="this.form.submit()">
-                <option value="">كل الإدارات</option>
+                <option value="">{{ t('common.all','الكل') }}</option>
                 @foreach($departments as $d)<option value="{{ $d->slug }}" @selected(request('department')===$d->slug)>{{ $d->name }}</option>@endforeach
             </select></div>
-        <div class="col-md-5"><label class="form-label small mb-1">بحث</label>
-            <input name="q" value="{{ request('q') }}" class="form-control form-control-sm" placeholder="اسم أو بريد…"></div>
-        <div class="col-md-3"><button class="btn btn-sm btn-primary">بحث</button>
-            <a href="{{ route('users.index') }}" class="btn btn-sm btn-outline-secondary">مسح</a></div>
+        <div class="col-md-5"><label class="form-label small mb-1">{{ t('common.search','بحث') }}</label>
+            <input name="q" value="{{ request('q') }}" class="form-control form-control-sm" placeholder="{{ t('users.search_ph','اسم أو بريد…') }}"></div>
+        <div class="col-md-3"><button class="btn btn-sm btn-primary">{{ t('common.search','بحث') }}</button>
+            <a href="{{ route('users.index') }}" class="btn btn-sm btn-outline-secondary">{{ t('common.reset','مسح') }}</a></div>
     </div>
 </form>
 
 <div class="card p-0">
     <table class="table table-hover align-middle mb-0">
-        <thead><tr><th>الاسم</th><th>البريد</th><th>الدور</th><th>الإدارة</th><th>الفرع</th><th class="text-center">مدير</th><th class="text-center">نشط</th><th></th></tr></thead>
+        <thead><tr><th>{{ t('common.name','الاسم') }}</th><th>{{ t('common.email','البريد') }}</th><th>{{ t('common.role','الدور') }}</th><th>{{ t('common.department','الإدارة') }}</th><th>{{ t('common.branch','الفرع') }}</th><th class="text-center">{{ t('common.manager','مدير') }}</th><th class="text-center">{{ t('common.active','نشط') }}</th><th></th></tr></thead>
         <tbody>
         @foreach($users as $u)
             <tr>
@@ -46,11 +46,11 @@
                 <td>{{ optional($u->department)->name ?? '—' }}</td>
                 <td class="small">{{ optional($u->branch)->branch_name ?? '—' }}</td>
                 <td class="text-center">{!! $u->is_department_manager ? '<i class="bi bi-check-circle-fill text-success"></i>' : '' !!}</td>
-                <td class="text-center">{!! $u->active ? '<span class="badge text-bg-success">نشط</span>' : '<span class="badge text-bg-secondary">موقوف</span>' !!}</td>
+                <td class="text-center">{!! $u->active ? '<span class="badge text-bg-success">'.t('common.active','نشط').'</span>' : '<span class="badge text-bg-secondary">'.t('users.inactive','موقوف').'</span>' !!}</td>
                 <td class="text-end">
-                    <button class="btn btn-sm btn-link p-0 me-2 edit-user" data-u='@json($u)' data-branches='@json($u->branches->pluck("id"))'>تعديل</button>
-                    <form method="POST" action="{{ route('users.destroy', $u) }}" class="d-inline" onsubmit="return confirm('حذف المستخدم؟')">
-                        @csrf @method('DELETE')<button class="btn btn-sm btn-link text-danger p-0">حذف</button>
+                    <button class="btn btn-sm btn-link p-0 me-2 edit-user" data-u='@json($u)' data-branches='@json($u->branches->pluck("id"))'>{{ t('common.edit','تعديل') }}</button>
+                    <form method="POST" action="{{ route('users.destroy', $u) }}" class="d-inline" onsubmit="return confirm('{{ t('users.confirm_delete','حذف المستخدم؟') }}')">
+                        @csrf @method('DELETE')<button class="btn btn-sm btn-link text-danger p-0">{{ t('common.delete','حذف') }}</button>
                     </form>
                 </td>
             </tr>

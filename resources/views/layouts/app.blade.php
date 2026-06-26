@@ -62,7 +62,7 @@
     </div>
     <form method="POST" action="{{ route('logout') }}" class="px-2 mt-2">
         @csrf
-        <button class="btn btn-sm btn-outline-light w-100"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+        <button class="btn btn-sm btn-outline-light w-100"><i class="bi bi-box-arrow-right me-1"></i>{{ t('common.logout','تسجيل الخروج') }}</button>
     </form>
 </nav>
 @endauth
@@ -87,10 +87,10 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-end shadow p-0" style="width:340px">
                     <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
-                        <strong class="small">Notifications</strong>
+                        <strong class="small">{{ t('nav.notifications','الإشعارات') }}</strong>
                         @if($unread > 0)
                             <form method="POST" action="{{ route('notifications.readAll') }}">@csrf
-                                <button class="btn btn-sm btn-link p-0 text-decoration-none">Mark all read</button>
+                                <button class="btn btn-sm btn-link p-0 text-decoration-none">{{ t('nav.mark_all_read','تعليم الكل كمقروء') }}</button>
                             </form>
                         @endif
                     </div>

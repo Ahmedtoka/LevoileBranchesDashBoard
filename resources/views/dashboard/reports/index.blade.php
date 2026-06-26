@@ -1,16 +1,16 @@
 @extends('layouts.app')
-@section('title', 'التقارير')
+@section('title', t('rep.title','التقارير'))
 
 @section('content')
-<h4 class="fw-bold mb-3">التقارير</h4>
+<h4 class="fw-bold mb-3">{{ t('rep.title','التقارير') }}</h4>
 
 {{-- tickets by source --}}
 <div class="row g-3 mb-3">
     @php
         $src = [
-            ['شيك ليست مدير الفرع', $bySource['store'] ?? 0, 'clipboard-check', '#6366f1', 'store'],
-            ['زيارات الأريا مانجر', $bySource['area'] ?? 0, 'binoculars', '#0d9488', 'area'],
-            ['طلبات الصيانة', $bySource['maintenance'] ?? 0, 'tools', '#9C1E6E', 'maintenance'],
+            [t('dash.src_store','شيك ليست مدير الفرع'), $bySource['store'] ?? 0, 'clipboard-check', '#6366f1', 'store'],
+            [t('dash.src_area','زيارات الأريا مانجر'), $bySource['area'] ?? 0, 'binoculars', '#0d9488', 'area'],
+            [t('dash.src_maintenance','طلبات الصيانة'), $bySource['maintenance'] ?? 0, 'tools', '#9C1E6E', 'maintenance'],
         ];
     @endphp
     @foreach($src as [$l,$v,$i,$c,$key])
@@ -29,7 +29,7 @@
 <div class="row g-3">
     <div class="col-lg-6">
         <div class="card p-3 h-100">
-            <h6 class="fw-bold">الزيارات حسب الفرع</h6>
+            <h6 class="fw-bold">{{ t('rep.visits_per_branch','الزيارات حسب الفرع') }}</h6>
             <table class="table table-sm mb-0 js-table">
                 <thead><tr><th>الفرع</th><th class="text-end" data-sum>الزيارات</th></tr></thead>
                 <tbody>
@@ -44,7 +44,7 @@
 
     <div class="col-lg-6">
         <div class="card p-3 h-100">
-            <h6 class="fw-bold">التذاكر حسب الإدارة</h6>
+            <h6 class="fw-bold">{{ t('dash.by_department','التذاكر حسب الإدارة') }}</h6>
             <table class="table table-sm mb-0 js-table">
                 <thead><tr><th>الإدارة</th><th class="text-center" data-sum>مفتوحة</th><th class="text-center" data-sum>مقفولة</th></tr></thead>
                 <tbody>
@@ -59,7 +59,7 @@
 
     <div class="col-lg-6">
         <div class="card p-3 h-100">
-            <h6 class="fw-bold">متوسط زمن الحل (ساعات)</h6>
+            <h6 class="fw-bold">{{ t('rep.avg_resolution','متوسط زمن الحل (ساعات)') }}</h6>
             <table class="table table-sm mb-0"><tbody>
                 @forelse($resolution as $row)
                     <tr><td>{{ optional($row->department)->name ?? '—' }}</td><td class="text-end fw-semibold">{{ round($row->avg_hours ?? 0, 1) }} س</td></tr>
@@ -72,7 +72,7 @@
 
     <div class="col-lg-6">
         <div class="card p-3 h-100">
-            <h6 class="fw-bold">طلبات متكررة</h6>
+            <h6 class="fw-bold">{{ t('dash.repeated','طلبات متكررة') }}</h6>
             <table class="table table-sm mb-0"><tbody>
                 @forelse($repeated as $row)
                     <tr><td><span class="badge text-bg-light text-capitalize">{{ $row->category }}</span> {{ optional($row->branch)->branch_name }}</td><td class="text-end fw-semibold">{{ $row->total }}×</td></tr>
@@ -85,7 +85,7 @@
 
     <div class="col-12">
         <div class="card p-3">
-            <h6 class="fw-bold">أداء الموظفين</h6>
+            <h6 class="fw-bold">{{ t('rep.performance','أداء الموظفين') }}</h6>
             <table class="table table-sm align-middle mb-0">
                 <thead><tr><th>الموظف</th><th>الإدارة</th><th class="text-center">مُسندة</th><th class="text-center">مقفولة</th><th class="text-center">معلّقة</th><th class="text-center">معاد فتحها</th><th class="text-center">م. الساعات</th><th>التقييم</th></tr></thead>
                 <tbody>
@@ -110,7 +110,7 @@
 
     <div class="col-12">
         <div class="card p-3">
-            <h6 class="fw-bold">التذاكر المتأخرة</h6>
+            <h6 class="fw-bold">{{ t('rep.overdue','التذاكر المتأخرة') }}</h6>
             <table class="table table-sm align-middle mb-0">
                 <thead><tr><th>الكود</th><th>العنوان</th><th>الفرع</th><th>الإدارة</th><th>الاستحقاق</th></tr></thead>
                 <tbody>
