@@ -2,7 +2,28 @@
 @section('title', t('dash.title','نظرة عامة'))
 
 @section('content')
-<h4 class="fw-bold mb-3">{{ t('dash.title','نظرة عامة') }}</h4>
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <h4 class="fw-bold mb-0">{{ t('dash.title','نظرة عامة') }}</h4>
+    @php $isAdmin = optional(auth()->user()->role)->slug === 'super_admin' || optional(auth()->user())->is_admin; @endphp
+    @if($isAdmin)
+    <div class="d-flex gap-2">
+        <form method="POST" action="{{ route('demo.generate') }}"
+              onsubmit="return confirm('سيتم توليد بيانات ديمو لـ 3 شهور (زيارات + تذاكر لكل الإدارات). متابعة؟');">
+            @csrf
+            <button class="btn btn-sm btn-primary"><i class="bi bi-magic me-1"></i> توليد بيانات ديمو</button>
+        </form>
+        <form method="POST" action="{{ route('demo.wipe') }}"
+              onsubmit="return confirm('سيتم مسح كل التذاكر والزيارات. متابعة؟');">
+            @csrf
+            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash3 me-1"></i> مسح البيانات</button>
+        </form>
+    </div>
+    @endif
+</div>
+
+@if(session('status'))
+    <div class="alert alert-success py-2 small">{{ session('status') }}</div>
+@endif
 
 @include('partials.filterbar', ['range' => $range])
 

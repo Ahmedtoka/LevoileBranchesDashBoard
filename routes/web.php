@@ -31,6 +31,10 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // ---- Demo data (generate / wipe everything across all roles) ----
+    Route::post('/demo/generate', [\App\Http\Controllers\Web\DemoDataController::class, 'generate'])->name('demo.generate');
+    Route::post('/demo/wipe', [\App\Http\Controllers\Web\DemoDataController::class, 'wipe'])->name('demo.wipe');
+
     Route::get('/branches', [BranchController::class, 'index'])->name('branches.index');
     Route::get('/branches/{branch}', [BranchController::class, 'show'])->name('branches.show');
 
