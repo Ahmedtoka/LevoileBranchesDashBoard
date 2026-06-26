@@ -209,13 +209,31 @@ class DemoDataController extends Controller
         $priorities = ['medium', 'medium', 'medium', 'medium', 'low', 'high', 'critical'];
         $priority = $priorities[array_rand($priorities)];
 
+        $notes = [
+            'اللمبة بتقفل وتفتح لوحدها، محتاجة فحص.',
+            'التكييف بيطلّع مية على الأرض ومش بيبرّد كويس.',
+            'الدهان متقشّر في ركن البروفة ومحتاج معالجة.',
+            'واجهة المحل عليها أتربة وبقع، محتاجة تنظيف.',
+            'المراية اتكسرت في غرفة القياس.',
+            'الباب الرئيسي بيعلّق ومش بيقفل بإحكام.',
+            'جهاز الكاشير بيفصل كل شوية أثناء البيع.',
+            'كاميرا المدخل مش شغّالة من امبارح.',
+            'في نقص أكياس وشنط بيع عند الكاشير.',
+            'نص لمبات اليافطة الخارجية مطفّية.',
+            'بلاطة مكسورة قدام المخزن ممكن تخبط حد.',
+            'تسريب مياه تحت حوض الحمام.',
+            'رف العرض الجانبي مفكوك ومايل.',
+            'مانيكان الفاترينة إيده مكسورة.',
+            'الإضاءة الخارجية بتفصل بالليل.',
+        ];
+
         $groupCode = $fromVisit ? null : 'MR-'.str_pad((string) ((Ticket::max('id') ?? 0) + 1), 5, '0', STR_PAD_LEFT);
 
         $ticket = Ticket::create([
             'reference' => Ticket::nextReference($prefix),
             'group_code' => $groupCode,
             'title' => $titles[array_rand($titles)],
-            'description' => 'بيانات ديمو — وصف الطلب.',
+            'description' => $notes[array_rand($notes)],
             'branch_id' => $branchId,
             'department_id' => $deptId,
             'visit_id' => $visitId,

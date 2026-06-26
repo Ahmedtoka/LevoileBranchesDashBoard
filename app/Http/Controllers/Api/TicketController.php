@@ -453,6 +453,7 @@ class TicketController extends Controller
             'reference' => $t->reference,
             'group_code' => $t->group_code,
             'title' => $t->title,
+            'note' => $t->description,
             'status' => $t->status,
             'priority' => $t->priority,
             'category' => $t->category,
