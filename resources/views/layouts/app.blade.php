@@ -1,11 +1,12 @@
+@php $loc = app()->getLocale(); $rtl = $loc === 'ar'; @endphp
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ $loc }}" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') · LeVoile Branches</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap{{ $rtl ? '.rtl' : '' }}.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
         :root { --lv: #4a0f33; --lv-accent: #9c1e6e; --bs-primary: #9c1e6e; }
@@ -16,7 +17,9 @@
         .text-primary { color:#9c1e6e !important; }
         .bg-primary, .text-bg-primary { background-color:#9c1e6e !important; }
         a { color: #9c1e6e; }
-        .sidebar { width: 250px; min-height: 100vh; background: var(--lv); color: #e7d6e2; position: fixed; }
+        .sidebar { width: 250px; min-height: 100vh; background: var(--lv); color: #e7d6e2; position: fixed; left: 0; top: 0; }
+        html[dir=rtl] .sidebar { left: auto; right: 0; }
+        html[dir=rtl] .content { margin-left: 0 !important; margin-right: 250px; }
         .sidebar .brand { color: #fff; font-weight: 700; letter-spacing: .5px; }
         .sidebar a { color: #cbd5e1; text-decoration: none; display: block; padding: .55rem .9rem; border-radius: .4rem; font-size: .9rem; }
         .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,.08); color: #fff; }
@@ -34,22 +37,22 @@
 @auth
 <nav class="sidebar p-3">
     <div class="brand fs-5 mb-3"><i class="bi bi-shop"></i> LeVoile</div>
-    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="bi bi-grid me-2"></i>نظرة عامة</a>
-    <a href="{{ route('tickets.index') }}" class="{{ request()->routeIs('tickets.index') ? 'active' : '' }}"><i class="bi bi-ticket-detailed me-2"></i>التذاكر</a>
-    <a href="{{ route('visits.index') }}" class="{{ request()->routeIs('visits.index') || request()->routeIs('visits.show') ? 'active' : '' }}"><i class="bi bi-clipboard-check me-2"></i>الزيارات</a>
-    <a href="{{ route('visits.schedule') }}" class="{{ request()->routeIs('visits.schedule') ? 'active' : '' }}"><i class="bi bi-calendar-plus me-2"></i>جدولة زيارة</a>
+    <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="bi bi-grid me-2"></i>{{ dt('نظرة عامة','Overview') }}</a>
+    <a href="{{ route('tickets.index') }}" class="{{ request()->routeIs('tickets.index') ? 'active' : '' }}"><i class="bi bi-ticket-detailed me-2"></i>{{ dt('التذاكر','Tickets') }}</a>
+    <a href="{{ route('visits.index') }}" class="{{ request()->routeIs('visits.index') || request()->routeIs('visits.show') ? 'active' : '' }}"><i class="bi bi-clipboard-check me-2"></i>{{ dt('الزيارات','Visits') }}</a>
+    <a href="{{ route('visits.schedule') }}" class="{{ request()->routeIs('visits.schedule') ? 'active' : '' }}"><i class="bi bi-calendar-plus me-2"></i>{{ dt('جدولة زيارة','Schedule Visit') }}</a>
 
-    <div class="nav-label">الإدارة</div>
-    <a href="{{ route('departments.index') }}" class="{{ request()->routeIs('departments.*') ? 'active' : '' }}"><i class="bi bi-diagram-3 me-2"></i>الإدارات</a>
-    <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="bi bi-people me-2"></i>المستخدمون</a>
-    <a href="{{ route('roles.index') }}" class="{{ request()->routeIs('roles.*') ? 'active' : '' }}"><i class="bi bi-person-badge me-2"></i>الأدوار</a>
-    <a href="{{ route('branches.index') }}" class="{{ request()->routeIs('branches.*') ? 'active' : '' }}"><i class="bi bi-geo-alt me-2"></i>الفروع</a>
-    <a href="{{ route('coverage.index') }}" class="{{ request()->routeIs('coverage.*') ? 'active' : '' }}"><i class="bi bi-geo me-2"></i>تغطية الفروع</a>
-    <a href="{{ route('templates.index') }}" class="{{ request()->routeIs('templates.*') || request()->routeIs('types.*') ? 'active' : '' }}"><i class="bi bi-ui-checks me-2"></i>محرّر الشيك ليست</a>
-    <a href="{{ route('maintenance.index') }}" class="{{ request()->routeIs('maintenance.*') ? 'active' : '' }}"><i class="bi bi-tools me-2"></i>مركز الصيانة</a>
+    <div class="nav-label">{{ dt('الإدارة','Management') }}</div>
+    <a href="{{ route('departments.index') }}" class="{{ request()->routeIs('departments.*') ? 'active' : '' }}"><i class="bi bi-diagram-3 me-2"></i>{{ dt('الإدارات','Departments') }}</a>
+    <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="bi bi-people me-2"></i>{{ dt('المستخدمون','Users') }}</a>
+    <a href="{{ route('roles.index') }}" class="{{ request()->routeIs('roles.*') ? 'active' : '' }}"><i class="bi bi-person-badge me-2"></i>{{ dt('الأدوار','Roles') }}</a>
+    <a href="{{ route('branches.index') }}" class="{{ request()->routeIs('branches.*') ? 'active' : '' }}"><i class="bi bi-geo-alt me-2"></i>{{ dt('الفروع','Branches') }}</a>
+    <a href="{{ route('coverage.index') }}" class="{{ request()->routeIs('coverage.*') ? 'active' : '' }}"><i class="bi bi-geo me-2"></i>{{ dt('تغطية الفروع','Branch Coverage') }}</a>
+    <a href="{{ route('templates.index') }}" class="{{ request()->routeIs('templates.*') || request()->routeIs('types.*') ? 'active' : '' }}"><i class="bi bi-ui-checks me-2"></i>{{ dt('محرّر الشيك ليست','Checklist Builder') }}</a>
+    <a href="{{ route('maintenance.index') }}" class="{{ request()->routeIs('maintenance.*') ? 'active' : '' }}"><i class="bi bi-tools me-2"></i>{{ dt('مركز الصيانة','Maintenance Center') }}</a>
 
-    <div class="nav-label">التقارير</div>
-    <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-bar-chart me-2"></i>التقارير</a>
+    <div class="nav-label">{{ dt('التقارير','Reports') }}</div>
+    <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-bar-chart me-2"></i>{{ dt('التقارير','Reports') }}</a>
 
     <hr class="text-secondary">
     <div class="small text-secondary px-2">
@@ -69,7 +72,11 @@
             $unread = auth()->user()->appNotifications()->whereNull('read_at')->count();
             $notes = auth()->user()->appNotifications()->limit(12)->get();
         @endphp
-        <div class="d-flex justify-content-end mb-3">
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-3">
+            <a href="{{ route('locale.switch', $loc === 'ar' ? 'en' : 'ar') }}"
+               class="btn btn-light fw-semibold" title="Language / اللغة">
+                <i class="bi bi-translate me-1"></i>{{ $loc === 'ar' ? 'English' : 'العربية' }}
+            </a>
             <div class="dropdown">
                 <button class="btn btn-light position-relative" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-bell"></i>

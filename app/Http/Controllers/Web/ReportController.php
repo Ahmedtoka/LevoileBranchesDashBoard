@@ -21,7 +21,14 @@ class ReportController extends Controller
         $byDept = Department::withCount([
             'tickets as open' => fn ($q) => $q->whereNotIn('status', ['closed']),
             'tickets as closed' => fn ($q) => $q->where('status', 'closed'),
-        ])->get();
+        ])->orderByDesc('open')->get();
+
+        // Tickets by source (store checklist / area visit / maintenance request)
+        $bySource = [
+            'store' => Ticket::whereHas('visit.template', fn ($q) => $q->where('type', 'store_manager'))->count(),
+            'area' => Ticket::whereHas('visit.template', fn ($q) => $q->where('type', 'area_manager'))->count(),
+            'maintenance' => Ticket::whereNull('visit_id')->count(),
+        ];
 
         // Avg resolution time (hours) per department
         $resolution = Ticket::selectRaw('department_id, AVG(TIMESTAMPDIFF(HOUR, created_at, closed_at)) as avg_hours')
@@ -58,7 +65,7 @@ class ReportController extends Controller
                     ->value('h');
                 $u->avg_hours = $avg ? round($avg, 1) : null;
                 $rate = $u->assigned ? $u->closed / $u->assigned : 0;
-                $u->performance = $rate >= 0.8 ? 'Excellent' : ($rate >= 0.5 ? 'Good' : 'Needs improvement');
+                $u->performance = $rate >= 0.8 ? 'ممتاز' : ($rate >= 0.5 ? 'جيد' : 'يحتاج تحسين');
 
                 return $u;
             });
@@ -69,7 +76,7 @@ class ReportController extends Controller
             ->with(['branch', 'department'])->get();
 
         return view('dashboard.reports.index', compact(
-            'visitsPerBranch', 'byDept', 'resolution', 'repeated', 'performance', 'overdue'
+            'visitsPerBranch', 'byDept', 'bySource', 'resolution', 'repeated', 'performance', 'overdue'
         ));
     }
 }

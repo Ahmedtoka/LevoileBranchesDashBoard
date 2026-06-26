@@ -17,6 +17,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('dashboard'));
 
+// Language toggle (Arabic / English)
+Route::get('/locale/{locale}', function (string $locale) {
+    session(['locale' => in_array($locale, ['ar', 'en'], true) ? $locale : 'ar']);
+    return back();
+})->name('locale.switch');
+
 // Auth
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
