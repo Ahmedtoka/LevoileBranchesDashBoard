@@ -12,7 +12,7 @@
         'cancelled' => 'ملغاة',
     ];
     $color = $map[$status] ?? 'secondary';
-    $label = $ar[$status] ?? ucwords(str_replace('_', ' ', $status));
+    $label = t('status.'.$status, $ar[$status] ?? ucwords(str_replace('_', ' ', $status)));
 @endphp
 @if($color === 'purple')
     <span class="badge badge-status" style="background:#7c3aed">{{ $label }}</span>

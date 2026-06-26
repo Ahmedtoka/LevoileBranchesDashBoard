@@ -9,13 +9,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // Tiny bilingual helper: dt('عربي', 'English') → string by current locale.
-        if (! function_exists('dt')) {
-            function dt(string $ar, string $en): string
-            {
-                return app()->getLocale() === 'en' ? $en : $ar;
-            }
-        }
+        // dt() and t() helpers are autoloaded from app/helpers.php (composer "files").
     }
 
     public function boot(): void

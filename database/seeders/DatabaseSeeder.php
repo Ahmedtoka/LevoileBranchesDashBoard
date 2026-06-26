@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             MaintenanceItemSeeder::class,
             TemplateSeeder::class,
             RealChecklistSeeder::class,
+            TranslationSeeder::class,
             // Demo tickets/visits intentionally NOT seeded — clean system.
             // DemoVisitSeeder::class,
             // BranchMaintenanceSeeder::class,

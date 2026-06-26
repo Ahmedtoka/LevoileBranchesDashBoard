@@ -45,6 +45,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::get('/roles', [\App\Http\Controllers\Web\RoleController::class, 'index'])->name('roles.index');
+    Route::get('/strings', [\App\Http\Controllers\Web\TranslationController::class, 'index'])->name('translations.index');
+    Route::put('/strings', [\App\Http\Controllers\Web\TranslationController::class, 'update'])->name('translations.update');
 
     // ---- Template types ----
     Route::get('/types', [TemplateTypeController::class, 'index'])->name('types.index');
