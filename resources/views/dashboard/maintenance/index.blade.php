@@ -12,10 +12,10 @@
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <h4 class="fw-bold mb-0">الصيانة</h4>
     <div class="d-flex gap-2">
-        <form method="POST" action="{{ route('maintenance.generate') }}" onsubmit="return confirm('سيتم مسح كل التذاكر/الزيارات وتوليد داتا الديمو من الشيت. متابعة؟')">
+        <form method="POST" action="{{ route('demo.generate') }}" onsubmit="return confirm('سيتم توليد ديمو حقيقي لكل السيستم (شيك ليست يومية لكل فرع + تذاكر لكل الإدارات). متابعة؟')">
             @csrf <button class="btn btn-success btn-sm"><i class="bi bi-magic"></i> توليد داتا ديمو</button>
         </form>
-        <form method="POST" action="{{ route('maintenance.wipe') }}" onsubmit="return confirm('سيتم مسح كل التذاكر والزيارات والإشعارات نهائياً. متابعة؟')">
+        <form method="POST" action="{{ route('demo.wipe') }}" onsubmit="return confirm('سيتم مسح كل التذاكر والزيارات والإشعارات نهائياً. متابعة؟')">
             @csrf <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i> مسح كل الداتا</button>
         </form>
     </div>
