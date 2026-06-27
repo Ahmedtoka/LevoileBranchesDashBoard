@@ -152,7 +152,8 @@ class VisitController extends Controller
 
         return response()->json([
             'visit' => $this->visitListItem($visit),
-            'read_only' => $visit->isReadOnly(),
+            // read-only unless the viewer is the visit's own assignee (others can only view the result)
+            'read_only' => $visit->isReadOnly() || $visit->user_id !== $request->user()->id,
             'general_comments' => $visit->general_comments,
             'employees' => $staff,
             'sections' => $sections,
@@ -172,7 +173,7 @@ class VisitController extends Controller
     /** POST /api/visits/{visit}/checkin */
     public function checkin(Request $request, Visit $visit): JsonResponse
     {
-        $this->authorizeVisit($request, $visit);
+        $this->authorizeOwner($request, $visit);
 
         $data = $request->validate([
             'latitude' => ['nullable', 'numeric'],
@@ -222,7 +223,7 @@ class VisitController extends Controller
     /** POST /api/visits/{visit}/start */
     public function start(Request $request, Visit $visit): JsonResponse
     {
-        $this->authorizeVisit($request, $visit);
+        $this->authorizeOwner($request, $visit);
 
         if (! $visit->checked_in_at) {
             return response()->json(['message' => 'You must check in before starting the visit.'], 422);
@@ -236,7 +237,7 @@ class VisitController extends Controller
     /** POST /api/visits/{visit}/answers — submit one answer */
     public function submitAnswer(Request $request, Visit $visit): JsonResponse
     {
-        $this->authorizeVisit($request, $visit);
+        $this->authorizeOwner($request, $visit);
 
         if ($visit->isReadOnly()) {
             return response()->json(['message' => 'This visit is read-only.'], 422);
@@ -339,7 +340,7 @@ class VisitController extends Controller
     /** POST /api/visits/{visit}/submit — finalize, create tickets, close */
     public function submit(Request $request, Visit $visit): JsonResponse
     {
-        $this->authorizeVisit($request, $visit);
+        $this->authorizeOwner($request, $visit);
 
         if ($visit->isReadOnly()) {
             return response()->json(['message' => 'This visit is already submitted.'], 422);
@@ -403,6 +404,14 @@ class VisitController extends Controller
     {
         if ($visit->user_id !== $request->user()->id && ! $request->user()->hasRole(['super_admin', 'area_manager', 'branch_director', 'ops_manager'])) {
             abort(403, 'This visit is not assigned to you.');
+        }
+    }
+
+    /** Only the visit's own assignee may check in / answer / submit (managers can only view). */
+    protected function authorizeOwner(Request $request, Visit $visit): void
+    {
+        if ($visit->user_id !== $request->user()->id) {
+            abort(403, 'هذه الزيارة مُسندة لشخص آخر — يمكنك عرض النتيجة فقط.');
         }
     }
 
