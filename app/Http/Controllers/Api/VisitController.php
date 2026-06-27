@@ -148,11 +148,13 @@ class VisitController extends Controller
             ];
         });
 
-        $staff = \App\Models\User::where('is_department_manager', false)
-            ->whereNotNull('department_id')
+        // People-issue questions list the employees OF THIS BRANCH (the sales team
+        // tied to the visited branch), so the picked employee is a real user.
+        $staff = \App\Models\User::where('branch_id', $visit->branch_id)
             ->where('active', true)
-            ->get(['id', 'name'])
-            ->map(fn ($u) => ['id' => $u->id, 'name' => $u->name]);
+            ->orderBy('name')
+            ->get(['id', 'name', 'job_title'])
+            ->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'job' => $u->job_title]);
 
         return response()->json([
             'visit' => $this->visitListItem($visit),
@@ -353,7 +355,7 @@ class VisitController extends Controller
         $data = $request->validate(['general_comments' => ['nullable', 'string']]);
 
         DB::transaction(function () use ($visit, $data) {
-            $visit->load(['answers.question', 'template.sections.questions']);
+            $visit->load(['answers.question', 'answers.selectedEmployees', 'template.sections.questions']);
 
             $totalQuestions = $visit->template->sections->sum(fn ($s) => $s->questions->count());
             $answered = $visit->answers->whereNotNull('result')->count();

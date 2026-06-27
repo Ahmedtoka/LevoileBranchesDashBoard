@@ -52,11 +52,21 @@ class TicketService
         $sla = $question->sla_hours;
         $created = 0;
 
+        // For people (HR) issues, record the concerned branch employees in the ticket.
+        $description = $answer->comment;
+        if ($question->is_people_issue) {
+            $names = $answer->selectedEmployees->pluck('name')->all();
+            if (! empty($names)) {
+                $line = 'الموظفون المعنيون: '.implode('، ', $names);
+                $description = $description ? $line."\n".$description : $line;
+            }
+        }
+
         foreach ($deptIds as $deptId) {
             $ticket = Ticket::create([
                 'reference' => $this->referenceForDept($deptId),
                 'title' => str($question->question_text)->limit(120),
-                'description' => $answer->comment,
+                'description' => $description,
                 'branch_id' => $visit->branch_id,
                 'department_id' => $deptId,
                 'visit_id' => $visit->id,

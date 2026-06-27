@@ -67,6 +67,10 @@ class RealChecklistSeeder extends Seeder
                         }
                     }
 
+                    // Any HR-linked question is a "people issue": on fail it lists the
+                    // branch's own employees to pick who it concerns.
+                    $isPeople = in_array('hr', $q['depts'] ?? [], true);
+
                     ChecklistQuestion::create([
                         'checklist_section_id' => $section->id,
                         'sort_order' => $qi,
@@ -87,7 +91,7 @@ class RealChecklistSeeder extends Seeder
                         'comment_required_on_fail' => true,
                         'photo_required_on_fail' => true,
                         'auto_create_ticket_on_fail' => true,
-                        'is_people_issue' => false,
+                        'is_people_issue' => $isPeople,
                         'default_priority' => 'medium',
                         'sla_hours' => 48,
                     ]);
