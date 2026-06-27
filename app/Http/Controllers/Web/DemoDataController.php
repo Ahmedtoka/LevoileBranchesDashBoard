@@ -9,301 +9,291 @@ use App\Models\Ticket;
 use App\Models\TicketUpdate;
 use App\Models\User;
 use App\Models\Visit;
+use App\Models\VisitAnswer;
 use App\Models\VisitTemplate;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+/**
+ * Realistic demo generator tied to the REAL checklists, branches and team:
+ *  - Every store manager fills ONE daily checklist per day (visible history).
+ *  - Failed answers route tickets to the responsible departments (multi-dept supported).
+ *  - HR / people-issue fails pick a real employee of that branch.
+ *  - Store managers also request maintenance every couple of days.
+ *  - Each area manager visits a covered branch per day and closes it with pass/fail.
+ */
 class DemoDataController extends Controller
 {
-    /** Wipe all tickets / visits / notifications (keeps users, branches, templates, departments). */
+    private const STORE_DAYS = 10;
+    private const AREA_DAYS = 10;
+
+    private array $statusPool = [];
+    private array $notes = [
+        'تم الرصد أثناء الجولة، يحتاج متابعة.',
+        'الملاحظة متكررة من زيارة سابقة.',
+        'محتاج تدخل سريع من الإدارة المختصة.',
+        'تم التنبيه على الفريق وجارٍ المتابعة.',
+        'الحالة غير مطابقة للمعايير المطلوبة.',
+        'يحتاج إصلاح/تجهيز قبل ذروة المبيعات.',
+    ];
+
     public function wipe()
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        foreach (['ticket_updates', 'ticket_evidence', 'visit_answer_evidence', 'visit_answer_user', 'visit_answers', 'tickets', 'visits', 'notifications'] as $table) {
+        foreach (['ticket_updates', 'ticket_evidence', 'visit_answer_evidence', 'visit_answer_selected_employees', 'visit_answers', 'tickets', 'visits', 'notifications'] as $table) {
             if (DB::getSchemaBuilder()->hasTable($table)) {
                 DB::table($table)->delete();
             }
         }
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
-        return back()->with('status', 'تم مسح كل التذاكر والزيارات.');
+        return back()->with('status', 'تم مسح كل التذاكر والزيارات والشيك ليستات.');
     }
 
-    /** Generate full demo data across every role — concentrated on recent days so default (today) views are populated. */
     public function generate()
     {
-        @set_time_limit(180);
+        @set_time_limit(300);
+
+        $this->buildStatusPool();
 
         $branches = Branch::where('active', true)->get();
         $deptList = Department::all();
         $depts = $deptList->pluck('id', 'slug');
+        $maintId = $depts['maintenance'] ?? null;
+        $salesDept = Department::where('slug', 'sales')->first();
 
-        $storeTpl = VisitTemplate::where('type', 'store_manager')->first();
-        $areaTpl = VisitTemplate::where('type', 'area_manager')->first();
+        $storeTpl = VisitTemplate::with('sections.questions')->where('type', 'store_manager')->first();
+        $areaTpl = VisitTemplate::with('sections.questions')->where('type', 'area_manager')->first();
+        $storeQs = $this->flatten($storeTpl);
+        $areaQs = $this->flatten($areaTpl);
 
         $storeManagers = User::whereHas('role', fn ($q) => $q->where('slug', 'store_manager'))
             ->whereNotNull('branch_id')->get();
-        $areaManager = User::whereHas('role', fn ($q) => $q->where('slug', 'area_manager'))->first();
+        $areaManagers = User::whereHas('role', fn ($q) => $q->where('slug', 'area_manager'))->get();
+        $maintTechs = $maintId ? User::where('department_id', $maintId)->where('is_department_manager', false)->pluck('id')->all() : [];
 
-        // employees per department (for assignment)
-        $empByDept = [];
-        foreach ($deptList as $d) {
-            $empByDept[$d->id] = User::where('department_id', $d->id)
-                ->where('is_department_manager', false)->pluck('id')->all();
+        // branch employees (sales staff) for people-issue picks
+        $branchEmps = [];
+        if ($salesDept) {
+            User::where('department_id', $salesDept->id)->whereNotNull('branch_id')
+                ->get(['id', 'branch_id'])->each(function ($u) use (&$branchEmps) {
+                    $branchEmps[$u->branch_id][] = $u->id;
+                });
         }
 
-        $maintId = $depts['maintenance'] ?? optional($deptList->first())->id;
-        $opsId = $depts['operation'] ?? null;
-        $storeBranchIds = $storeManagers->pluck('branch_id')->filter()->values()->all();
-        $smByBranch = $storeManagers->keyBy('branch_id');
-
-        $titles = [
-            'صيانة — لمبة لا تعمل', 'صيانة — تكييف ضعيف التبريد', 'دهان حائط يحتاج معالجة',
-            'تنظيف واجهة المحل', 'مراية مكسورة', 'باب لا يغلق جيدًا', 'POS لا يعمل',
-            'كاميرا CCTV معطلة', 'نواقص شنط بيع', 'يافطة تحتاج تنظيف', 'أرضية تحتاج معالجة',
-            'تسريب مياه في الحمام', 'رف مكسور', 'مانيكان يحتاج صيانة', 'إضاءة خارجية لا تعمل',
+        $maintTitles = [
+            'صيانة — لمبة لا تعمل', 'صيانة — تكييف ضعيف', 'دهان حائط يحتاج معالجة', 'باب لا يغلق جيدًا',
+            'تسريب مياه', 'رف مكسور', 'مانيكان يحتاج صيانة', 'كاميرا CCTV معطلة', 'POS لا يعمل', 'يافطة تحتاج تنظيف',
         ];
-
-        $statusDist = [
-            'open' => 20, 'assigned' => 14, 'on_the_way' => 10, 'in_progress' => 14,
-            'waiting_approval' => 10, 'closed' => 18, 'postponed' => 6, 'not_fixed' => 4, 'rejected' => 4,
-        ];
-        $statusPool = [];
-        foreach ($statusDist as $st => $w) {
-            $statusPool = array_merge($statusPool, array_fill(0, $w, $st));
-        }
 
         $created = 0;
+        $visits = 0;
 
         DB::transaction(function () use (
-            $branches, $deptList, $storeTpl, $areaTpl, $storeManagers, $areaManager,
-            $empByDept, $titles, $statusPool, $maintId, $opsId, $storeBranchIds, $smByBranch, &$created
+            $storeManagers, $areaManagers, $storeTpl, $areaTpl, $storeQs, $areaQs,
+            $deptList, $maintId, $maintTechs, $branchEmps, $branches, $maintTitles, &$created, &$visits
         ) {
-            // 1) Store-manager checklist visits + their tickets (created_by = store manager)
+            // 1) STORE MANAGERS — one daily checklist per day
             foreach ($storeManagers as $sm) {
-                $branch = $branches->firstWhere('id', $sm->branch_id);
-                if (! $branch || ! $storeTpl) {
-                    continue;
+                $branchId = $sm->branch_id;
+                $emps = $branchEmps[$branchId] ?? [];
+
+                for ($d = 0; $d < self::STORE_DAYS; $d++) {
+                    $date = Carbon::now()->subDays($d)->setTime(rand(10, 20), rand(0, 59));
+                    $visit = $this->makeVisit($storeTpl->id, $branchId, $sm->id, $date);
+                    $created += $this->fillVisit($visit, $storeQs, $deptList, $maintTechs, $emps, $sm->id, $branchId, $date);
+                    $visits++;
                 }
-                for ($i = 0; $i < 16; $i++) {
-                    $date = $this->dateBucket();
-                    $problems = rand(0, 3);
-                    $visit = $this->makeVisit($storeTpl, $branch, $sm, $date, $problems);
-                    for ($p = 0; $p < $problems; $p++) {
-                        $this->makeTicket($deptList, $empByDept, $titles, $statusPool, $date, $branch->id, $visit->id, true, $deptList->random()->id, $sm->id);
+
+                // maintenance requests every 2-3 days
+                for ($d = 0; $d < self::STORE_DAYS; $d += rand(2, 3)) {
+                    $date = Carbon::now()->subDays($d)->setTime(rand(10, 21), rand(0, 59));
+                    $group = 'MR-'.str_pad((string) ((Ticket::max('id') ?? 0) + 1), 5, '0', STR_PAD_LEFT);
+                    foreach (range(1, rand(1, 2)) as $_) {
+                        $this->makeTicket($deptList, $maintTechs, $date, $maintId, $branchId, $sm->id, null, null, null,
+                            $maintTitles[array_rand($maintTitles)], $this->notes[array_rand($this->notes)],
+                            $group, ['painting', 'electrical', 'plumbing', 'carpentry', 'air-conditioning'][array_rand([0, 1, 2, 3, 4])]);
                         $created++;
                     }
                 }
             }
 
-            // 2) Area-manager visits + tickets (created_by = area manager) + a few upcoming visits to do
-            if ($areaManager && $areaTpl) {
-                foreach ($branches->shuffle()->take(10) as $branch) {
-                    for ($k = 0; $k < rand(2, 3); $k++) {
-                        $date = $this->dateBucket();
-                        $problems = rand(0, 3);
-                        $visit = $this->makeVisit($areaTpl, $branch, $areaManager, $date, $problems);
-                        for ($p = 0; $p < $problems; $p++) {
-                            $this->makeTicket($deptList, $empByDept, $titles, $statusPool, $date, $branch->id, $visit->id, true, $deptList->random()->id, $areaManager->id);
-                            $created++;
-                        }
-                    }
+            // 2) AREA MANAGERS — visit a covered branch per day, close with pass/fail
+            foreach ($areaManagers as $am) {
+                $cov = $am->branches()->pluck('branches.id')->all();
+                if (empty($cov)) {
+                    $cov = $branches->random(min(5, $branches->count()))->pluck('id')->all();
                 }
-                foreach ($branches->shuffle()->take(4) as $branch) {
-                    $this->makeScheduledVisit($areaTpl, $branch, $areaManager);
+                for ($d = 0; $d < self::AREA_DAYS; $d++) {
+                    $branchId = $cov[$d % count($cov)];
+                    $emps = $branchEmps[$branchId] ?? [];
+                    $date = Carbon::now()->subDays($d)->setTime(rand(11, 18), 0);
+                    $visit = $this->makeVisit($areaTpl->id, $branchId, $am->id, $date);
+                    $created += $this->fillVisit($visit, $areaQs, $deptList, $maintTechs, $emps, $am->id, $branchId, $date);
+                    $visits++;
                 }
-            }
-
-            // 3) Per-department requests (visit_id null) on the active store branches, created_by = that branch's SM
-            $pickBranch = fn () => $storeBranchIds ? $storeBranchIds[array_rand($storeBranchIds)] : $branches->random()->id;
-
-            foreach ($deptList as $d) {
-                $n = $d->id === $maintId ? 45 : (($opsId && $d->id === $opsId) ? 28 : rand(8, 12));
-                for ($i = 0; $i < $n; $i++) {
-                    $branchId = $pickBranch();
-                    $createdBy = optional($smByBranch->get($branchId))->id;
-                    $this->makeTicket($deptList, $empByDept, $titles, $statusPool, $this->dateBucket(), $branchId, null, false, $d->id, $createdBy);
-                    $created++;
-                }
-                // guarantee a few fresh (today, open) tickets so every "today" board is populated
-                for ($i = 0; $i < 3; $i++) {
-                    $branchId = $pickBranch();
-                    $createdBy = optional($smByBranch->get($branchId))->id;
-                    $this->makeTicket($deptList, $empByDept, $titles, $statusPool, $this->todayAt(), $branchId, null, false, $d->id, $createdBy, 'open');
-                    $created++;
-                }
-            }
-
-            // 4) FULL-CYCLE TODAY showcase — every reviewer sees the complete flow on the default (today) view.
-            $cycle = ['open', 'assigned', 'on_the_way', 'in_progress', 'waiting_approval', 'closed', 'postponed', 'not_fixed', 'rejected'];
-
-            // Each technician in the heavy depts gets one ticket of every status, today.
-            foreach (array_filter([$maintId, $opsId]) as $dId) {
-                $techList = $empByDept[$dId] ?? [];
-                foreach (($techList ?: [null]) as $techId) {
-                    foreach ($cycle as $st) {
-                        $branchId = $pickBranch();
-                        $createdBy = optional($smByBranch->get($branchId))->id;
-                        $this->makeTicket($deptList, $empByDept, $titles, $statusPool, $this->todayAt(), $branchId, null, false, $dId, $createdBy, $st, $techId);
-                        $created++;
-                    }
-                }
-            }
-
-            // Each store manager gets one of every status today → their "my requests" shows the full flow.
-            $firstMaintTech = $empByDept[$maintId][0] ?? null;
-            foreach ($storeManagers as $sm) {
-                if (! $sm->branch_id) {
-                    continue;
-                }
-                foreach ($cycle as $st) {
-                    $this->makeTicket($deptList, $empByDept, $titles, $statusPool, $this->todayAt(), $sm->branch_id, null, false, $maintId, $sm->id, $st, $firstMaintTech);
-                    $created++;
+                // a couple of upcoming visits still to do
+                foreach (array_slice($cov, 0, 2) as $branchId) {
+                    Visit::create([
+                        'visit_template_id' => $areaTpl->id, 'branch_id' => $branchId, 'user_id' => $am->id,
+                        'status' => 'assigned', 'scheduled_date' => Carbon::today()->addDays(rand(0, 3))->toDateString(),
+                    ]);
                 }
             }
         });
 
-        return back()->with('status', "تم توليد بيانات ديمو كاملة لكل الأدوار — {$created} تذكرة + زيارات (مركّزة على آخر أيام).");
+        return back()->with('status', "تم توليد ديمو حقيقي — {$visits} شيك ليست و{$created} تذكرة موزّعة على الإدارات.");
     }
 
-    // ---------- helpers ----------
+    // ---------- core ----------
 
-    private function makeVisit(VisitTemplate $tpl, Branch $branch, User $user, Carbon $date, int $problems): Visit
+    /** Flatten a template into [['id'=>, 'deptIds'=>[], 'people'=>bool, 'title'=>], ...]. */
+    private function flatten(?VisitTemplate $tpl): array
+    {
+        if (! $tpl) {
+            return [];
+        }
+        $out = [];
+        foreach ($tpl->sections as $sec) {
+            foreach ($sec->questions as $q) {
+                $out[] = [
+                    'id' => $q->id,
+                    'deptIds' => $q->departmentIds(),
+                    'people' => (bool) $q->is_people_issue,
+                    'title' => Str::limit($q->question_text_ar ?: $q->question_text, 120),
+                ];
+            }
+        }
+
+        return $out;
+    }
+
+    private function makeVisit(int $templateId, int $branchId, int $userId, Carbon $date): Visit
     {
         $visit = Visit::create([
-            'visit_template_id' => $tpl->id,
-            'branch_id' => $branch->id,
-            'user_id' => $user->id,
-            'status' => 'completed',
-            'scheduled_date' => $date->toDateString(),
-            'checked_in_at' => $date,
-            'started_at' => $date,
-            'completed_at' => $date->copy()->addHours(1),
-            'positives_count' => rand(15, 40),
-            'problems_count' => $problems,
-            'tickets_count' => $problems,
+            'visit_template_id' => $templateId, 'branch_id' => $branchId, 'user_id' => $userId,
+            'status' => 'completed', 'scheduled_date' => $date->toDateString(),
+            'checked_in_at' => $date, 'started_at' => $date, 'completed_at' => $date->copy()->addHour(),
         ]);
         $this->backdate('visits', $visit->id, $date);
 
         return $visit;
     }
 
-    /** An upcoming (assigned) visit the user still has to perform — gives area/store managers a live to-do. */
-    private function makeScheduledVisit(VisitTemplate $tpl, Branch $branch, User $user): void
+    /** Answer the visit (bulk pass + individual fails), route tickets. Returns tickets created. */
+    private function fillVisit(Visit $visit, array $questions, $deptList, array $maintTechs, array $emps, int $createdBy, int $branchId, Carbon $date): int
     {
-        $date = Carbon::today()->addDays(rand(0, 3));
-        Visit::create([
-            'visit_template_id' => $tpl->id,
-            'branch_id' => $branch->id,
-            'user_id' => $user->id,
-            'status' => 'assigned',
-            'scheduled_date' => $date->toDateString(),
+        if (empty($questions)) {
+            return 0;
+        }
+        $total = count($questions);
+        $failCount = min($total, rand(1, 3));
+        $failIdx = (array) array_rand($questions, $failCount);
+        $failSet = array_flip($failIdx);
+
+        // bulk-insert the passed answers
+        $passRows = [];
+        foreach ($questions as $i => $q) {
+            if (isset($failSet[$i])) {
+                continue;
+            }
+            $passRows[] = [
+                'visit_id' => $visit->id, 'checklist_question_id' => $q['id'], 'result' => 'pass',
+                'created_at' => $date, 'updated_at' => $date,
+            ];
+        }
+        if ($passRows) {
+            foreach (array_chunk($passRows, 50) as $chunk) {
+                DB::table('visit_answers')->insert($chunk);
+            }
+        }
+
+        $tickets = 0;
+        foreach ($failIdx as $i) {
+            $q = $questions[$i];
+            $answer = VisitAnswer::create([
+                'visit_id' => $visit->id, 'checklist_question_id' => $q['id'],
+                'result' => 'fail', 'comment' => $this->notes[array_rand($this->notes)],
+            ]);
+            $this->backdate('visit_answers', $answer->id, $date);
+
+            $names = [];
+            if ($q['people'] && ! empty($emps)) {
+                $pick = array_slice($emps, 0, 1); // one concerned employee
+                $answer->selectedEmployees()->attach($pick);
+                $names = User::whereIn('id', $pick)->pluck('name')->all();
+            }
+
+            $desc = $this->notes[array_rand($this->notes)];
+            if ($names) {
+                $desc = 'الموظفون المعنيون: '.implode('، ', $names)."\n".$desc;
+            }
+
+            $deptIds = ! empty($q['deptIds']) ? $q['deptIds'] : [null];
+            foreach ($deptIds as $deptId) {
+                $this->makeTicket($deptList, $maintTechs, $date, $deptId, $branchId, $createdBy, $visit->id, $answer->id, $q['id'],
+                    $q['title'], $desc, null, null);
+                $tickets++;
+            }
+        }
+
+        $visit->update([
+            'positives_count' => $total - $failCount,
+            'problems_count' => $failCount,
+            'tickets_count' => $tickets,
         ]);
+
+        return $tickets;
     }
 
-    /** Weighted date: ~30% today, ~15% yesterday, ~25% this week, ~30% older (history). */
-    private function dateBucket(): Carbon
+    private function makeTicket($deptList, array $maintTechs, Carbon $date, ?int $deptId, int $branchId, int $createdBy, ?int $visitId, ?int $answerId, ?int $questionId, string $title, string $desc, ?string $groupCode, ?string $category): void
     {
-        $r = mt_rand(1, 100);
-        if ($r <= 30) {
-            return $this->todayAt();
-        }
-        if ($r <= 45) {
-            return Carbon::yesterday()->addMinutes(mt_rand(540, 1320));
-        }
-        if ($r <= 70) {
-            return Carbon::now()->subDays(mt_rand(2, 7))->setTime(mt_rand(9, 21), mt_rand(0, 59));
-        }
-
-        return Carbon::now()->subDays(mt_rand(8, 75))->setTime(mt_rand(9, 21), mt_rand(0, 59));
-    }
-
-    /** A random time earlier today (between midnight and now). */
-    private function todayAt(): Carbon
-    {
-        $minutes = (int) max(1, Carbon::today()->diffInMinutes(Carbon::now()));
-
-        return Carbon::today()->addMinutes(mt_rand(0, $minutes));
-    }
-
-    private function makeTicket($deptList, $empByDept, $titles, $statusPool, Carbon $date, int $branchId, ?int $visitId, bool $fromVisit, int $deptId, ?int $createdBy, ?string $forceStatus = null, ?int $forceTech = null): void
-    {
-        $dept = $deptList->firstWhere('id', $deptId);
+        $dept = $deptId ? $deptList->firstWhere('id', $deptId) : null;
         $prefix = $dept->ticket_prefix ?? 'GEN';
 
-        $status = $forceStatus ?? $statusPool[array_rand($statusPool)];
-        // priority biased to medium (default), occasional high/critical/low
+        $status = $this->statusPool[array_rand($this->statusPool)];
         $priorities = ['medium', 'medium', 'medium', 'medium', 'low', 'high', 'critical'];
-        $priority = $priorities[array_rand($priorities)];
-
-        $notes = [
-            'اللمبة بتقفل وتفتح لوحدها، محتاجة فحص.',
-            'التكييف بيطلّع مية على الأرض ومش بيبرّد كويس.',
-            'الدهان متقشّر في ركن البروفة ومحتاج معالجة.',
-            'واجهة المحل عليها أتربة وبقع، محتاجة تنظيف.',
-            'المراية اتكسرت في غرفة القياس.',
-            'الباب الرئيسي بيعلّق ومش بيقفل بإحكام.',
-            'جهاز الكاشير بيفصل كل شوية أثناء البيع.',
-            'كاميرا المدخل مش شغّالة من امبارح.',
-            'في نقص أكياس وشنط بيع عند الكاشير.',
-            'نص لمبات اليافطة الخارجية مطفّية.',
-            'بلاطة مكسورة قدام المخزن ممكن تخبط حد.',
-            'تسريب مياه تحت حوض الحمام.',
-            'رف العرض الجانبي مفكوك ومايل.',
-            'مانيكان الفاترينة إيده مكسورة.',
-            'الإضاءة الخارجية بتفصل بالليل.',
-        ];
-
-        $groupCode = $fromVisit ? null : 'MR-'.str_pad((string) ((Ticket::max('id') ?? 0) + 1), 5, '0', STR_PAD_LEFT);
 
         $ticket = Ticket::create([
             'reference' => Ticket::nextReference($prefix),
             'group_code' => $groupCode,
-            'title' => $titles[array_rand($titles)],
-            'description' => $notes[array_rand($notes)],
+            'title' => $title,
+            'description' => $desc,
             'branch_id' => $branchId,
             'department_id' => $deptId,
             'visit_id' => $visitId,
+            'visit_answer_id' => $answerId,
+            'checklist_question_id' => $questionId,
             'created_by' => $createdBy,
             'status' => 'open',
-            'priority' => $priority,
+            'priority' => $priorities[array_rand($priorities)],
             'sla_hours' => 48,
             'due_at' => $date->copy()->addHours(48),
+            'category' => $category,
         ]);
 
-        // timeline + advance to the chosen status
         $cursor = $date->copy();
-        $this->addUpdate($ticket, 'created', null, 'open', $fromVisit ? 'طلب من الشيك ليست.' : 'تم إنشاء الطلب.', $cursor);
+        $this->addUpdate($ticket, 'created', null, 'open', $visitId ? 'طلب من الشيك ليست.' : 'تم إنشاء الطلب.', $cursor);
 
-        $techs = $empByDept[$deptId] ?? [];
-        $tech = $forceTech ?? (! empty($techs) ? $techs[array_rand($techs)] : null);
+        // maintenance tickets get assigned to a technician
+        $tech = ($deptId && in_array($deptId, $deptList->pluck('id')->all()) && ! empty($maintTechs) && $dept && $dept->slug === 'maintenance')
+            ? $maintTechs[array_rand($maintTechs)] : null;
 
-        $path = $this->pathTo($status);
         $assignedTo = null;
         $assignedAt = null;
         $closedAt = null;
-
-        foreach ($path as $step) {
-            $cursor = $cursor->copy()->addHours(rand(2, 30));
+        foreach ($this->pathTo($status) as $step) {
+            $cursor = $cursor->copy()->addHours(rand(2, 26));
             if ($step === 'assigned') {
                 $assignedTo = $tech;
                 $assignedAt = $cursor->copy();
                 $this->addUpdate($ticket, 'assignment', 'open', 'assigned', 'تعيين للفني', $cursor, $tech);
             } elseif ($step === 'rejected') {
                 $assignedTo = null;
-                $this->addUpdate($ticket, 'declined', 'assigned', 'rejected', 'رفض الفني: غير متاح حاليًا.', $cursor, $tech);
+                $this->addUpdate($ticket, 'declined', 'assigned', 'rejected', 'رفض الفني.', $cursor, $tech);
             } else {
-                $note = match ($step) {
-                    'on_the_way' => 'تم قبول الطلب',
-                    'in_progress' => 'تم بدء العمل',
-                    'waiting_approval' => 'تم التصليح',
-                    'postponed' => 'تم التأجيل',
-                    'not_fixed' => 'لم يتم التصليح',
-                    'closed' => 'تم الإغلاق',
-                    default => null,
-                };
-                $this->addUpdate($ticket, 'status_change', null, $step, $note, $cursor, $tech);
+                $this->addUpdate($ticket, 'status_change', null, $step, $this->stepNote($step), $cursor, $tech);
                 if ($step === 'closed') {
                     $closedAt = $cursor->copy();
                 }
@@ -311,16 +301,28 @@ class DemoDataController extends Controller
         }
 
         DB::table('tickets')->where('id', $ticket->id)->update([
-            'status' => $status,
-            'assigned_to' => $assignedTo,
-            'assigned_at' => $assignedAt,
-            'closed_at' => $closedAt,
-            'created_at' => $date,
-            'updated_at' => $cursor,
+            'status' => $status, 'assigned_to' => $assignedTo, 'assigned_at' => $assignedAt,
+            'closed_at' => $closedAt, 'created_at' => $date, 'updated_at' => $cursor,
         ]);
     }
 
-    /** Ordered transitions to reach a target status. */
+    private function stepNote(string $step): ?string
+    {
+        return [
+            'on_the_way' => 'تم قبول الطلب', 'in_progress' => 'تم بدء العمل', 'waiting_approval' => 'تم التصليح',
+            'postponed' => 'تم التأجيل', 'not_fixed' => 'لم يتم التصليح', 'closed' => 'تم الإغلاق',
+        ][$step] ?? null;
+    }
+
+    private function buildStatusPool(): void
+    {
+        $dist = ['open' => 22, 'assigned' => 14, 'on_the_way' => 10, 'in_progress' => 14,
+            'waiting_approval' => 10, 'closed' => 16, 'postponed' => 6, 'not_fixed' => 4, 'rejected' => 4];
+        foreach ($dist as $st => $w) {
+            $this->statusPool = array_merge($this->statusPool, array_fill(0, $w, $st));
+        }
+    }
+
     private function pathTo(string $status): array
     {
         return match ($status) {

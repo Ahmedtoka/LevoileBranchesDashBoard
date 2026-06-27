@@ -66,7 +66,7 @@ class RealTeamSeeder extends Seeder
 
         // ---- wipe old demo users + demo data (keep super_admin) ----
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        foreach (['ticket_updates', 'ticket_evidence', 'visit_answer_evidence', 'visit_answer_user', 'visit_answers', 'tickets', 'visits', 'notifications'] as $t) {
+        foreach (['ticket_updates', 'ticket_evidence', 'visit_answer_evidence', 'visit_answer_selected_employees', 'visit_answers', 'tickets', 'visits', 'notifications'] as $t) {
             if (DB::getSchemaBuilder()->hasTable($t)) {
                 DB::table($t)->delete();
             }
