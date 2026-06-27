@@ -55,9 +55,13 @@ class VisitController extends Controller
         }
 
         $status = $request->query('status', 'all'); // all | open | old
+        $from = $request->query('from');
+        $to = $request->query('to');
         $query = Visit::with(['branch', 'template'])
             ->whereHas('template', fn ($t) => $t->where('type', 'store_manager'))
             ->whereIn('branch_id', $branchIds)
+            ->when($from, fn ($x) => $x->whereDate('scheduled_date', '>=', substr($from, 0, 10)))
+            ->when($to, fn ($x) => $x->whereDate('scheduled_date', '<=', substr($to, 0, 10)))
             ->when($status === 'open', fn ($x) => $x->whereIn('status', ['assigned', 'checked_in', 'in_progress']))
             ->when($status === 'old', fn ($x) => $x->whereIn('status', ['completed', 'cancelled']))
             ->latest('scheduled_date');

@@ -68,6 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/ops/schedule', [OpsController::class, 'schedule']);
     Route::get('/ops/visits', [OpsController::class, 'visits']);
     Route::get('/ops/tickets', [OpsController::class, 'tickets']);
+    Route::get('/ops/maintenance', [OpsController::class, 'maintenance']);
 
     // ---- Notifications ----
     Route::get('/notifications', [NotificationController::class, 'index']);

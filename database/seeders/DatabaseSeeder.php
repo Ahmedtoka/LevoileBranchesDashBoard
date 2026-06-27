@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             DepartmentSeeder::class,
             BranchSeeder::class,
-            UserSeeder::class,
+            RealTeamSeeder::class, // real store/sales team + maintenance + ops + area managers
             TemplateTypeSeeder::class,
             MaintenanceItemSeeder::class,
             TemplateSeeder::class,

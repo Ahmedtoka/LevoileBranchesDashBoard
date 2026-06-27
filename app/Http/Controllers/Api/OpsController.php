@@ -170,15 +170,76 @@ class OpsController extends Controller
         ]);
     }
 
-    /** GET /api/ops/tickets?category=store|area|maintenance */
+    /** GET /api/ops/maintenance?from=&to= — maintenance hub: KPIs + per-branch + technicians. */
+    public function maintenance(Request $request): JsonResponse
+    {
+        $from = $request->query('from');
+        $to = $request->query('to');
+        $deptId = Department::where('slug', 'maintenance')->value('id');
+
+        $base = fn () => Ticket::query()
+            ->when($deptId, fn ($q) => $q->where('department_id', $deptId))
+            ->when($from, fn ($q) => $q->where('created_at', '>=', $from))
+            ->when($to, fn ($q) => $q->where('created_at', '<=', $to));
+
+        $kpis = [
+            'total' => $base()->count(),
+            'open' => $base()->whereNotIn('status', ['closed'])->count(),
+            'closed' => $base()->where('status', 'closed')->count(),
+            'overdue' => $base()->whereNotNull('due_at')->where('due_at', '<', now())
+                ->whereNotIn('status', ['closed', 'waiting_approval'])->count(),
+        ];
+
+        $branches = $base()->with('branch:id,branch_name')->get()->groupBy('branch_id')->map(function ($g) {
+            $first = $g->first();
+
+            return [
+                'branch_id' => $first->branch_id,
+                'branch' => optional($first->branch)->branch_name ?? '—',
+                'total' => $g->count(),
+                'open' => $g->whereNotIn('status', ['closed'])->count(),
+                'closed' => $g->where('status', 'closed')->count(),
+                'unassigned' => $g->whereNull('assigned_to')->whereNotIn('status', ['closed'])->count(),
+            ];
+        })->values()->sortByDesc('open')->values();
+
+        $technicians = $deptId ? User::where('department_id', $deptId)
+            ->where('is_department_manager', false)
+            ->withCount([
+                'assignedTickets as open_count' => fn ($q) => $q->whereIn('status', ['assigned', 'on_the_way']),
+                'assignedTickets as working_count' => fn ($q) => $q->where('status', 'in_progress'),
+                'assignedTickets as closed_count' => fn ($q) => $q->where('status', 'closed'),
+            ])
+            ->orderByDesc('open_count')
+            ->get(['id', 'name'])
+            ->map(fn ($u) => [
+                'id' => $u->id, 'name' => $u->name,
+                'open' => $u->open_count, 'working' => $u->working_count, 'closed' => $u->closed_count,
+            ]) : [];
+
+        return response()->json([
+            'kpis' => $kpis,
+            'branches' => $branches,
+            'technicians' => $technicians,
+        ]);
+    }
+
+    /** GET /api/ops/tickets?category=all|store|area|maintenance&status=&from=&to= */
     public function tickets(Request $request): JsonResponse
     {
-        $cat = $request->query('category', 'store');
+        $cat = $request->query('category', 'all');
+        $status = $request->query('status', 'all'); // all | open | closed
+        $from = $request->query('from');
+        $to = $request->query('to');
 
         $q = Ticket::with(['branch:id,branch_name', 'department:id,name', 'assignee:id,name'])
             ->when($cat === 'store', fn ($x) => $x->whereHas('visit.template', fn ($t) => $t->where('type', 'store_manager')))
             ->when($cat === 'area', fn ($x) => $x->whereHas('visit.template', fn ($t) => $t->where('type', 'area_manager')))
             ->when($cat === 'maintenance', fn ($x) => $x->whereNull('visit_id'))
+            ->when($status === 'open', fn ($x) => $x->whereNotIn('status', ['closed']))
+            ->when($status === 'closed', fn ($x) => $x->where('status', 'closed'))
+            ->when($from, fn ($x) => $x->where('created_at', '>=', $from))
+            ->when($to, fn ($x) => $x->where('created_at', '<=', $to))
             ->latest();
 
         return response()->json([
