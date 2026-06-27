@@ -138,8 +138,8 @@ class OpsController extends Controller
         $to = $request->query('to');
 
         $q = Visit::with(['branch:id,branch_name', 'user:id,name', 'template:id,name,type'])
-            ->when($from, fn ($x) => $x->where('created_at', '>=', $from))
-            ->when($to, fn ($x) => $x->where('created_at', '<=', $to))
+            ->when($from, fn ($x) => $x->whereDate('scheduled_date', '>=', substr($from, 0, 10)))
+            ->when($to, fn ($x) => $x->whereDate('scheduled_date', '<=', substr($to, 0, 10)))
             ->when($type === 'area', fn ($x) => $x->whereHas('template', fn ($t) => $t->where('type', 'area_manager')))
             ->when($type === 'store', fn ($x) => $x->whereHas('template', fn ($t) => $t->where('type', 'store_manager')))
             ->when($status === 'assigned', fn ($x) => $x->where('status', 'assigned'))
