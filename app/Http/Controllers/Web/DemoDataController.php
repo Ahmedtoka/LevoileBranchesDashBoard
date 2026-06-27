@@ -100,7 +100,7 @@ class DemoDataController extends Controller
                 $emps = $branchEmps[$branchId] ?? [];
 
                 for ($d = 0; $d < self::STORE_DAYS; $d++) {
-                    $date = Carbon::now()->subDays($d)->setTime(rand(10, 20), rand(0, 59));
+                    $date = $this->dayDate($d);
                     $visit = $this->makeVisit($storeTpl->id, $branchId, $sm->id, $date);
                     $created += $this->fillVisit($visit, $storeQs, $deptList, $maintTechs, $emps, $sm->id, $branchId, $date);
                     $visits++;
@@ -108,7 +108,7 @@ class DemoDataController extends Controller
 
                 // maintenance requests every 2-3 days
                 for ($d = 0; $d < self::STORE_DAYS; $d += rand(2, 3)) {
-                    $date = Carbon::now()->subDays($d)->setTime(rand(10, 21), rand(0, 59));
+                    $date = $this->dayDate($d);
                     $group = 'MR-'.str_pad((string) ((Ticket::max('id') ?? 0) + 1), 5, '0', STR_PAD_LEFT);
                     foreach (range(1, rand(1, 2)) as $_) {
                         $this->makeTicket($deptList, $maintTechs, $date, $maintId, $branchId, $sm->id, null, null, null,
@@ -128,7 +128,7 @@ class DemoDataController extends Controller
                 for ($d = 0; $d < self::AREA_DAYS; $d++) {
                     $branchId = $cov[$d % count($cov)];
                     $emps = $branchEmps[$branchId] ?? [];
-                    $date = Carbon::now()->subDays($d)->setTime(rand(11, 18), 0);
+                    $date = $this->dayDate($d);
                     $visit = $this->makeVisit($areaTpl->id, $branchId, $am->id, $date);
                     $created += $this->fillVisit($visit, $areaQs, $deptList, $maintTechs, $emps, $am->id, $branchId, $date);
                     $visits++;
@@ -304,6 +304,18 @@ class DemoDataController extends Controller
             'status' => $status, 'assigned_to' => $assignedTo, 'assigned_at' => $assignedAt,
             'closed_at' => $closedAt, 'created_at' => $date, 'updated_at' => $cursor,
         ]);
+    }
+
+    /** A datetime for $d days ago; for today it is always BEFORE now (so "today" filters include it). */
+    private function dayDate(int $d): Carbon
+    {
+        if ($d <= 0) {
+            $minutes = (int) max(1, Carbon::today()->diffInMinutes(Carbon::now()));
+
+            return Carbon::today()->addMinutes(rand(0, $minutes));
+        }
+
+        return Carbon::now()->subDays($d)->setTime(rand(9, 21), rand(0, 59));
     }
 
     private function stepNote(string $step): ?string
