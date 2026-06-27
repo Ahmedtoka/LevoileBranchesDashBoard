@@ -67,9 +67,9 @@ class RealChecklistSeeder extends Seeder
                         }
                     }
 
-                    // Any HR-linked question is a "people issue": on fail it lists the
-                    // branch's own employees to pick who it concerns.
-                    $isPeople = in_array('hr', $q['depts'] ?? [], true);
+                    // HR-linked or explicitly flagged questions are "people issues":
+                    // on fail they list the branch's own employees to pick who it concerns.
+                    $isPeople = in_array('hr', $q['depts'] ?? [], true) || ($q['people'] ?? false) === true;
 
                     ChecklistQuestion::create([
                         'checklist_section_id' => $section->id,

@@ -1,245 +1,295 @@
 {
- "name": "Area Manager Visit",
  "slug": "area-manager",
+ "name": "Area Manager Visit",
  "type": "area_manager",
  "role": "area_manager",
  "sections": [
   {
    "title": "Operations",
-   "title_ar": "Operations",
+   "title_ar": "العمليات",
    "questions": [
     {
      "text": "Music",
-     "text_ar": null,
+     "text_ar": "الموسيقى شغّالة",
      "depts": [
       "it",
-      "maintenance"
+      "maintenance",
+      "operation"
      ]
     },
     {
      "text": "Store Cleaning & Outside sign / Bascket",
-     "text_ar": null,
+     "text_ar": "نظافة المحل واللافتة الخارجية والسلة",
      "depts": [
+      "operation",
       "cleaning"
      ]
     },
     {
      "text": "Air Fresher.",
-     "text_ar": null,
+     "text_ar": "معطّر الجو",
      "depts": [
       "maintenance"
      ]
     },
     {
      "text": "Section Handling.",
-     "text_ar": null,
-     "depts": []
+     "text_ar": "ترتيب الأقسام",
+     "depts": [
+      "operation"
+     ]
     },
     {
      "text": "Marketing materials are implemented in the right position.",
-     "text_ar": null,
+     "text_ar": "المواد التسويقية موضوعة في مكانها الصحيح",
      "depts": [
+      "operation",
       "vm"
      ]
     },
     {
      "text": "All Rolls of(Visa - Cash - Barcode- Prices) are available",
-     "text_ar": null,
+     "text_ar": "كل رولات (فيزا/كاش/باركود/أسعار) متوفرة",
      "depts": [
+      "operation",
       "finance"
      ]
     },
     {
      "text": "All sizes of Carrier bags are available",
-     "text_ar": null,
+     "text_ar": "كل مقاسات شنط الحمل متوفرة",
      "depts": [
+      "operation",
       "warehouse"
      ]
     },
     {
      "text": "All Team wearing the uniform & Scarf",
-     "text_ar": null,
+     "text_ar": "كل الفريق لابس اليونيفورم والإيشارب",
      "depts": [
+      "operation",
       "warehouse"
      ]
     },
     {
      "text": "The manager follow the weekly sch or there is any different without approval",
-     "text_ar": null,
-     "depts": []
+     "text_ar": "المدير ملتزم بالجدول الأسبوعي ومفيش تغيير بدون موافقة",
+     "depts": [
+      "operation"
+     ]
     },
     {
      "text": "The manager Compelet the Store checklist and the team work on",
-     "text_ar": null,
-     "depts": []
+     "text_ar": "المدير أكمل شيك ليست المحل والفريق منفّذ",
+     "depts": [
+      "operation"
+     ]
     },
     {
      "text": "All Products with the correct prices and in the right position",
-     "text_ar": null,
-     "depts": []
+     "text_ar": "كل المنتجات بأسعار صحيحة وفي مكانها",
+     "depts": [
+      "operation"
+     ]
     },
     {
      "text": "All Products with a good steaming",
-     "text_ar": null,
+     "text_ar": "كل المنتجات مكويّة كويس (ستيمنج)",
      "depts": [
+      "operation",
       "vm"
      ]
     },
     {
      "text": "The free stands & Rails are organized and handing.",
-     "text_ar": null,
+     "text_ar": "الاستاندات والرفوف منظّمة ومرتّبة",
      "depts": [
+      "operation",
       "vm"
      ]
     },
     {
      "text": "All accessories are displayed with a good way on the cash counter.",
-     "text_ar": null,
+     "text_ar": "الإكسسوارات معروضة بشكل كويس على الكاشير",
      "depts": [
+      "operation",
       "vm"
      ]
     },
     {
      "text": "QR code & Return policy on a good position and Visible to customers.",
-     "text_ar": null,
+     "text_ar": "كود QR وسياسة الإرجاع في مكان واضح للعملاء",
      "depts": [
+      "operation",
       "marketing"
      ]
     },
     {
      "text": "All VM Tools with a good storage",
-     "text_ar": null,
+     "text_ar": "كل أدوات الـ VM متخزّنة كويس",
      "depts": [
+      "operation",
       "vm"
      ]
     },
     {
      "text": "All Required maintanace is Done",
-     "text_ar": null,
+     "text_ar": "كل الصيانة المطلوبة تمّت",
      "depts": [
+      "operation",
       "maintenance"
      ]
     },
     {
      "text": "Follow and implemented VM Guidelines and standards .",
-     "text_ar": null,
+     "text_ar": "الالتزام بإرشادات ومعايير الـ VM",
      "depts": [
+      "operation",
       "vm"
      ]
     },
     {
      "text": "Stockroom is organized and cleaned .",
-     "text_ar": null,
-     "depts": []
+     "text_ar": "المخزن منظّم ونظيف",
+     "depts": [
+      "operation"
+     ]
     },
     {
      "text": "Damage items check , as per the Brand standards .",
-     "text_ar": null,
-     "depts": []
+     "text_ar": "فحص الأصناف التالفة حسب معايير البراند",
+     "depts": [
+      "operation"
+     ]
     },
     {
      "text": "Follow the transfer between stores .",
-     "text_ar": null,
-     "depts": []
+     "text_ar": "متابعة التحويلات بين الفروع",
+     "depts": [
+      "operation"
+     ]
     }
    ]
   },
   {
    "title": "People",
-   "title_ar": "People",
+   "title_ar": "الموظفون",
    "questions": [
     {
      "text": "Customer service Training file is available and implemented",
-     "text_ar": null,
-     "depts": []
+     "text_ar": "ملف تدريب خدمة العملاء متوفر ومنفّذ",
+     "depts": [
+      "operation"
+     ]
     },
     {
      "text": "Brand induction for the new hire .",
-     "text_ar": null,
+     "text_ar": "تعريف الموظف الجديد بالبراند",
      "depts": [
+      "operation",
       "hr"
-     ]
+     ],
+     "people": true
     },
     {
      "text": "Follow the new hire Training and probation period evaluation.",
-     "text_ar": null,
+     "text_ar": "متابعة تدريب الموظف الجديد وتقييم فترة الاختبار",
      "depts": [
+      "operation",
       "hr"
-     ]
+     ],
+     "people": true
     },
     {
      "text": "Review the evaluation with the Manager and Staff",
-     "text_ar": null,
-     "depts": []
+     "text_ar": "مراجعة التقييم مع المدير والموظفين",
+     "depts": [
+      "operation"
+     ],
+     "people": true
     },
     {
      "text": "Review & Fllow the products knowledge with the team",
-     "text_ar": null,
+     "text_ar": "مراجعة ومتابعة معرفة المنتجات مع الفريق",
      "depts": [
+      "operation",
       "vm",
       "designer"
      ]
     },
     {
      "text": "Review & Follow the 6 steps .",
-     "text_ar": null,
-     "depts": []
+     "text_ar": "مراجعة ومتابعة الـ6 خطوات",
+     "depts": [
+      "operation"
+     ]
     },
     {
      "text": "Review & Follow ROZ and schedule . ( choose the right one to be a leader shift )",
-     "text_ar": null,
-     "depts": []
+     "text_ar": "مراجعة ومتابعة الـ ROZ والجدول (اختيار المناسب ليكون ليدر شيفت)",
+     "depts": [
+      "operation"
+     ],
+     "people": true
     }
    ]
   },
   {
    "title": "Commercial",
-   "title_ar": "Commercial",
+   "title_ar": "التجاري",
    "questions": [
     {
      "text": "The windows are clean and with a sufficient depth.",
-     "text_ar": null,
+     "text_ar": "الفاترين نظيفة وبعمق كافٍ",
      "depts": [
+      "operation",
       "vm"
      ]
     },
     {
      "text": "The outfit on Mannequin is matched and attractive as per the last update",
-     "text_ar": null,
+     "text_ar": "ملابس المانيكان متناسقة وجذّابة حسب آخر تحديث",
      "depts": [
+      "operation",
       "vm"
      ]
     },
     {
      "text": "The new collection items are dispalyed in the primary area .",
-     "text_ar": null,
+     "text_ar": "منتجات الكولكشن الجديد معروضة في المنطقة الأساسية",
      "depts": [
+      "operation",
       "vm"
      ]
     },
     {
      "text": "Follow the toplist",
-     "text_ar": null,
-     "depts": []
+     "text_ar": "متابعة التوب ليست",
+     "depts": [
+      "operation"
+     ]
     },
     {
      "text": "New Collection Feedback",
-     "text_ar": null,
+     "text_ar": "فيدباك الكولكشن الجديد",
      "depts": [
+      "operation",
       "merchandise"
      ]
     },
     {
      "text": "Missed Opportunity",
-     "text_ar": null,
+     "text_ar": "الفرص الضائعة",
      "depts": [
+      "operation",
       "merchandise"
      ]
     },
     {
      "text": "Custmer Needs",
-     "text_ar": null,
+     "text_ar": "احتياجات العملاء",
      "depts": [
+      "operation",
       "merchandise"
      ]
     }
