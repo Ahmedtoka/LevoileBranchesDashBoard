@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ---- Visits ----
     Route::get('/checklist/today', [VisitController::class, 'today']);
     Route::get('/visits', [VisitController::class, 'index']);
+    Route::get('/visits/branch-checklists', [VisitController::class, 'branchChecklists']);
     Route::get('/visits/{visit}', [VisitController::class, 'show']);
     Route::post('/visits/{visit}/checkin', [VisitController::class, 'checkin']);
     Route::post('/visits/{visit}/start', [VisitController::class, 'start']);

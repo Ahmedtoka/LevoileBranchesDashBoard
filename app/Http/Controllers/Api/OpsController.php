@@ -133,12 +133,15 @@ class OpsController extends Controller
     public function visits(Request $request): JsonResponse
     {
         $status = $request->query('status', 'all'); // all | assigned | in_progress | completed | overdue
+        $type = $request->query('type', 'all');     // all | area | store
         $from = $request->query('from');
         $to = $request->query('to');
 
-        $q = Visit::with(['branch:id,branch_name', 'user:id,name', 'template:id,name'])
+        $q = Visit::with(['branch:id,branch_name', 'user:id,name', 'template:id,name,type'])
             ->when($from, fn ($x) => $x->where('created_at', '>=', $from))
             ->when($to, fn ($x) => $x->where('created_at', '<=', $to))
+            ->when($type === 'area', fn ($x) => $x->whereHas('template', fn ($t) => $t->where('type', 'area_manager')))
+            ->when($type === 'store', fn ($x) => $x->whereHas('template', fn ($t) => $t->where('type', 'store_manager')))
             ->when($status === 'assigned', fn ($x) => $x->where('status', 'assigned'))
             ->when($status === 'in_progress', fn ($x) => $x->whereIn('status', ['checked_in', 'in_progress']))
             ->when($status === 'completed', fn ($x) => $x->where('status', 'completed'))
@@ -150,12 +153,16 @@ class OpsController extends Controller
             'data' => $q->get()->map(fn ($v) => [
                 'id' => $v->id,
                 'branch' => optional($v->branch)->branch_name,
+                'branch_id' => $v->branch_id,
                 'user' => optional($v->user)->name,
                 'template' => optional($v->template)->name,
+                'template_type' => optional($v->template)->type,
                 'status' => $v->status,
                 'scheduled_date' => optional($v->scheduled_date)->toDateString(),
                 'scheduled_time' => $v->scheduled_time,
+                'positives' => $v->positives_count,
                 'problems' => $v->problems_count,
+                'tickets' => $v->tickets_count,
                 'completed_at' => optional($v->completed_at)->toDateTimeString(),
                 'overdue' => $v->scheduled_date && $v->scheduled_date->isPast()
                     && in_array($v->status, ['assigned', 'checked_in', 'in_progress'], true),

@@ -37,6 +37,36 @@ class VisitController extends Controller
         ]);
     }
 
+    /**
+     * GET /api/visits/branch-checklists — store-manager daily checklists for the
+     * branches the current user is responsible for (area manager coverage / own branch).
+     */
+    public function branchChecklists(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $branchIds = $user->branches()->pluck('branches.id')->all();
+        if (empty($branchIds) && $user->branch_id) {
+            $branchIds = [$user->branch_id];
+        }
+        // ops managers / admins see all branches
+        if ($user->hasRole(['ops_manager', 'super_admin', 'branch_director'])) {
+            $branchIds = \App\Models\Branch::pluck('id')->all();
+        }
+
+        $status = $request->query('status', 'all'); // all | open | old
+        $query = Visit::with(['branch', 'template'])
+            ->whereHas('template', fn ($t) => $t->where('type', 'store_manager'))
+            ->whereIn('branch_id', $branchIds)
+            ->when($status === 'open', fn ($x) => $x->whereIn('status', ['assigned', 'checked_in', 'in_progress']))
+            ->when($status === 'old', fn ($x) => $x->whereIn('status', ['completed', 'cancelled']))
+            ->latest('scheduled_date');
+
+        return response()->json([
+            'data' => $query->get()->map(fn ($v) => $this->visitListItem($v)),
+        ]);
+    }
+
     /** GET /api/checklist/today — store manager's daily checklist (auto-create, no check-in). */
     public function today(Request $request): JsonResponse
     {
@@ -371,7 +401,7 @@ class VisitController extends Controller
 
     protected function authorizeVisit(Request $request, Visit $visit): void
     {
-        if ($visit->user_id !== $request->user()->id && ! $request->user()->hasRole(['super_admin', 'area_manager', 'branch_director'])) {
+        if ($visit->user_id !== $request->user()->id && ! $request->user()->hasRole(['super_admin', 'area_manager', 'branch_director', 'ops_manager'])) {
             abort(403, 'This visit is not assigned to you.');
         }
     }

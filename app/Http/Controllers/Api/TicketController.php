@@ -285,11 +285,17 @@ class TicketController extends Controller
                 'branch_id' => $first->branch_id,
                 'branch' => optional($first->branch)->branch_name ?? '—',
                 'total' => $group->count(),
-                'new' => $group->where('status', 'open')->count(),
-                'in_progress' => $group->whereIn('status', ['assigned', 'on_the_way', 'in_progress'])->count(),
-                'closed' => $group->where('status', 'closed')->count(),
                 'open' => $group->whereNotIn('status', ['closed'])->count(),
+                'closed' => $group->where('status', 'closed')->count(),
                 'unassigned' => $group->whereNull('assigned_to')->whereNotIn('status', ['closed'])->count(),
+                // granular per-status breakdown
+                'new' => $group->where('status', 'open')->count(),
+                'assigned' => $group->where('status', 'assigned')->count(),
+                'accepted' => $group->where('status', 'on_the_way')->count(),
+                'in_progress' => $group->where('status', 'in_progress')->count(),
+                'waiting_approval' => $group->where('status', 'waiting_approval')->count(),
+                'postponed' => $group->whereIn('status', ['postponed', 'not_fixed'])->count(),
+                'rejected' => $group->where('status', 'rejected')->count(),
             ];
         })->values()->sortByDesc('open')->values();
 
