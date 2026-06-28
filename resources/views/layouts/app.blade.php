@@ -37,6 +37,8 @@
 @auth
 @php
     $dm = auth()->user()->is_department_manager && auth()->user()->department_id;
+    $kpiOps = in_array(optional(auth()->user()->role)->slug, ['super_admin', 'ops_manager'], true);
+    $canKpi = $kpiOps || $dm;
 @endphp
 <nav class="sidebar p-3">
     <div class="brand fs-5 mb-3"><i class="bi bi-shop"></i> LeVoile</div>
@@ -65,6 +67,17 @@
 
         <div class="nav-label">{{ t('nav.reports','التقارير') }}</div>
         <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-bar-chart me-2"></i>{{ t('nav.reports','التقارير') }}</a>
+    @endif
+
+    @if($canKpi)
+        <div class="nav-label">{{ dt('مؤشرات الأداء KPIs','KPIs') }}</div>
+        <a href="{{ route('kpis.index') }}" class="{{ request()->routeIs('kpis.index') ? 'active' : '' }}"><i class="bi bi-speedometer2 me-2"></i>{{ dt('لوحة المؤشرات','KPI overview') }}</a>
+        <a href="{{ route('kpis.tickets') }}" class="{{ request()->routeIs('kpis.tickets') ? 'active' : '' }}"><i class="bi bi-hourglass-split me-2"></i>{{ dt('دورة حياة التذاكر / SLA','Ticket lifecycle / SLA') }}</a>
+        @if($kpiOps)
+            <a href="{{ route('kpis.visits') }}" class="{{ request()->routeIs('kpis.visits') ? 'active' : '' }}"><i class="bi bi-clock-history me-2"></i>{{ dt('أداء الزيارات','Visit performance') }}</a>
+            <a href="{{ route('kpis.integrity') }}" class="{{ request()->routeIs('kpis.integrity') ? 'active' : '' }}"><i class="bi bi-shield-check me-2"></i>{{ dt('نزاهة الشيك ليست','Checklist integrity') }}</a>
+            <a href="{{ route('kpis.compliance') }}" class="{{ request()->routeIs('kpis.compliance') ? 'active' : '' }}"><i class="bi bi-calendar-check me-2"></i>{{ dt('التزام مديري الفروع','Daily compliance') }}</a>
+        @endif
     @endif
 
     <hr class="text-secondary">

@@ -84,6 +84,13 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
+    // ---- KPIs & deep reports ----
+    Route::get('/kpis', [\App\Http\Controllers\Web\KpiController::class, 'index'])->name('kpis.index');
+    Route::get('/kpis/tickets', [\App\Http\Controllers\Web\KpiController::class, 'tickets'])->name('kpis.tickets');
+    Route::get('/kpis/visits', [\App\Http\Controllers\Web\KpiController::class, 'visits'])->name('kpis.visits');
+    Route::get('/kpis/integrity', [\App\Http\Controllers\Web\KpiController::class, 'integrity'])->name('kpis.integrity');
+    Route::get('/kpis/compliance', [\App\Http\Controllers\Web\KpiController::class, 'compliance'])->name('kpis.compliance');
+
     // ---- Checklist Builder ----
     Route::get('/templates', [TemplateController::class, 'index'])->name('templates.index');
     Route::post('/templates', [TemplateController::class, 'store'])->name('templates.store');

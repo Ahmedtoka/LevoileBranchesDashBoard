@@ -258,7 +258,8 @@ class TicketController extends Controller
 
         $employees = User::where('department_id', $deptId)
             ->where('is_department_manager', false)
-            ->get(['id', 'name', 'email']);
+            ->get(['id', 'name', 'email', 'job_title'])
+            ->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'job' => $u->job_title]);
 
         return response()->json(['data' => $employees]);
     }

@@ -16,17 +16,21 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * Realistic demo generator tied to the REAL checklists, branches and team:
- *  - Every store manager fills ONE daily checklist per day (visible history).
- *  - Failed answers route tickets to the responsible departments (multi-dept supported).
- *  - HR / people-issue fails pick a real employee of that branch.
- *  - Store managers also request maintenance every couple of days.
- *  - Each area manager visits a covered branch per day and closes it with pass/fail.
+ * Realistic demo generator tied to the REAL checklists, branches and team.
+ *
+ * Built to feed the KPI / reports engine, so it produces:
+ *  - Per-question answer timestamps (so we can measure time-between-answers and
+ *    detect "rushing" — a manager who taps through without a real check).
+ *  - Visit scheduled_time vs actual check-in (so we can measure on-time arrival)
+ *    and a real visit duration (check-in → completed).
+ *  - Full ticket lifecycle timestamps (created → assigned → accepted → started →
+ *    fixed → closed), each written to ticket_updates with its own timestamp.
+ *  - Some missed days for store managers (so daily-checklist compliance < 100%).
  */
 class DemoDataController extends Controller
 {
-    private const STORE_DAYS = 10;
-    private const AREA_DAYS = 10;
+    private const STORE_DAYS = 14;
+    private const AREA_DAYS = 14;
 
     private array $statusPool = [];
     private array $notes = [
@@ -53,7 +57,7 @@ class DemoDataController extends Controller
 
     public function generate()
     {
-        @set_time_limit(300);
+        @set_time_limit(600);
 
         $this->buildStatusPool();
 
@@ -71,7 +75,13 @@ class DemoDataController extends Controller
         $storeManagers = User::whereHas('role', fn ($q) => $q->where('slug', 'store_manager'))
             ->whereNotNull('branch_id')->get();
         $areaManagers = User::whereHas('role', fn ($q) => $q->where('slug', 'area_manager'))->get();
-        $maintTechs = $maintId ? User::where('department_id', $maintId)->where('is_department_manager', false)->pluck('id')->all() : [];
+
+        // employees per department (any dept can be assigned its own people)
+        $empByDept = [];
+        User::whereNotNull('department_id')->where('is_department_manager', false)
+            ->get(['id', 'department_id'])->each(function ($u) use (&$empByDept) {
+                $empByDept[$u->department_id][] = $u->id;
+            });
 
         // branch employees (sales staff) for people-issue picks
         $branchEmps = [];
@@ -92,17 +102,21 @@ class DemoDataController extends Controller
 
         DB::transaction(function () use (
             $storeManagers, $areaManagers, $storeTpl, $areaTpl, $storeQs, $areaQs,
-            $deptList, $maintId, $maintTechs, $branchEmps, $branches, $maintTitles, &$created, &$visits
+            $deptList, $maintId, $empByDept, $branchEmps, $branches, $maintTitles, &$created, &$visits
         ) {
-            // 1) STORE MANAGERS — one daily checklist per day
+            // 1) STORE MANAGERS — one daily checklist per day (some days missed).
             foreach ($storeManagers as $sm) {
                 $branchId = $sm->branch_id;
                 $emps = $branchEmps[$branchId] ?? [];
+                // Each manager has a "discipline" — how often they actually do the daily list.
+                $skipChance = [0, 0, 8, 15, 30][array_rand([0, 1, 2, 3, 4])];
 
                 for ($d = 0; $d < self::STORE_DAYS; $d++) {
-                    $date = $this->dayDate($d);
-                    $visit = $this->makeVisit($storeTpl->id, $branchId, $sm->id, $date);
-                    $created += $this->fillVisit($visit, $storeQs, $deptList, $maintTechs, $emps, $sm->id, $branchId, $date);
+                    // Skip some past days to make compliance realistic (never skip today).
+                    if ($d > 0 && rand(1, 100) <= $skipChance) {
+                        continue;
+                    }
+                    $created += $this->generateVisit($storeTpl->id, $storeQs, $deptList, $empByDept, $emps, $sm->id, $branchId, $d, false);
                     $visits++;
                 }
 
@@ -111,7 +125,7 @@ class DemoDataController extends Controller
                     $date = $this->dayDate($d);
                     $group = 'MR-'.str_pad((string) ((Ticket::max('id') ?? 0) + 1), 5, '0', STR_PAD_LEFT);
                     foreach (range(1, rand(1, 2)) as $_) {
-                        $this->makeTicket($deptList, $maintTechs, $date, $maintId, $branchId, $sm->id, null, null, null,
+                        $this->makeTicket($deptList, $empByDept, $date, $maintId, $branchId, $sm->id, null, null, null,
                             $maintTitles[array_rand($maintTitles)], $this->notes[array_rand($this->notes)],
                             $group, ['painting', 'electrical', 'plumbing', 'carpentry', 'air-conditioning'][array_rand([0, 1, 2, 3, 4])]);
                         $created++;
@@ -119,7 +133,7 @@ class DemoDataController extends Controller
                 }
             }
 
-            // 2) AREA MANAGERS — visit a covered branch per day, close with pass/fail
+            // 2) AREA MANAGERS — visit a covered branch per day, close with pass/fail.
             foreach ($areaManagers as $am) {
                 $cov = $am->branches()->pluck('branches.id')->all();
                 if (empty($cov)) {
@@ -128,9 +142,7 @@ class DemoDataController extends Controller
                 for ($d = 0; $d < self::AREA_DAYS; $d++) {
                     $branchId = $cov[$d % count($cov)];
                     $emps = $branchEmps[$branchId] ?? [];
-                    $date = $this->dayDate($d);
-                    $visit = $this->makeVisit($areaTpl->id, $branchId, $am->id, $date);
-                    $created += $this->fillVisit($visit, $areaQs, $deptList, $maintTechs, $emps, $am->id, $branchId, $date);
+                    $created += $this->generateVisit($areaTpl->id, $areaQs, $deptList, $empByDept, $emps, $am->id, $branchId, $d, true);
                     $visits++;
                 }
                 // a couple of upcoming visits still to do
@@ -138,6 +150,7 @@ class DemoDataController extends Controller
                     Visit::create([
                         'visit_template_id' => $areaTpl->id, 'branch_id' => $branchId, 'user_id' => $am->id,
                         'status' => 'assigned', 'scheduled_date' => Carbon::today()->addDays(rand(0, 3))->toDateString(),
+                        'scheduled_time' => sprintf('%02d:00', rand(9, 16)),
                     ]);
                 }
             }
@@ -169,58 +182,80 @@ class DemoDataController extends Controller
         return $out;
     }
 
-    private function makeVisit(int $templateId, int $branchId, int $userId, Carbon $date): Visit
-    {
-        $visit = Visit::create([
-            'visit_template_id' => $templateId, 'branch_id' => $branchId, 'user_id' => $userId,
-            'status' => 'completed', 'scheduled_date' => $date->toDateString(),
-            'checked_in_at' => $date, 'started_at' => $date, 'completed_at' => $date->copy()->addHour(),
-        ]);
-        $this->backdate('visits', $visit->id, $date);
-
-        return $visit;
-    }
-
-    /** Answer the visit (bulk pass + individual fails), route tickets. Returns tickets created. */
-    private function fillVisit(Visit $visit, array $questions, $deptList, array $maintTechs, array $emps, int $createdBy, int $branchId, Carbon $date): int
+    /**
+     * Create one completed visit with realistic per-question timing, on-time/late
+     * check-in, real duration, answers and routed tickets. Returns tickets created.
+     */
+    private function generateVisit(int $templateId, array $questions, $deptList, array $empByDept, array $emps, int $userId, int $branchId, int $d, bool $isArea): int
     {
         if (empty($questions)) {
             return 0;
         }
-        $total = count($questions);
-        $failCount = min($total, rand(1, 3));
-        $failIdx = (array) array_rand($questions, $failCount);
-        $failSet = array_flip($failIdx);
+        $n = count($questions);
 
-        // bulk-insert the passed answers
+        // 1) Speed profile → seconds per question (this is the heart of "rushing").
+        [$secBase, $profile] = $this->speedProfile();
+
+        // 2) Per-question cumulative time offsets (seconds from check-in).
+        $offsets = [];
+        $t = 0;
+        for ($i = 0; $i < $n; $i++) {
+            $gap = max(1, (int) round($secBase * (0.5 + lcg_value() * 1.3)));
+            $t += $gap;
+            $offsets[$i] = $t;
+        }
+        $durationMin = max(1, (int) ceil($t / 60));
+
+        // 3) Check-in vs scheduled (on-time ~65%, late ~35%).
+        $late = rand(1, 100) <= 35;
+        [$checkIn, $schedTime] = $this->visitWindow($d, $durationMin, $late);
+        $completed = $checkIn->copy()->addSeconds($t);
+
+        // 4) Create the visit.
+        $visit = Visit::create([
+            'visit_template_id' => $templateId, 'branch_id' => $branchId, 'user_id' => $userId,
+            'status' => 'completed', 'scheduled_date' => $checkIn->toDateString(), 'scheduled_time' => $schedTime,
+            'checked_in_at' => $checkIn, 'checkin_simulated' => true,
+            'started_at' => $checkIn, 'completed_at' => $completed,
+        ]);
+        $this->backdate('visits', $visit->id, $checkIn);
+
+        // 5) Failures — rushed visits tend to "pass everything"; thorough visits catch more.
+        $failCount = match ($profile) {
+            'rushed' => rand(0, 1),
+            'thorough' => min($n, rand(2, 4)),
+            default => min($n, rand(1, 3)),
+        };
+        $failSet = [];
+        if ($failCount > 0) {
+            foreach ((array) array_rand($questions, min($failCount, $n)) as $fi) {
+                $failSet[$fi] = true;
+            }
+        }
+
+        // 6) Answers in order, each stamped at its own moment.
         $passRows = [];
+        $tickets = 0;
         foreach ($questions as $i => $q) {
-            if (isset($failSet[$i])) {
+            $at = $checkIn->copy()->addSeconds($offsets[$i]);
+            if (! isset($failSet[$i])) {
+                $passRows[] = [
+                    'visit_id' => $visit->id, 'checklist_question_id' => $q['id'], 'result' => 'pass',
+                    'created_at' => $at, 'updated_at' => $at,
+                ];
+
                 continue;
             }
-            $passRows[] = [
-                'visit_id' => $visit->id, 'checklist_question_id' => $q['id'], 'result' => 'pass',
-                'created_at' => $date, 'updated_at' => $date,
-            ];
-        }
-        if ($passRows) {
-            foreach (array_chunk($passRows, 50) as $chunk) {
-                DB::table('visit_answers')->insert($chunk);
-            }
-        }
 
-        $tickets = 0;
-        foreach ($failIdx as $i) {
-            $q = $questions[$i];
             $answer = VisitAnswer::create([
                 'visit_id' => $visit->id, 'checklist_question_id' => $q['id'],
                 'result' => 'fail', 'comment' => $this->notes[array_rand($this->notes)],
             ]);
-            $this->backdate('visit_answers', $answer->id, $date);
+            $this->backdate('visit_answers', $answer->id, $at);
 
             $names = [];
             if ($q['people'] && ! empty($emps)) {
-                $pick = array_slice($emps, 0, 1); // one concerned employee
+                $pick = array_slice($emps, 0, 1);
                 $answer->selectedEmployees()->attach($pick);
                 $names = User::whereIn('id', $pick)->pluck('name')->all();
             }
@@ -232,22 +267,58 @@ class DemoDataController extends Controller
 
             $deptIds = ! empty($q['deptIds']) ? $q['deptIds'] : [null];
             foreach ($deptIds as $deptId) {
-                $this->makeTicket($deptList, $maintTechs, $date, $deptId, $branchId, $createdBy, $visit->id, $answer->id, $q['id'],
+                $this->makeTicket($deptList, $empByDept, $checkIn, $deptId, $branchId, $userId, $visit->id, $answer->id, $q['id'],
                     $q['title'], $desc, null, null);
                 $tickets++;
             }
         }
 
+        if ($passRows) {
+            foreach (array_chunk($passRows, 50) as $chunk) {
+                DB::table('visit_answers')->insert($chunk);
+            }
+        }
+
         $visit->update([
-            'positives_count' => $total - $failCount,
-            'problems_count' => $failCount,
+            'positives_count' => $n - count($failSet),
+            'problems_count' => count($failSet),
             'tickets_count' => $tickets,
         ]);
 
         return $tickets;
     }
 
-    private function makeTicket($deptList, array $maintTechs, Carbon $date, ?int $deptId, int $branchId, int $createdBy, ?int $visitId, ?int $answerId, ?int $questionId, string $title, string $desc, ?string $groupCode, ?string $category): void
+    /** Seconds-per-question profile: 20% rushed ("طخ طخ"), 45% normal, 35% thorough. */
+    private function speedProfile(): array
+    {
+        $r = rand(1, 100);
+        if ($r <= 20) {
+            return [rand(2, 6), 'rushed'];
+        }
+        if ($r <= 65) {
+            return [rand(12, 24), 'normal'];
+        }
+
+        return [rand(28, 70), 'thorough'];
+    }
+
+    /** [check-in Carbon, scheduled 'H:i'] for day $d; keeps "today" before now. */
+    private function visitWindow(int $d, int $durationMin, bool $late): array
+    {
+        if ($d <= 0) {
+            $room = max(5, (int) Carbon::today()->diffInMinutes(Carbon::now()) - $durationMin - 5);
+            $checkIn = Carbon::today()->addMinutes(rand(0, $room));
+        } else {
+            $checkIn = Carbon::now()->subDays($d)->setTime(rand(9, 17), rand(0, 59));
+        }
+        // Late visits check in well after the scheduled time; on-time ones within ±25 min.
+        $offset = $late ? rand(35, 110) : rand(-25, 25);
+        $sched = $checkIn->copy()->subMinutes($offset);
+
+        return [$checkIn, $sched->format('H:i')];
+    }
+
+    private function makeTicket($deptList, array $empByDept, Carbon $date, ?int $deptId, int $branchId, int $createdBy, ?int $visitId, ?int $answerId, ?int $questionId, string $title, string $desc, ?string $groupCode, ?string $category): void
     {
         $dept = $deptId ? $deptList->firstWhere('id', $deptId) : null;
         $prefix = $dept->ticket_prefix ?? 'GEN';
@@ -276,24 +347,28 @@ class DemoDataController extends Controller
         $cursor = $date->copy();
         $this->addUpdate($ticket, 'created', null, 'open', $visitId ? 'طلب من الشيك ليست.' : 'تم إنشاء الطلب.', $cursor);
 
-        // maintenance tickets get assigned to a technician
-        $tech = ($deptId && in_array($deptId, $deptList->pluck('id')->all()) && ! empty($maintTechs) && $dept && $dept->slug === 'maintenance')
-            ? $maintTechs[array_rand($maintTechs)] : null;
+        // Assign to one of the ticket department's OWN employees (any department).
+        $deptEmps = $deptId ? ($empByDept[$deptId] ?? []) : [];
+        $tech = ! empty($deptEmps) ? $deptEmps[array_rand($deptEmps)] : null;
 
         $assignedTo = null;
         $assignedAt = null;
+        $resolvedAt = null;
         $closedAt = null;
         foreach ($this->pathTo($status) as $step) {
             $cursor = $cursor->copy()->addHours(rand(2, 26));
             if ($step === 'assigned') {
                 $assignedTo = $tech;
                 $assignedAt = $cursor->copy();
-                $this->addUpdate($ticket, 'assignment', 'open', 'assigned', 'تعيين للفني', $cursor, $tech);
+                $this->addUpdate($ticket, 'assignment', 'open', 'assigned', 'تعيين الموظف المختص', $cursor, $tech);
             } elseif ($step === 'rejected') {
                 $assignedTo = null;
-                $this->addUpdate($ticket, 'declined', 'assigned', 'rejected', 'رفض الفني.', $cursor, $tech);
+                $this->addUpdate($ticket, 'declined', 'assigned', 'rejected', 'رفض الموظف.', $cursor, $tech);
             } else {
                 $this->addUpdate($ticket, 'status_change', null, $step, $this->stepNote($step), $cursor, $tech);
+                if ($step === 'waiting_approval') {
+                    $resolvedAt = $cursor->copy();
+                }
                 if ($step === 'closed') {
                     $closedAt = $cursor->copy();
                 }
@@ -302,7 +377,7 @@ class DemoDataController extends Controller
 
         DB::table('tickets')->where('id', $ticket->id)->update([
             'status' => $status, 'assigned_to' => $assignedTo, 'assigned_at' => $assignedAt,
-            'closed_at' => $closedAt, 'created_at' => $date, 'updated_at' => $cursor,
+            'resolved_at' => $resolvedAt, 'closed_at' => $closedAt, 'created_at' => $date, 'updated_at' => $cursor,
         ]);
     }
 

@@ -102,6 +102,36 @@ class RealTeamSeeder extends Seeder
             }
         }
 
+        // ---- a manager + employees for every other department (so each dept can assign) ----
+        $deptStaff = [
+            'operation' => ['موظف عمليات', 3],
+            'vm' => ['منسق VM', 2],
+            'hr' => ['أخصائي موارد بشرية', 2],
+            'warehouse' => ['أمين مخزن', 2],
+            'lp' => ['مسؤول حماية', 2],
+            'finance' => ['محاسب', 2],
+            'cleaning' => ['عامل نظافة', 3],
+            'marketing' => ['منسق تسويق', 2],
+            'designer' => ['مصمم', 2],
+            'merchandise' => ['ميرشندايزر', 2],
+            'stock_control' => ['مراقب مخزون', 2],
+            'purchasing' => ['مسؤول مشتريات', 2],
+            'it' => ['مهندس', 2],
+            'cctv' => ['مراقب كاميرات', 2],
+        ];
+        foreach ($deptStaff as $slug => [$title, $n]) {
+            $dept = Department::where('slug', $slug)->first();
+            if (! $dept) {
+                continue;
+            }
+            $this->make($dept->name.' Manager', $slug.'.manager@levoile.com', $roles['department_manager'] ?? null,
+                ['department_id' => $dept->id, 'is_department_manager' => true, 'job_title' => 'مدير '.$dept->name]);
+            for ($i = 1; $i <= $n; $i++) {
+                $this->make($dept->name.' '.$title.' '.$i, $slug.'.emp'.$i.'@levoile.com', $roles['department_employee'] ?? null,
+                    ['department_id' => $dept->id, 'is_department_manager' => false, 'job_title' => $title]);
+            }
+        }
+
         // ---- operations manager ----
         $this->make('Abdel Sabour', 'abdAlSabour@levoile.com', $roles['ops_manager'] ?? null,
             ['job_title' => 'مدير العمليات']);

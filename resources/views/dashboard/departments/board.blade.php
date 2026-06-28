@@ -25,7 +25,7 @@
                 <tbody>
                 @forelse($employees as $e)
                     <tr class="{{ $e->assigned == 0 ? 'table-light' : '' }}">
-                        <td>{{ $e->name }} @if($e->assigned == 0)<span class="badge text-bg-light text-muted">free</span>@endif</td>
+                        <td>{{ $e->name }}@if($e->job_title)<br><span class="text-muted" style="font-size:.72rem">{{ $e->job_title }}</span>@endif @if($e->assigned == 0)<span class="badge text-bg-light text-muted">free</span>@endif</td>
                         <td class="text-center">{{ $e->open }}</td>
                         <td class="text-center">{{ $e->closed }}</td>
                     </tr>
@@ -100,7 +100,7 @@
                     <label class="form-label small">Employee</label>
                     <select name="employee_id" class="form-select" required>
                         <option value="">Select…</option>
-                        @foreach($employees as $e)<option value="{{ $e->id }}">{{ $e->name }} ({{ $e->open }} open)</option>@endforeach
+                        @foreach($employees as $e)<option value="{{ $e->id }}">{{ $e->name }}{{ $e->job_title ? ' · '.$e->job_title : '' }} ({{ $e->open }} open)</option>@endforeach
                     </select>
                 </div>
                 <div class="mb-2">
