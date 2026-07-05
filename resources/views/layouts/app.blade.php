@@ -39,6 +39,8 @@
     $dm = auth()->user()->is_department_manager && auth()->user()->department_id;
     $kpiOps = in_array(optional(auth()->user()->role)->slug, ['super_admin', 'ops_manager'], true);
     $canKpi = $kpiOps || $dm;
+    $deptSlug = optional(auth()->user()->department)->slug;
+    $purcAdmin = in_array(optional(auth()->user()->role)->slug, ['super_admin', 'ops_manager', 'branch_director'], true) || in_array($deptSlug, ['purchasing', 'finance'], true);
 @endphp
 <nav class="sidebar p-3">
     <div class="brand fs-5 mb-3"><i class="bi bi-shop"></i> LeVoile</div>
@@ -78,6 +80,13 @@
             <a href="{{ route('kpis.integrity') }}" class="{{ request()->routeIs('kpis.integrity') ? 'active' : '' }}"><i class="bi bi-shield-check me-2"></i>{{ dt('نزاهة الشيك ليست','Checklist integrity') }}</a>
             <a href="{{ route('kpis.compliance') }}" class="{{ request()->routeIs('kpis.compliance') ? 'active' : '' }}"><i class="bi bi-calendar-check me-2"></i>{{ dt('التزام مديري الفروع','Daily compliance') }}</a>
         @endif
+    @endif
+
+    <div class="nav-label">{{ dt('المشتريات','Purchasing') }}</div>
+    <a href="{{ route('purchasing.index') }}" class="{{ request()->routeIs('purchasing.index') || request()->routeIs('purchasing.show') ? 'active' : '' }}"><i class="bi bi-cart3 me-2"></i>{{ dt('طلبات الشراء','Purchase requests') }}</a>
+    @if($purcAdmin)
+        <a href="{{ route('vendors.index') }}" class="{{ request()->routeIs('vendors.*') ? 'active' : '' }}"><i class="bi bi-truck me-2"></i>{{ dt('الموردين','Vendors') }}</a>
+        <a href="{{ route('purchasing.kpis') }}" class="{{ request()->routeIs('purchasing.kpis') ? 'active' : '' }}"><i class="bi bi-graph-up-arrow me-2"></i>{{ dt('مؤشرات المشتريات','Purchasing KPIs') }}</a>
     @endif
 
     <hr class="text-secondary">

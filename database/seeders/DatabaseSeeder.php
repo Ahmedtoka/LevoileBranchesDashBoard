@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             TemplateSeeder::class,
             RealChecklistSeeder::class,
             TranslationSeeder::class,
+            PurchasingSeeder::class, // real purchasing data (vendors, requisitions, POs)
             // Demo tickets/visits intentionally NOT seeded — clean system.
             // DemoVisitSeeder::class,
             // BranchMaintenanceSeeder::class,

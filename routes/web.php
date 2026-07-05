@@ -84,6 +84,24 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
+    // ---- Purchasing module ----
+    Route::get('/purchasing', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'index'])->name('purchasing.index');
+    Route::post('/purchasing', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'store'])->name('purchasing.store');
+    Route::get('/purchasing/kpis', [\App\Http\Controllers\Web\PurchaseKpiController::class, 'index'])->name('purchasing.kpis');
+    Route::get('/purchasing/vendors', [\App\Http\Controllers\Web\VendorController::class, 'index'])->name('vendors.index');
+    Route::post('/purchasing/vendors', [\App\Http\Controllers\Web\VendorController::class, 'store'])->name('vendors.store');
+    Route::put('/purchasing/vendors/{vendor}', [\App\Http\Controllers\Web\VendorController::class, 'update'])->name('vendors.update');
+    Route::delete('/purchasing/vendors/{vendor}', [\App\Http\Controllers\Web\VendorController::class, 'destroy'])->name('vendors.destroy');
+    Route::get('/purchasing/{pr}', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'show'])->name('purchasing.show');
+    Route::post('/purchasing/{pr}/assign-buyer', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'assignBuyer'])->name('purchasing.assignBuyer');
+    Route::post('/purchasing/{pr}/quotation', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'addQuotation'])->name('purchasing.quotation');
+    Route::post('/purchasing/{pr}/select-quotation', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'selectQuotation'])->name('purchasing.selectQuotation');
+    Route::post('/purchasing/{pr}/finance', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'finance'])->name('purchasing.finance');
+    Route::post('/purchasing/{pr}/po', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'issuePo'])->name('purchasing.po');
+    Route::post('/purchasing/{pr}/execute', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'execute'])->name('purchasing.execute');
+    Route::post('/purchasing/{pr}/receive', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'receive'])->name('purchasing.receive');
+    Route::post('/purchasing/{pr}/status', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'status'])->name('purchasing.status');
+
     // ---- KPIs & deep reports ----
     Route::get('/kpis', [\App\Http\Controllers\Web\KpiController::class, 'index'])->name('kpis.index');
     Route::get('/kpis/tickets', [\App\Http\Controllers\Web\KpiController::class, 'tickets'])->name('kpis.tickets');
