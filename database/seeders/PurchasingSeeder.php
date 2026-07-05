@@ -4,11 +4,13 @@ namespace Database\Seeders;
 
 use App\Models\Branch;
 use App\Models\Department;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * Imports the REAL purchasing data (from the developed + old sheets) as demo data:
@@ -26,6 +28,8 @@ class PurchasingSeeder extends Seeder
         @set_time_limit(600);
         $this->dataDir = database_path('data');
 
+        $this->ensureTeam();
+
         // Clean slate for the purchasing module.
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         foreach (['purchase_request_updates', 'purchase_orders', 'purchase_quotations', 'purchase_requests', 'vendors'] as $t) {
@@ -42,6 +46,30 @@ class PurchasingSeeder extends Seeder
         $this->seedOrders($extToId, $vendorByName);
 
         $this->command?->info('Purchasing import done.');
+    }
+
+    /** Ensure the purchasing department has a manager + 2 buyers to assign. */
+    private function ensureTeam(): void
+    {
+        $dept = Department::where('slug', 'purchasing')->first();
+        if (! $dept) {
+            return;
+        }
+        $empRole = Role::where('slug', 'department_employee')->value('id');
+        $mgrRole = Role::where('slug', 'department_manager')->value('id');
+
+        if (! User::where('department_id', $dept->id)->where('is_department_manager', true)->exists()) {
+            User::updateOrCreate(['email' => 'purchasing.manager@levoile.com'], [
+                'name' => 'مدير المشتريات', 'password' => Hash::make('password'), 'role_id' => $mgrRole,
+                'department_id' => $dept->id, 'is_department_manager' => true, 'job_title' => 'مدير المشتريات', 'active' => true,
+            ]);
+        }
+        foreach ([1, 2] as $i) {
+            User::updateOrCreate(['email' => "purchasing{$i}@levoile.com"], [
+                'name' => "مشتريات {$i}", 'password' => Hash::make('password'), 'role_id' => $empRole,
+                'department_id' => $dept->id, 'is_department_manager' => false, 'job_title' => 'مسؤول مشتريات', 'active' => true,
+            ]);
+        }
     }
 
     // ---------------- vendors ----------------

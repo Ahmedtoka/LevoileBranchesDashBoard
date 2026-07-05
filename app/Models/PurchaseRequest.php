@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PurchaseRequest extends Model
@@ -117,6 +118,23 @@ class PurchaseRequest extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(PurchaseOrder::class);
+    }
+
+    /** Combined POs this request was batched into. */
+    public function batchOrders(): BelongsToMany
+    {
+        return $this->belongsToMany(PurchaseOrder::class, 'purchase_order_request');
+    }
+
+    /** Display string of every PO number linked to this request (single + batched). */
+    public function poNumbers(): string
+    {
+        $nums = $this->relationLoaded('batchOrders') ? $this->batchOrders->pluck('po_number') : collect();
+        if ($this->relationLoaded('orders')) {
+            $nums = $nums->merge($this->orders->pluck('po_number'));
+        }
+
+        return $nums->filter()->unique()->implode('، ');
     }
 
     public function updates(): HasMany

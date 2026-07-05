@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class PurchaseOrder extends Model
 {
@@ -39,6 +40,12 @@ class PurchaseOrder extends Model
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class);
+    }
+
+    /** Requests batched into this (combined) PO. */
+    public function requests(): BelongsToMany
+    {
+        return $this->belongsToMany(PurchaseRequest::class, 'purchase_order_request');
     }
 
     public function vendorLabel(): string

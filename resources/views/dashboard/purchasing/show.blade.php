@@ -83,17 +83,24 @@
             @endif
         </div>
 
-        {{-- Purchase orders --}}
-        @if($pr->orders->isNotEmpty())
+        {{-- Purchase orders (single + combined) --}}
+        @php $allPos = $pr->orders->merge($pr->batchOrders)->unique('id'); @endphp
+        @if($allPos->isNotEmpty())
         <div class="card p-3 mb-3">
             <h6 class="fw-bold mb-2"><i class="bi bi-receipt me-1"></i>{{ dt('أوامر التوريد','Purchase orders') }}</h6>
             <table class="table table-sm align-middle mb-0">
                 <thead><tr><th>PO</th><th>{{ dt('المورد','Vendor') }}</th><th class="text-center">{{ dt('القيمة','Amount') }}</th><th>{{ dt('التوريد','Supply') }}</th><th>{{ dt('السداد','Payment') }}</th></tr></thead>
                 <tbody>
-                @foreach($pr->orders as $o)
+                @foreach($allPos as $o)
                     <tr><td class="small fw-semibold">{{ $o->po_number }}</td><td class="small">{{ $o->vendorLabel() }}</td>
                         <td class="text-center small">{{ $o->amount ? number_format($o->amount,2) : '—' }}</td>
                         <td class="small">{{ $o->supplyAr() }}</td><td class="small">{{ $o->paymentAr() }}</td></tr>
+                    @if($o->relationLoaded('requests') && $o->requests->count() > 1)
+                        <tr><td colspan="5" class="small text-muted bg-light">
+                            <i class="bi bi-collection me-1"></i>{{ dt('أمر توريد مجمّع يضم','Combined PO covering') }} {{ $o->requests->count() }} {{ dt('طلب:','requests:') }}
+                            @foreach($o->requests as $sib)<a href="{{ route('purchasing.show', $sib->id) }}" class="badge text-bg-light border text-decoration-none">{{ $sib->reference }}</a> @endforeach
+                        </td></tr>
+                    @endif
                 @endforeach
                 </tbody>
             </table>

@@ -111,10 +111,39 @@ class PurchaseService
             'payment_terms' => $data['payment_terms'] ?? null,
             'supply_status' => 'none',
         ]);
+        $po->requests()->syncWithoutDetaching([$pr->id]);
         if ($pr->status !== 'po_issued') {
             $pr->update(['status' => 'po_issued']);
         }
         $this->log($pr, 'po', null, 'po_issued', 'إصدار أمر توريد رقم '.$po->po_number, $actor);
+
+        return $po;
+    }
+
+    /** One combined PO covering several requests (batching). */
+    public function issueCombinedPo(array $ids, array $data, User $actor): PurchaseOrder
+    {
+        $reqs = PurchaseRequest::whereIn('id', $ids)->get();
+        $vendorName = $data['vendor_name'] ?? optional(\App\Models\Vendor::find($data['vendor_id'] ?? 0))->name;
+
+        $po = PurchaseOrder::create([
+            'po_number' => $data['po_number'] ?? PurchaseOrder::nextNumber(),
+            'purchase_request_id' => $reqs->first()?->id,
+            'vendor_id' => $data['vendor_id'] ?? null,
+            'vendor_name' => $vendorName,
+            'issued_at' => now(),
+            'amount' => $data['amount'] ?? $reqs->sum('execution_price'),
+            'payment_status' => $data['payment_status'] ?? null,
+            'payment_terms' => $data['payment_terms'] ?? null,
+            'supply_status' => 'none',
+        ]);
+        $po->requests()->syncWithoutDetaching($reqs->pluck('id')->all());
+
+        foreach ($reqs as $pr) {
+            $pr->update(['status' => 'po_issued']);
+            $this->log($pr, 'po', null, 'po_issued',
+                'أمر توريد مجمّع رقم '.$po->po_number.' ('.count($ids).' طلب)', $actor);
+        }
 
         return $po;
     }

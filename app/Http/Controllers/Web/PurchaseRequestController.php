@@ -70,7 +70,8 @@ class PurchaseRequestController extends Controller
             $user
         );
 
-        $query = $base()->with(['branch', 'requestingDepartment', 'buyer', 'selectedVendor']);
+        $query = $base()->with(['branch', 'requestingDepartment', 'buyer', 'selectedVendor',
+            'batchOrders:id,po_number', 'orders:id,purchase_request_id,po_number']);
 
         foreach (['status', 'priority', 'category'] as $f) {
             if ($request->filled($f)) {
@@ -105,10 +106,72 @@ class PurchaseRequestController extends Controller
         $categories = PurchaseRequest::query()->select('category')->whereNotNull('category')->distinct()->pluck('category');
         $buyers = User::whereHas('department', fn ($d) => $d->where('slug', 'purchasing'))->orderBy('name')->get();
         $branches = Branch::orderBy('branch_name')->get();
+        $vendors = Vendor::where('active', true)->orderBy('name')->get();
 
         $can = ['purchasing' => $this->isPurchasing($user), 'finance' => $this->isFinance($user)];
 
-        return view('dashboard.purchasing.index', compact('requests', 'stats', 'range', 'categories', 'buyers', 'branches', 'can'));
+        return view('dashboard.purchasing.index', compact('requests', 'stats', 'range', 'categories', 'buyers', 'branches', 'vendors', 'can'));
+    }
+
+    // -------- bulk (batch) actions --------
+    public function bulk(Request $request)
+    {
+        $data = $request->validate([
+            'action' => ['required', 'in:assign_buyer,send_finance,finance_approve,issue_po,cancel'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:purchase_requests,id'],
+            'buyer_id' => ['nullable', 'exists:users,id'],
+            'vendor_id' => ['nullable', 'exists:vendors,id'],
+            'amount' => ['nullable', 'numeric'],
+            'payment_status' => ['nullable', 'in:cash,cheque,credit'],
+            'note' => ['nullable', 'string'],
+        ]);
+        $user = $request->user();
+        $ids = $data['ids'];
+        $reqs = PurchaseRequest::whereIn('id', $ids)->get();
+
+        switch ($data['action']) {
+            case 'assign_buyer':
+                $this->authorizePurchasing($request);
+                if (empty($data['buyer_id'])) {
+                    return back()->with('status', 'اختر القائم بالشراء أولًا.');
+                }
+                $buyer = User::findOrFail($data['buyer_id']);
+                foreach ($reqs as $pr) {
+                    $this->service->assignBuyer($pr, $buyer, $user);
+                }
+                break;
+
+            case 'send_finance':
+                $this->authorizePurchasing($request);
+                foreach ($reqs as $pr) {
+                    $pr->update(['status' => 'finance_review', 'pricing_ended_at' => $pr->pricing_ended_at ?? now()]);
+                    $this->service->log($pr, 'finance', null, 'finance_review', 'إرسال مجمّع للمالية', $user);
+                }
+                break;
+
+            case 'finance_approve':
+                abort_unless($this->isFinance($user), 403);
+                foreach ($reqs as $pr) {
+                    $this->service->financeApprove($pr, $user, $data['note'] ?? null);
+                }
+                break;
+
+            case 'issue_po':
+                $this->authorizePurchasing($request);
+                $po = $this->service->issueCombinedPo($ids, $data, $user);
+
+                return back()->with('status', 'تم إصدار أمر توريد مجمّع رقم '.$po->po_number.' لعدد '.count($ids).' طلب.');
+
+            case 'cancel':
+                foreach ($reqs as $pr) {
+                    abort_unless($this->isPurchasing($user) || $pr->requester_id === $user->id, 403);
+                    $this->service->setStatus($pr, 'cancelled', $user, $data['note'] ?? null);
+                }
+                break;
+        }
+
+        return back()->with('status', 'تم تنفيذ الإجراء المجمّع على '.count($ids).' طلب.');
     }
 
     // -------- detail --------
@@ -120,7 +183,8 @@ class PurchaseRequestController extends Controller
             || ($user->branch_id && $pr->branch_id === $user->branch_id), 403);
 
         $pr->load(['branch', 'requestingDepartment', 'requester', 'buyer', 'financeApprover',
-            'selectedVendor', 'quotations.vendor', 'orders.vendor', 'updates.user']);
+            'selectedVendor', 'quotations.vendor', 'orders.vendor', 'batchOrders.vendor',
+            'batchOrders.requests:id,reference,item_name', 'updates.user']);
 
         $vendors = Vendor::where('active', true)->orderBy('name')->get();
         $buyers = User::whereHas('department', fn ($d) => $d->where('slug', 'purchasing'))->orderBy('name')->get();

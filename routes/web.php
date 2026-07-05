@@ -88,6 +88,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/purchasing', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'index'])->name('purchasing.index');
     Route::post('/purchasing', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'store'])->name('purchasing.store');
     Route::get('/purchasing/kpis', [\App\Http\Controllers\Web\PurchaseKpiController::class, 'index'])->name('purchasing.kpis');
+    Route::post('/purchasing/bulk', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'bulk'])->name('purchasing.bulk');
     Route::get('/purchasing/vendors', [\App\Http\Controllers\Web\VendorController::class, 'index'])->name('vendors.index');
     Route::post('/purchasing/vendors', [\App\Http\Controllers\Web\VendorController::class, 'store'])->name('vendors.store');
     Route::put('/purchasing/vendors/{vendor}', [\App\Http\Controllers\Web\VendorController::class, 'update'])->name('vendors.update');
