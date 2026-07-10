@@ -44,15 +44,28 @@ class DemoDataController extends Controller
 
     public function wipe()
     {
+        // Clears ALL operational/transactional data for a clean production test.
+        // Keeps: users, roles, departments, branches, checklist templates, vendors, coverage.
+        $tables = [
+            // checklists & tickets
+            'ticket_updates', 'ticket_evidence', 'visit_answer_evidence',
+            'visit_answer_selected_employees', 'visit_answers', 'tickets', 'visits',
+            // purchasing (transactional only — vendors kept as reference data)
+            'purchase_order_request', 'purchase_request_updates', 'purchase_quotations',
+            'purchase_orders', 'purchase_requests',
+            // notifications
+            'notifications',
+        ];
+
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        foreach (['ticket_updates', 'ticket_evidence', 'visit_answer_evidence', 'visit_answer_selected_employees', 'visit_answers', 'tickets', 'visits', 'notifications'] as $table) {
+        foreach ($tables as $table) {
             if (DB::getSchemaBuilder()->hasTable($table)) {
                 DB::table($table)->delete();
             }
         }
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
-        return back()->with('status', 'تم مسح كل التذاكر والزيارات والشيك ليستات.');
+        return back()->with('status', 'تم مسح كل بيانات النظام (تذاكر، زيارات، شيك ليستات، مشتريات) — مع الإبقاء على المستخدمين والإدارات والفروع.');
     }
 
     public function generate()

@@ -23,9 +23,9 @@
             <button class="btn btn-sm btn-primary"><i class="bi bi-magic me-1"></i> {{ dt('توليد بيانات ديمو','Generate demo data') }}</button>
         </form>
         <form method="POST" action="{{ route('demo.wipe') }}"
-              onsubmit="return confirm('سيتم مسح كل التذاكر والزيارات. متابعة؟');">
+              onsubmit="return confirm('سيتم مسح كل بيانات النظام (تذاكر، زيارات، شيك ليستات، مشتريات) مع الإبقاء على المستخدمين والإدارات والفروع. متابعة؟');">
             @csrf
-            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash3 me-1"></i> {{ dt('مسح البيانات','Wipe data') }}</button>
+            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash3 me-1"></i> {{ dt('مسح كل البيانات','Wipe all data') }}</button>
         </form>
     </div>
     @endif
