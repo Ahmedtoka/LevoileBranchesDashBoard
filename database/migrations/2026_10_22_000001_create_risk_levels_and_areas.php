@@ -52,15 +52,10 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (Schema::hasColumn('departments', 'is_reporting')) {
-            Schema::table('departments', function (Blueprint $table) {
-                $table->dropColumn('is_reporting');
-            });
-        }
-
+        // branches.area_id and departments.is_reporting live on existing tables and hold real data, so their columns are kept.
         if (Schema::hasColumn('branches', 'area_id')) {
             Schema::table('branches', function (Blueprint $table) {
-                $table->dropConstrainedForeignId('area_id');
+                $table->dropForeign(['area_id']);
             });
         }
 
