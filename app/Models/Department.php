@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Department extends Model
 {
-    protected $fillable = ['slug', 'name', 'ticket_prefix', 'color', 'active'];
+    protected $fillable = ['slug', 'name', 'ticket_prefix', 'color', 'active', 'is_reporting'];
 
-    protected $casts = ['active' => 'boolean'];
+    protected $casts = ['active' => 'boolean', 'is_reporting' => 'boolean'];
 
     public function users(): HasMany
     {

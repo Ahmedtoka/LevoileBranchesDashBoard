@@ -1,0 +1,553 @@
+<title>Le Voile Observations Flow</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a horizontal stepper on top, one "stage" per step with a device mock on the right and the explanation on the left. RTL throughout. */
+:root{
+  --bg:#f7f4f6; --surface:#ffffff; --fg:#231a21; --muted:#6f5f6a; --line:#e6dde2;
+  --brand:#9c1e6e; --brand-soft:#f6e3ee; --ink:#2b1f27;
+  --crit:#b3261e; --high:#d9480f; --med:#c58a00; --low:#2f7d4f; --none:#7a7a7a;
+  --ok:#2f7d4f; --ok-soft:#e3f2e8; --warn-soft:#fff4d6;
+  --font:"Tajawal",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --radius:14px; --shadow:0 10px 30px rgba(35,26,33,.08);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#17121a; --surface:#221a26; --fg:#f1e9ee; --muted:#b19fab; --line:#3a2d37;
+  --brand:#e07ab8; --brand-soft:#3a2234; --ink:#f1e9ee;
+  --crit:#ff7b72; --high:#ff9a5c; --med:#f2c94c; --low:#6fcf97; --none:#a0a0a0;
+  --ok:#6fcf97; --ok-soft:#1f3a2a; --warn-soft:#3d3416; --shadow:0 10px 30px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17121a; --surface:#221a26; --fg:#f1e9ee; --muted:#b19fab; --line:#3a2d37;
+  --brand:#e07ab8; --brand-soft:#3a2234; --ink:#f1e9ee;
+  --crit:#ff7b72; --high:#ff9a5c; --med:#f2c94c; --low:#6fcf97; --none:#a0a0a0;
+  --ok:#6fcf97; --ok-soft:#1f3a2a; --warn-soft:#3d3416; --shadow:0 10px 30px rgba(0,0,0,.35); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.6;direction:rtl}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+header.top h1{margin:0;font-size:clamp(24px,3.2vw,34px);font-weight:800;letter-spacing:-.01em;text-wrap:balance}
+header.top .sub{color:var(--muted);margin:4px 0 0}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);font-weight:700;font-family:var(--mono)}
+
+/* stepper */
+.steps{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:18px;scrollbar-width:thin}
+.steps button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.steps button .n{display:inline-block;min-width:22px;height:22px;line-height:22px;text-align:center;border-radius:999px;background:var(--line);color:var(--fg);font-family:var(--mono);font-size:12px;margin-left:6px}
+.steps button.active{background:var(--brand);border-color:var(--brand);color:#fff}
+.steps button.active .n{background:rgba(255,255,255,.25);color:#fff}
+.steps button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+/* stage */
+.stage{display:none;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+.stage.active{display:grid}
+@media (max-width:860px){.stage.active{grid-template-columns:1fr}}
+.explain h2{margin:0 0 8px;font-size:26px;font-weight:800;text-wrap:balance}
+.explain p{margin:0 0 12px;max-width:62ch}
+.explain ol,.explain ul{padding-right:20px;margin:0 0 12px;max-width:62ch}
+.explain li{margin-bottom:6px}
+.callout{border-right:4px solid var(--brand);background:var(--brand-soft);padding:10px 14px;border-radius:10px;margin:14px 0}
+.callout b{color:var(--brand)}
+.nav{display:flex;gap:10px;margin-top:18px}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:10px 18px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.btn[disabled]{opacity:.45;cursor:default}
+.who{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px;color:var(--muted);margin-bottom:10px}
+.who i{width:8px;height:8px;border-radius:50%;background:var(--brand);display:inline-block}
+
+/* device mocks */
+.device{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.phone{max-width:390px;margin:0 auto;border-radius:34px;border-width:8px;border-color:var(--ink)}
+.phone .bar{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.laptop{border-radius:12px 12px 4px 4px}
+.laptop .chrome{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--bg)}
+.laptop .chrome i{width:10px;height:10px;border-radius:50%;background:var(--line);display:inline-block}
+.laptop .chrome .url{margin-right:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.appbar{background:var(--brand);color:#fff;padding:12px 16px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+.appbar small{font-weight:500;opacity:.85}
+.screen{padding:14px;min-height:420px;display:flex;flex-direction:column;gap:10px}
+.row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;font-size:15px}
+.row .t span{color:var(--muted);font-size:13px}
+.pill{font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;color:#fff;white-space:nowrap}
+.pill.crit{background:var(--crit)}.pill.high{background:var(--high)}.pill.med{background:var(--med)}.pill.low{background:var(--low)}.pill.none{background:var(--none)}
+.pill.outline{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.chip{font-size:12px;padding:2px 8px;border-radius:6px;background:var(--bg);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.fab{align-self:flex-start;background:var(--brand);color:#fff;border:0;border-radius:999px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer}
+.screen .btn{align-self:stretch;text-align:center}
+textarea.mock{width:100%;min-height:110px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:var(--bg);color:var(--fg);resize:vertical}
+.photo{width:54px;height:54px;border-radius:8px;background:linear-gradient(135deg,var(--brand-soft),var(--line));display:grid;place-items:center;font-size:11px;color:var(--muted);flex:0 0 auto}
+.ai{border:1px dashed var(--brand);border-radius:10px;padding:10px 12px;background:var(--brand-soft)}
+.ai .reason{font-size:12px;color:var(--muted)}
+.ai .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{animation:none}}
+.toast{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok);border-radius:10px;padding:8px 12px;font-weight:700;font-size:14px}
+.sec{font-size:12px;letter-spacing:.06em;color:var(--muted);font-weight:700;margin:4px 0 0}
+table.mock{width:100%;border-collapse:collapse;font-size:13px}
+table.mock th,table.mock td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+table.mock th{color:var(--muted);font-weight:700;font-size:12px}
+.tablewrap{overflow-x:auto}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface)}
+.kpi b{display:block;font-size:24px;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--muted)}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:110px 1fr 36px;align-items:center;gap:8px;font-size:13px}
+.bar .track{height:10px;background:var(--line);border-radius:999px;overflow:hidden}
+.bar .fill{height:100%;background:var(--brand);border-radius:999px}
+.ba{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ba .box{border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px}
+.ba .box h4{margin:0 0 6px;font-size:13px;color:var(--muted)}
+.timeline{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.timeline li{display:flex;gap:8px;align-items:flex-start}
+.timeline li::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--brand);margin-top:6px;flex:0 0 auto}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
+.flow div{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px;text-align:center;font-weight:700;font-size:14px}
+.flow div small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.hidden{display:none !important}
+.sidebar-mock{display:grid;grid-template-columns:160px 1fr;min-height:420px}
+.sidebar-mock aside{background:var(--ink);color:#fff;padding:14px;font-size:13px;display:flex;flex-direction:column;gap:8px}
+.sidebar-mock aside b{opacity:.6;font-size:11px;letter-spacing:.06em}
+.sidebar-mock aside .item{padding:6px 8px;border-radius:6px;opacity:.85}
+.sidebar-mock aside .item.on{background:rgba(255,255,255,.14);opacity:1}
+.sidebar-mock main{padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+@media (max-width:520px){.sidebar-mock{grid-template-columns:1fr}.sidebar-mock aside{flex-direction:row;flex-wrap:wrap}}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.role{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface)}
+.role b{display:block;margin-bottom:4px}
+.role span{font-size:13px;color:var(--muted)}
+footer{margin-top:40px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div>
+    <div class="eyebrow">Le Voile · Branch Observations</div>
+    <h1>فلو الملاحظات والريسك، خطوة بخطوة</h1>
+    <p class="sub">سيميولاتور تفاعلي للموديول الجديد في LeVoile Branches. الشاشات دي نماذج توضيحية مش السيستم النهائي.</p>
+  </div>
+  <div class="who"><i></i> 9 خطوات · اضغط على أي خطوة أو استخدم التالي</div>
+</header>
+
+<nav class="steps" id="steps"></nav>
+
+<!-- 1 -->
+<section class="stage" data-title="المشكلة والفكرة">
+  <div class="explain">
+    <h2>من ملفات متفرقة إلى سجل واحد حي</h2>
+    <p>كل إدارة بتزور الفروع وبتسجل ملاحظات: CCTV بيشوف الكاميرات، مراقبة المخزون بتشوف الاستلام والتكويد، Merchandising بتشوف العرض، المالية بتراجع اليوميات. النهارده كل إدارة بتبعت ملف Excel أو Word مختلف، وحد بيجمعهم يدوي.</p>
+    <p>في أسبوعين بس طلع 376 سجل، فيهم تواريخ ناقصة، وأسماء فروع مكتوبة بثلاث طرق، ومفيش حد يعرف مين حل إيه.</p>
+    <div class="callout"><b>الفكرة:</b> الملاحظة تتسجل في لحظتها من الموبايل أو اللاب توب، تاخد درجة ريسك وإدارة مسؤولة تلقائي، توصل كتيكت للمسؤول في نفس الدقيقة، وما تتقفلش إلا لما حد يتحقق فعلاً إنها اتحلت.</div>
+    <div class="flow">
+      <div>تسجيل<small>من الفرع</small></div>
+      <div>تصنيف<small>كتالوج أو إيجينت</small></div>
+      <div>تيكت<small>للإدارة المسؤولة</small></div>
+      <div>حل<small>صورة بعد</small></div>
+      <div>تحقق<small>زيارة لاحقة</small></div>
+      <div>إغلاق<small>كنا وبقينا</small></div>
+    </div>
+    <div class="nav"><button class="btn" data-prev disabled>السابق</button><button class="btn primary" data-next>التالي: الأدوار</button></div>
+  </div>
+  <div class="device laptop">
+    <div class="chrome"><i></i><i></i><i></i><span class="url">LeVoile_Control_Center_FINAL.xlsx · 376 rows</span></div>
+    <div class="screen">
+      <div class="sec">عينة من الداتا الحالية (أسبوعان، 8 إدارات)</div>
+      <div class="tablewrap"><table class="mock">
+        <tr><th>الإدارة</th><th>الفرع</th><th>الملاحظة</th><th>الحالة</th></tr>
+        <tr><td>CCTV</td><td>Zayed</td><td>تأخير الموظفة 20 دقيقة عن ميعاد فتح الفرع</td><td>Reported</td></tr>
+        <tr><td>CCTV</td><td>RBT</td><td>عدم فتح الشنطة الشخصية أمام كاميرا الكاشير</td><td>Reported</td></tr>
+        <tr><td>Stock Control</td><td>مول العرب</td><td>ديفوهات ودراي كلين لم تتم مراجعتها</td><td>متوسط</td></tr>
+        <tr><td>Merchandising</td><td>جنينة</td><td>آثار ميك أب على ألوان متعددة</td><td>Open</td></tr>
+        <tr><td>Finance</td><td>Mall of Arabia</td><td>سداد مبلغ شخصي من الموظف على مصروف الفرع</td><td>Reported</td></tr>
+        <tr><td>Maintenance</td><td>Abbas 1</td><td>تركيب مرايا جديدة في الفرع</td><td>Done</td></tr>
+      </table></div>
+      <div class="legend">
+        <span class="chip">سيتي ستارز = City Stars = Citystars</span>
+        <span class="chip">تاريخ الحدث: فارغ في 160 سجل</span>
+        <span class="chip">مسؤول الحل: فارغ في 106 سجل</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="stage" data-title="الأدوار">
+  <div class="explain">
+    <h2>مين بيعمل إيه</h2>
+    <p>الفروع بتتجمع في مناطق. كل منطقة ليها Area Manager، والـ Operation Manager شايف الكل. الإدارة اللي بتسجل الملاحظة اسمها "المُبلِّغة"، واللي بتحلها "المسؤولة"، وممكن يكونوا نفس الإدارة.</p>
+    <ul>
+      <li><b>موظف الإدارة المُبلِّغة:</b> يسجل الملاحظات من الفرع (موبايل أو لاب توب) ويتحقق بعدين إنها اتحلت.</li>
+      <li><b>الإدارة المسؤولة:</b> بتستلم تيكت عادي زي اللي شغالة عليه دلوقتي. ما بتشوفش شاشات جديدة.</li>
+      <li><b>مدير الفرع:</b> يشوف ملاحظات فرعه ويعتمد الحل لما يشوف صورة "بعد".</li>
+      <li><b>Area Manager:</b> يشوف فروع منطقته، يتبلغ بالـ High والـ Critical والمتأخر، ويتحقق.</li>
+      <li><b>Operation Manager:</b> يشوف كل حاجة، يعيد توجيه، يرفع ريسك.</li>
+      <li><b>الأدمن:</b> المناطق، درجات الريسك، الفئات، الكتالوج، واعتماد تصنيفات الإيجينت.</li>
+    </ul>
+    <div class="nav"><button class="btn" data-prev>السابق</button><button class="btn primary" data-next>التالي: إعداد الأدمن</button></div>
+  </div>
+  <div class="device laptop">
+    <div class="chrome"><i></i><i></i><i></i><span class="url">stores.levoilestores.com/admin/areas</span></div>
+    <div class="sidebar-mock">
+      <aside>
+        <b>الإدارة</b>
+        <div class="item on">المناطق</div><div class="item">درجات الريسك</div><div class="item">الفئات</div><div class="item">الكتالوج</div>
+        <b>الملاحظات</b>
+        <div class="item">السجل</div><div class="item">اعتماد التصنيفات</div><div class="item">كنا وبقينا</div><div class="item">الداشبورد</div>
+      </aside>
+      <main>
+        <div class="sec">المناطق والفروع</div>
+        <div class="roles">
+          <div class="role"><b>مصر الجديدة ومدينة نصر</b><span>Area Manager: كريم منير · 7 فروع: الميرغني، الحجاز، عباس 1، عباس 2، النزهة، جنينة، سيتي ستارز</span></div>
+          <div class="role"><b>القاهرة الجديدة والرحاب</b><span>Area Manager: أحمد محمد · 5 فروع: Galleria، Point 90، El Rebat، The Yard، مدينتي</span></div>
+          <div class="role"><b>الجيزة وأكتوبر</b><span>Area Manager: محمد يوسف · 5 فروع: المهندسين، مول مصر، مول مصر 2، مول العرب، زايد</span></div>
+          <div class="role"><b>الإسكندرية والأقاليم</b><span>بدون مدير بعد · 6 فروع</span></div>
+        </div>
+        <div class="sec">Operation Manager: عبد الصبور، يشوف كل المناطق</div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="stage" data-title="إعداد الأدمن">
+  <div class="explain">
+    <h2>الريسك قرار شركة، مش تخمين</h2>
+    <p>الأدمن بيجهز حاجتين مرة واحدة: <b>الفئات</b> (5 إلى 8 لكل إدارة، كل فئة ليها ريسك افتراضي وإدارة مسؤولة ومهلة) و<b>الكتالوج</b> (الملاحظات المتكررة كبنود جاهزة بتصنيف كامل). الـ 376 سجل الحاليين بيطلع منهم حوالي 25 فئة و70 بند كبداية.</p>
+    <p>كل بند ممكن يكون ليه حقول إضافية (عدد الدقايق، اسم الموظف) وقاعدة تصعيد (تأخير 30 دقيقة أو أكتر يبقى High).</p>
+    <div class="legend">
+      <span class="pill crit">Critical · 24 ساعة · تحقق ميداني</span>
+      <span class="pill high">High · 48 ساعة · تحقق ميداني</span>
+      <span class="pill med">Medium · 3 أيام</span>
+      <span class="pill low">Low · 7 أيام</span>
+      <span class="pill none">بدون ريسك · أنشطة وتدريب</span>
+    </div>
+    <div class="callout"><b>قابل للتعديل:</b> الأسماء، الألوان، المهل، ومين يحتاج تحقق ميداني، كله من شاشة الأدمن. مدير كل إدارة يعدل كتالوج إدارته هو بس.</div>
+    <div class="nav"><button class="btn" data-prev>السابق</button><button class="btn primary" data-next>التالي: الزيارة من الموبايل</button></div>
+  </div>
+  <div class="device laptop">
+    <div class="chrome"><i></i><i></i><i></i><span class="url">stores.levoilestores.com/admin/observation-catalog?department=cctv</span></div>
+    <div class="screen">
+      <div class="sec">كتالوج CCTV · 14 بند</div>
+      <div class="tablewrap"><table class="mock">
+        <tr><th>الفئة</th><th>البند</th><th>الريسك</th><th>المسؤولة</th><th>المهلة</th><th>حقول</th></tr>
+        <tr><td>فتح الفرع</td><td>تأخير عن ميعاد الفتح</td><td><span class="pill med">Medium</span></td><td>Operation</td><td>72 س</td><td>دقائق، موظف · ≥30 → High</td></tr>
+        <tr><td>الكاشير</td><td>عد النقدية بمفرده</td><td><span class="pill high">High</span></td><td>Operation · cc LP</td><td>48 س</td><td>موظف</td></tr>
+        <tr><td>الكاشير</td><td>عدم فتح الشنطة أمام الكاميرا</td><td><span class="pill high">High</span></td><td>Operation · cc LP</td><td>48 س</td><td>موظف</td></tr>
+        <tr><td>الفلور</td><td>عدم ارتداء النيم تاج</td><td><span class="pill low">Low</span></td><td>Operation</td><td>7 أيام</td><td>موظف</td></tr>
+        <tr><td>الفلور</td><td>عدم ارتداء اسكارف اليونيفورم</td><td><span class="pill low">Low</span></td><td>Operation</td><td>7 أيام</td><td>موظف</td></tr>
+        <tr><td>الفيتنج روم</td><td>دخول أكثر من 5 قطع</td><td><span class="pill med">Medium</span></td><td>Operation</td><td>72 س</td><td>—</td></tr>
+        <tr><td>الكاميرات</td><td>فصل الـ DVR</td><td><span class="pill crit">Critical</span></td><td>IT</td><td>24 س</td><td>—</td></tr>
+      </table></div>
+      <button class="fab">+ بند جديد</button>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="stage" data-title="الزيارة من الموبايل">
+  <div class="explain">
+    <span class="who"><i></i> موظف CCTV · في فرع زايد</span>
+    <h2>التسجيل في لحظته</h2>
+    <p>الموظف يفتح "زيارة ملاحظات"، يختار الفرع، ويعمل check-in بنفس طريقة الزيارات الحالية. بعدها يضيف ملاحظات بطريقتين:</p>
+    <ol>
+      <li><b>من الكتالوج:</b> يدور في بنود إدارته ويختار، يملأ الحقول الإضافية، ياخد صورة. التصنيف كله بيتحط لوحده.</li>
+      <li><b>كتابة حرة:</b> لما اللي شافه مش في القائمة. سطر لكل نقطة، وبعدين زر "فحص".</li>
+    </ol>
+    <div class="callout"><b>جرب:</b> اضغط "من الكتالوج" لإضافة بند جاهز، وبعدين "كتابة حرة" وروح للخطوة الجاية.</div>
+    <div class="nav"><button class="btn" data-prev>السابق</button><button class="btn primary" data-next>التالي: الفحص بالإيجينت</button></div>
+  </div>
+  <div class="device phone">
+    <div class="bar"><span>9:41</span><span>LeVoile</span></div>
+    <div class="appbar"><span>زيارة ملاحظات</span><small>زايد · 22/10/2026</small></div>
+    <div class="screen" id="s4">
+      <div class="toast">تم الـ check-in · Sheikh Zayed - Saraya Mall</div>
+      <div class="sec">الملاحظات (<span id="s4count">0</span>)</div>
+      <div id="s4list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div style="display:flex;gap:8px;margin-top:auto">
+        <button class="fab" id="s4catalog">من الكتالوج</button>
+        <button class="fab" id="s4free" style="background:var(--surface);color:var(--brand);border:1px solid var(--brand)">كتابة حرة</button>
+      </div>
+      <div id="s4picker" class="hidden" style="border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--bg)">
+        <div class="sec">اختر بند · CCTV</div>
+        <div class="row" data-pick="late"><div class="t"><b>تأخير عن ميعاد الفتح</b><span>حقل: دقائق · موظف</span></div><span class="pill med">Medium</span></div>
+        <div class="row" data-pick="bag"><div class="t"><b>عدم فتح الشنطة أمام الكاميرا</b><span>الكاشير</span></div><span class="pill high">High</span></div>
+        <div class="row" data-pick="tag"><div class="t"><b>عدم ارتداء النيم تاج</b><span>الفلور</span></div><span class="pill low">Low</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="stage" data-title="الفحص بالإيجينت">
+  <div class="explain">
+    <span class="who"><i></i> نفس الموظف · الملاحظات الحرة</span>
+    <h2>الإيجينت يصنف، الموظف يأكد</h2>
+    <p>الموظف كتب 3 نقط بكلامه. لما يدوس <b>فحص</b>، الإيجينت ياخد النقط كلها مرة واحدة ويرجّع لكل نقطة: هل هي نفس بند موجود في الكتالوج؟ ولا فئة جديدة؟ وإيه الريسك والإدارة المسؤولة وليه.</p>
+    <p>الإيجينت بيعرف ده من ثلاث حاجات: كتالوج الإدارة وفئاتها، تعريف درجات الريسك، وآخر 40 قرار اعتمدهم الأدمن على ملاحظات مشابهة. يعني بيتعلم من قرارات الشركة الفعلية.</p>
+    <p>الموظف يراجع ويدوس "تأكيد الكل" أو يعدل نقطة بعينها. لو الإيجينت مش متاح، يختار الفئة يدوي والشغل ما يقفش.</p>
+    <div class="callout"><b>جرب:</b> اضغط "فحص" وشوف النتيجة، وبعدين "تأكيد الكل" ثم "إرسال الزيارة".</div>
+    <div class="nav"><button class="btn" data-prev>السابق</button><button class="btn primary" data-next>التالي: الزيارة من اللاب توب</button></div>
+  </div>
+  <div class="device phone">
+    <div class="bar"><span>9:52</span><span>LeVoile</span></div>
+    <div class="appbar"><span>كتابة حرة</span><small>زايد</small></div>
+    <div class="screen" id="s5">
+      <div id="s5input">
+        <textarea class="mock" id="s5text" readonly>الموظفة سارة فتحت الفرع 9:35 بدل 9:00
+موظف الكاشير عد الدرج لوحده والفرع فيه 3 موظفين
+فيه لمبة في الفاترينة مطفية من أسبوع</textarea>
+        <div style="display:flex;gap:8px;margin-top:8px"><div class="photo">📷 2 صور</div><button class="btn primary" id="s5check" style="flex:1">فحص</button></div>
+      </div>
+      <div id="s5loading" class="hidden"><span class="spinner"></span> الإيجينت بيحلل 3 نقط…</div>
+      <div id="s5results" class="hidden" style="display:flex;flex-direction:column;gap:8px">
+        <div class="ai"><b>1. الموظفة سارة فتحت الفرع 9:35 بدل 9:00</b>
+          <div class="reason">قصدك: <b>تأخير عن ميعاد الفتح</b> · 35 دقيقة ≥ 30 → تصعيد</div>
+          <div class="meta"><span class="pill high">High</span><span class="chip">المسؤولة: Operation</span><span class="chip">ثقة 0.94</span><span class="chip">موظف: سارة · دقائق: 35</span></div></div>
+        <div class="ai"><b>2. موظف الكاشير عد الدرج لوحده والفرع فيه 3 موظفين</b>
+          <div class="reason">قصدك: <b>عد النقدية بمفرده</b> رغم وجود موظفين</div>
+          <div class="meta"><span class="pill high">High</span><span class="chip">المسؤولة: Operation · cc LP</span><span class="chip">ثقة 0.91</span></div></div>
+        <div class="ai"><b>3. فيه لمبة في الفاترينة مطفية من أسبوع</b>
+          <div class="reason">مش في كتالوج CCTV. مقترح: فئة <b>أخرى</b> → تحويل لإدارة الصيانة</div>
+          <div class="meta"><span class="pill low">Low</span><span class="chip">المسؤولة: Maintenance</span><span class="chip">ثقة 0.78</span><span class="chip">مقترح · يراجعه الأدمن</span></div></div>
+        <button class="btn primary" id="s5confirm">تأكيد الكل</button>
+      </div>
+      <div id="s5submit" class="hidden" style="display:flex;flex-direction:column;gap:8px">
+        <div class="toast">3 نقط مؤكدة · جاهزة للإرسال</div>
+        <button class="btn primary" id="s5send">إرسال الزيارة</button>
+      </div>
+      <div id="s5done" class="hidden" style="display:flex;flex-direction:column;gap:8px">
+        <div class="toast">تم الإرسال · 3 ملاحظات · 3 تيكتات</div>
+        <div class="row"><div class="t"><b>OPR-0412</b><span>تأخير عن الفتح · Operation · مهلة 48 س</span></div><span class="pill high">High</span></div>
+        <div class="row"><div class="t"><b>OPR-0413</b><span>عد النقدية بمفرده · Operation · LP مُبلَّغة</span></div><span class="pill high">High</span></div>
+        <div class="row"><div class="t"><b>MTN-0587</b><span>لمبة فاترينة · Maintenance · بانتظار اعتماد التصنيف</span></div><span class="pill low">Low</span></div>
+        <div class="sec">إشعارات: مدير Operation، مدير الفرع، Area Manager (High)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="stage" data-title="الزيارة من اللاب توب">
+  <div class="explain">
+    <span class="who"><i></i> نفس الفلو · من المتصفح</span>
+    <h2>نفس الزيارة من اللاب توب</h2>
+    <p>اللي بيروح الفرع بلاب توب، أو بيكتب من المكتب، بيفتح نفس الشاشة على الويب. الفرق الوحيد إن الصور بتترفع كملفات بدل الكاميرا، والـ check-in يدوي.</p>
+    <ul>
+      <li><b>زيارة ميدانية:</b> فرع واحد، نفس الكتالوج والكتابة الحرة والفحص.</li>
+      <li><b>تسجيل مكتبي:</b> لإدارات زي HR وIT اللي ملاحظاتها على كل الفروع. الملاحظة على "كل الفروع" بتتسجل كنشاط بدون تيكت، ولو عايز تيكتات تختار الفروع واحد واحد.</li>
+      <li>المسودة بتتحفظ تلقائي، وتقدر تكملها من الموبايل بعدين.</li>
+    </ul>
+    <div class="nav"><button class="btn" data-prev>السابق</button><button class="btn primary" data-next>التالي: الحل والتحقق</button></div>
+  </div>
+  <div class="device laptop">
+    <div class="chrome"><i></i><i></i><i></i><span class="url">stores.levoilestores.com/observations/new</span></div>
+    <div class="screen">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="chip" style="border-color:var(--brand);color:var(--brand)">● زيارة ميدانية</span><span class="chip">○ تسجيل مكتبي</span>
+        <span class="chip">الإدارة: مراقبة المخزون</span><span class="chip">الفرع: مول العرب</span><span class="chip">التاريخ: 22/10/2026</span>
+      </div>
+      <div class="tablewrap"><table class="mock">
+        <tr><th>#</th><th>البند / الملاحظة</th><th>الريسك</th><th>المسؤولة</th><th>صور</th></tr>
+        <tr><td>1</td><td>ديفوهات ودراي كلين غير مراجعة <span class="chip">كتالوج</span></td><td><span class="pill med">Medium</span></td><td>Operation</td><td>📎 1</td></tr>
+        <tr><td>2</td><td>قطع بدون كود في رف الإسدالات <span class="chip">كتالوج</span></td><td><span class="pill med">Medium</span></td><td>Operation</td><td>📎 2</td></tr>
+        <tr><td>3</td><td>تدريب المديرة على شيت In &amp; Out <span class="chip">نشاط</span></td><td><span class="pill none">بدون</span></td><td>—</td><td>—</td></tr>
+        <tr><td>4</td><td><em>المخزن فيه كراتين على الممر قدام طفاية الحريق</em> <span class="chip">حرة</span></td><td colspan="3"><button class="btn" style="padding:4px 12px;font-size:13px">فحص</button></td></tr>
+      </table></div>
+      <div style="display:flex;gap:8px;margin-top:auto"><button class="btn">+ من الكتالوج</button><button class="btn">+ كتابة حرة</button><button class="btn primary" style="margin-right:auto">إرسال الزيارة</button></div>
+      <div class="sec">مسودة محفوظة تلقائياً · آخر حفظ قبل 10 ثوانٍ</div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="stage" data-title="الحل والتحقق">
+  <div class="explain">
+    <span class="who"><i></i> الإدارة المسؤولة ثم المُبلِّغة</span>
+    <h2>كنا وبقينا</h2>
+    <p>التيكت بيوصل لبورد الإدارة المسؤولة زي أي تيكت دلوقتي: يتعيّن، الفني ينفذ، يرفع صورة "بعد"، ويبعت للاعتماد. مدير الفرع أو الـ Area Manager يعتمد.</p>
+    <p>بعد الاعتماد الملاحظة بتدخل مرحلة <b>التحقق</b>:</p>
+    <ul>
+      <li><b>Medium وLow:</b> اعتماد صورة "بعد" كافي، الملاحظة تتقفل.</li>
+      <li><b>High وCritical:</b> لازم حد من الإدارة المُبلِّغة أو الـ Area Manager يشوفها في الفرع في زيارة لاحقة ويدوس "اتحلت". لو داس "لسه"، تتفتح تاني بتيكت جديد ويزيد عداد التكرار.</li>
+    </ul>
+    <div class="callout"><b>قاعدة ثابتة:</b> مفيش إغلاق من غير صورة بعد، وتاريخ الملاحظة الأصلي ما بيتغيرش أبداً.</div>
+    <div class="callout"><b>جرب:</b> اضغط "اتحلت" أو "لسه" وشوف إيه اللي بيحصل.</div>
+    <div class="nav"><button class="btn" data-prev>السابق</button><button class="btn primary" data-next>التالي: اعتماد الأدمن</button></div>
+  </div>
+  <div class="device phone">
+    <div class="bar"><span>11:20</span><span>LeVoile</span></div>
+    <div class="appbar"><span>تحقق · زايد</span><small>Area Manager</small></div>
+    <div class="screen" id="s7">
+      <div class="sec">بانتظار التحقق (2)</div>
+      <div class="row" style="flex-direction:column;align-items:stretch">
+        <div style="display:flex;gap:8px;align-items:center"><div class="t"><b>OB-0211 · تأخير عن الفتح</b><span>سُجلت 22/10 · تيكت OPR-0412 معتمد 24/10</span></div><span class="pill high">High</span></div>
+        <div class="ba" style="margin-top:8px">
+          <div class="box"><h4>كنا</h4>فتح 9:35 · تأخير 35 دقيقة<div class="photo" style="margin-top:6px">قبل</div></div>
+          <div class="box"><h4>بقينا</h4>تنبيه مكتوب + جدول فتح جديد<div class="photo" style="margin-top:6px">بعد</div></div>
+        </div>
+        <div id="s7actions" style="display:flex;gap:8px;margin-top:8px"><button class="btn primary" id="s7ok" style="flex:1">اتحلت</button><button class="btn" id="s7no" style="flex:1">لسه</button></div>
+        <div id="s7resolved" class="toast hidden" style="margin-top:8px">تم التحقق والإغلاق · OB-0211 مقفولة بتاريخها الأصلي</div>
+        <div id="s7reopen" class="hidden" style="margin-top:8px;background:var(--warn-soft);border-radius:10px;padding:8px 12px;font-size:14px"><b>أُعيد فتحها</b> · تيكت جديد OPR-0431 · التكرار 2 من 3 · لو اتكررت تاني تطلع Critical وتتبلغ الإدارة</div>
+      </div>
+      <div class="row"><div class="t"><b>OB-0212 · عد النقدية بمفرده</b><span>تيكت OPR-0413 · بانتظار صورة بعد</span></div><span class="pill high">High</span></div>
+      <div class="sec">سجل OB-0211</div>
+      <ul class="timeline">
+        <li>22/10 09:52 · سُجلت من زيارة CCTV · فحص الإيجينت · تأكيد الموظف</li>
+        <li>22/10 09:53 · تيكت OPR-0412 · إشعار لمدير Operation ومدير الفرع والـ Area Manager</li>
+        <li>23/10 14:10 · تعيين · تنفيذ · صورة بعد</li>
+        <li>24/10 10:00 · اعتماد مدير الفرع · بانتظار التحقق الميداني</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="stage" data-title="اعتماد الأدمن">
+  <div class="explain">
+    <span class="who"><i></i> الأدمن أو مدير الإدارة</span>
+    <h2>الكتالوج بيكبر من الواقع</h2>
+    <p>كل ملاحظة حرة صنفها الإيجينت بتظهر في شاشة "اعتماد التصنيفات". الأدمن قدامه أربع اختيارات لكل واحدة:</p>
+    <ol>
+      <li><b>اعتماد</b> زي ما هي.</li>
+      <li><b>تعديل</b> الفئة أو الريسك أو الإدارة المسؤولة. لو التيكت لسه مفتوح، بيتحدث فوراً.</li>
+      <li><b>دمج في بند موجود</b> لما تكون نفس حاجة مكتوبة بصيغة مختلفة.</li>
+      <li><b>إضافة كبند جديد</b> في الكتالوج، فالمرة الجاية تظهر في القائمة الجاهزة.</li>
+    </ol>
+    <p>كل قرار من دول بيتسجل كمثال معتمد وبيتبعت للإيجينت في الفحوصات الجاية. ده التدريب الحقيقي: من قرارات الشركة مش من تخمين.</p>
+    <div class="callout"><b>الملاحظة بتبقى تيكت فوراً</b> بعد تأكيد الموظف. اعتماد الأدمن بيمشي بالتوازي، فالحل ما بيستناش حد.</div>
+    <div class="nav"><button class="btn" data-prev>السابق</button><button class="btn primary" data-next>التالي: الداشبورد</button></div>
+  </div>
+  <div class="device laptop">
+    <div class="chrome"><i></i><i></i><i></i><span class="url">stores.levoilestores.com/observations/review</span></div>
+    <div class="screen">
+      <div class="sec">بانتظار الاعتماد · 7 ملاحظات حرة</div>
+      <div class="tablewrap"><table class="mock">
+        <tr><th>النص</th><th>اقتراح الإيجينت</th><th>الموظف أكد</th><th>القرار</th></tr>
+        <tr><td>فيه لمبة في الفاترينة مطفية من أسبوع</td><td>أخرى → Maintenance <span class="pill low">Low</span></td><td>نعم</td><td><span class="chip">اعتماد</span> <span class="chip">تعديل</span> <span class="chip">دمج</span> <span class="chip" style="border-color:var(--brand);color:var(--brand)">+ بند جديد: "إضاءة فاترينة معطلة"</span></td></tr>
+        <tr><td>المخزن فيه كراتين على الممر قدام طفاية الحريق</td><td>تنظيم المخزن <span class="pill low">Low</span></td><td>عدّل → <span class="pill high">High</span> "سلامة"</td><td><span class="chip" style="border-color:var(--brand);color:var(--brand)">اعتماد High</span> <span class="chip">+ فئة "سلامة"</span></td></tr>
+        <tr><td>البنت اللي على الكاشير مش لابسة الاسكارف</td><td>قصدك: عدم ارتداء اسكارف اليونيفورم <span class="pill low">Low</span></td><td>نعم</td><td><span class="chip" style="border-color:var(--brand);color:var(--brand)">دمج في البند</span></td></tr>
+        <tr><td>الاسكارف بتاع اليونيفورم مش موجود على موظفة</td><td>قصدك: عدم ارتداء اسكارف اليونيفورم <span class="pill low">Low</span></td><td>نعم</td><td><span class="chip" style="border-color:var(--brand);color:var(--brand)">دمج في البند</span></td></tr>
+      </table></div>
+      <div style="display:flex;gap:8px"><button class="btn primary">دمج كل المشابه (2)</button><button class="btn">اعتماد الكل</button></div>
+      <div class="sec">آخر 30 يوم: الإيجينت أصاب في 86% من القرارات المعتمدة</div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="stage" data-title="الداشبورد">
+  <div class="explain">
+    <span class="who"><i></i> الإدارة العليا والـ Area Managers</span>
+    <h2>أداء الإدارات بالأرقام</h2>
+    <p>الداشبورد بيجاوب على الأسئلة اللي اتطلبت بالظبط: كل إدارة زارت كام فرع، طلعت كام ملاحظة من كام زيارة، وكام منهم اتحل في المهلة. كل رقم بيفتح القائمة ورا الرقم.</p>
+    <ul>
+      <li><b>عدد الزيارات</b> من الزيارات المرسلة فعلاً، مش من عدد السجلات.</li>
+      <li><b>المتأخر</b> بنفس تعريف التيكتات الحالي.</li>
+      <li><b>الفروع المتكررة:</b> نفس البند في نفس الفرع مرتين أو أكتر.</li>
+      <li><b>خارج الكتالوج:</b> نسبة الملاحظات الحرة لكل إدارة. لو عالية، الإدارة محتاجة بنود جديدة.</li>
+      <li>الـ Area Manager بيشوف نفس الشاشة على منطقته، ومدير الإدارة على إدارته.</li>
+    </ul>
+    <div class="callout"><b>الاستيراد:</b> الـ 376 سجل الحاليين بيدخلوا السيستم مرة واحدة بفروعهم الصحيحة وتواريخهم، من غير إشعارات، فالداشبورد يبدأ بتاريخ حقيقي من أول يوم.</div>
+    <div class="nav"><button class="btn" data-prev>السابق</button><button class="btn primary" data-restart>من الأول</button></div>
+  </div>
+  <div class="device laptop">
+    <div class="chrome"><i></i><i></i><i></i><span class="url">stores.levoilestores.com/observations/dashboard?range=week</span></div>
+    <div class="screen">
+      <div class="kpis">
+        <div class="kpi"><b>41</b><span>زيارة هذا الأسبوع</span></div>
+        <div class="kpi"><b>23</b><span>فرع تمت زيارته</span></div>
+        <div class="kpi"><b>3.4</b><span>ملاحظة لكل زيارة</span></div>
+        <div class="kpi"><b>58</b><span>مشكلة مفتوحة</span></div>
+        <div class="kpi"><b>71%</b><span>حُلّت في المهلة</span></div>
+        <div class="kpi"><b>9</b><span>متأخرة الآن</span></div>
+      </div>
+      <div class="sec">توزيع الريسك حسب الإدارة المُبلِّغة</div>
+      <div class="bars">
+        <div class="bar"><span>CCTV</span><div class="track"><div class="fill" style="width:92%"></div></div><b>64</b></div>
+        <div class="bar"><span>مراقبة المخزون</span><div class="track"><div class="fill" style="width:40%"></div></div><b>28</b></div>
+        <div class="bar"><span>Merchandising</span><div class="track"><div class="fill" style="width:33%"></div></div><b>23</b></div>
+        <div class="bar"><span>المالية</span><div class="track"><div class="fill" style="width:20%"></div></div><b>14</b></div>
+        <div class="bar"><span>HR / IT</span><div class="track"><div class="fill" style="width:9%"></div></div><b>6</b></div>
+      </div>
+      <div class="sec">الفروع المتكررة</div>
+      <div class="tablewrap"><table class="mock">
+        <tr><th>الفرع</th><th>البند</th><th>مرات</th><th>آخر مرة</th></tr>
+        <tr><td>زايد</td><td>تأخير عن ميعاد الفتح</td><td>3</td><td>22/10</td></tr>
+        <tr><td>RBT</td><td>عدم فتح الشنطة أمام الكاميرا</td><td>2</td><td>19/10</td></tr>
+        <tr><td>مول العرب</td><td>ديفوهات غير مراجعة</td><td>2</td><td>21/10</td></tr>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<footer>مبني على مستند التصميم 2026-10-22 · الأرقام والأسماء في الشاشات أمثلة توضيحية.</footer>
+</div>
+
+<script>
+(function(){
+  var stages=[].slice.call(document.querySelectorAll('.stage'));
+  var nav=document.getElementById('steps');
+  var current=0;
+  stages.forEach(function(s,i){
+    var b=document.createElement('button');
+    b.innerHTML='<span class="n">'+(i+1)+'</span>'+s.dataset.title;
+    b.addEventListener('click',function(){go(i)});
+    nav.appendChild(b);
+  });
+  function go(i){
+    current=Math.max(0,Math.min(stages.length-1,i));
+    stages.forEach(function(s,k){s.classList.toggle('active',k===current)});
+    [].slice.call(nav.children).forEach(function(b,k){b.classList.toggle('active',k===current)});
+    try{nav.children[current].scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'})}catch(e){}
+    window.scrollTo({top:0,behavior:'smooth'});
+    try{localStorage.setItem('lv_obs_sim_step',String(current))}catch(e){}
+  }
+  document.querySelectorAll('[data-next]').forEach(function(b){b.addEventListener('click',function(){go(current+1)})});
+  document.querySelectorAll('[data-prev]').forEach(function(b){b.addEventListener('click',function(){go(current-1)})});
+  document.querySelectorAll('[data-restart]').forEach(function(b){b.addEventListener('click',function(){go(0)})});
+  document.addEventListener('keydown',function(e){
+    if(['INPUT','TEXTAREA'].indexOf(document.activeElement.tagName)>-1)return;
+    if(e.key==='ArrowLeft')go(current+1);
+    if(e.key==='ArrowRight')go(current-1);
+  });
+  var start=0;
+  try{var h=location.hash.replace('#','');if(/^step\d$/.test(h))start=parseInt(h.slice(4),10)-1;else{var st=localStorage.getItem('lv_obs_sim_step');if(st)start=parseInt(st,10)||0}}catch(e){}
+  go(start);
+
+  /* step 4: add observations */
+  var list=document.getElementById('s4list'),count=document.getElementById('s4count'),picker=document.getElementById('s4picker');
+  var items={late:['تأخير عن ميعاد الفتح','سارة · 35 دقيقة · كتالوج','high'],bag:['عدم فتح الشنطة أمام الكاميرا','الكاشير · كتالوج','high'],tag:['عدم ارتداء النيم تاج','الفلور · كتالوج','low']};
+  var labels={high:'High',med:'Medium',low:'Low'};
+  document.getElementById('s4catalog').addEventListener('click',function(){picker.classList.toggle('hidden')});
+  picker.querySelectorAll('[data-pick]').forEach(function(r){r.addEventListener('click',function(){
+    var it=items[r.dataset.pick];
+    var d=document.createElement('div');d.className='row';
+    d.innerHTML='<div class="photo">📷</div><div class="t"><b>'+it[0]+'</b><span>'+it[1]+'</span></div><span class="pill '+it[2]+'">'+labels[it[2]]+'</span>';
+    list.appendChild(d);count.textContent=list.children.length;picker.classList.add('hidden');
+  })});
+  document.getElementById('s4free').addEventListener('click',function(){
+    var d=document.createElement('div');d.className='row';
+    d.innerHTML='<div class="t"><b>3 نقط حرة</b><span>لم تُفحص بعد · اضغط "التالي"</span></div><span class="pill outline">حرة</span>';
+    list.appendChild(d);count.textContent=list.children.length;go(4);
+  });
+
+  /* step 5: AI check */
+  function show(id,on){document.getElementById(id).classList.toggle('hidden',!on)}
+  document.getElementById('s5check').addEventListener('click',function(){
+    show('s5input',false);show('s5loading',true);
+    setTimeout(function(){show('s5loading',false);show('s5results',true)},1100);
+  });
+  document.getElementById('s5confirm').addEventListener('click',function(){show('s5results',false);show('s5submit',true)});
+  document.getElementById('s5send').addEventListener('click',function(){show('s5submit',false);show('s5done',true)});
+
+  /* step 7: verification */
+  document.getElementById('s7ok').addEventListener('click',function(){show('s7actions',false);show('s7resolved',true)});
+  document.getElementById('s7no').addEventListener('click',function(){show('s7actions',false);show('s7reopen',true)});
+})();
+</script>

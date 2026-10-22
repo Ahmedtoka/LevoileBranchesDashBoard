@@ -10,7 +10,7 @@ class Branch extends Model
 {
     protected $fillable = [
         'branch_name', 'area', 'city', 'address', 'google_maps_url',
-        'mobile', 'latitude', 'longitude', 'checkin_radius', 'manager_id', 'active',
+        'mobile', 'latitude', 'longitude', 'checkin_radius', 'manager_id', 'active', 'area_id',
     ];
 
     protected $casts = [
@@ -22,6 +22,11 @@ class Branch extends Model
     public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    public function area(): BelongsTo
+    {
+        return $this->belongsTo(Area::class, 'area_id');
     }
 
     public function visits(): HasMany

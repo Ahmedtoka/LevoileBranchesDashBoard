@@ -1,0 +1,1638 @@
+[
+    {
+        "department": "cctv",
+        "category": {
+            "slug": "branch_opening",
+            "name_ar": "فتح الفرع",
+            "name_en": "Branch opening",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "CCTV-OPEN-LATE",
+                "label_ar": "تأخير عن ميعاد الفتح",
+                "label_en": "Late branch opening",
+                "keywords": [
+                    "تأخير",
+                    "فتح",
+                    "ميعاد الفتح",
+                    "اتأخر",
+                    "late",
+                    "opening",
+                    "open late"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": [
+                    {
+                        "key": "minutes_late",
+                        "type": "number",
+                        "label_ar": "دقائق التأخير",
+                        "label_en": "Minutes late",
+                        "required": true
+                    },
+                    {
+                        "key": "employee",
+                        "type": "text",
+                        "label_ar": "الموظف",
+                        "label_en": "Employee",
+                        "required": false
+                    }
+                ],
+                "escalation_rules": [
+                    {
+                        "field": "minutes_late",
+                        "gte": 30,
+                        "risk": "high"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "department": "cctv",
+        "category": {
+            "slug": "cashier",
+            "name_ar": "الكاشير",
+            "name_en": "Cashier",
+            "default_kind": "issue",
+            "risk": "high",
+            "responsible": "operation",
+            "cc": [
+                "lp"
+            ]
+        },
+        "items": [
+            {
+                "code": "CCTV-CASH-COUNT-ALONE",
+                "label_ar": "عد النقدية بمفرده",
+                "label_en": "Counting cash alone",
+                "keywords": [
+                    "عد النقدية",
+                    "بمفرده",
+                    "لوحده",
+                    "كاش",
+                    "cash count",
+                    "alone",
+                    "cashier"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-CASH-BAG-LIGHTS-OFF",
+                "label_ar": "فتح الشنطة بعد غلق النور",
+                "label_en": "Opening the bag after lights off",
+                "keywords": [
+                    "الشنطة",
+                    "غلق النور",
+                    "النور مطفي",
+                    "bag",
+                    "lights off",
+                    "cashier"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-CASH-BAG-OFF-CAMERA",
+                "label_ar": "عدم فتح الشنطة أمام الكاميرا",
+                "label_en": "Bag not opened in front of the camera",
+                "keywords": [
+                    "الشنطة",
+                    "الكاميرا",
+                    "تفتيش",
+                    "bag",
+                    "camera",
+                    "bag check"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "cctv",
+        "category": {
+            "slug": "floor",
+            "name_ar": "الفلور",
+            "name_en": "Sales floor",
+            "default_kind": "issue",
+            "risk": "low",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "CCTV-FLOOR-NO-NAMETAG",
+                "label_ar": "عدم ارتداء النيم تاج",
+                "label_en": "Not wearing the name tag",
+                "keywords": [
+                    "نيم تاج",
+                    "اسم",
+                    "بادج",
+                    "name tag",
+                    "badge",
+                    "uniform"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-FLOOR-NO-SCARF",
+                "label_ar": "عدم ارتداء اسكارف اليونيفورم",
+                "label_en": "Not wearing the uniform scarf",
+                "keywords": [
+                    "اسكارف",
+                    "يونيفورم",
+                    "طرحة",
+                    "scarf",
+                    "uniform"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-FLOOR-ACCESSORY",
+                "label_ar": "ارتداء إكسسوار",
+                "label_en": "Wearing accessories",
+                "keywords": [
+                    "إكسسوار",
+                    "اكسسوارات",
+                    "سلسلة",
+                    "accessory",
+                    "jewelry",
+                    "uniform"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-FLOOR-MOBILE",
+                "label_ar": "استخدام الموبايل",
+                "label_en": "Using the mobile phone",
+                "keywords": [
+                    "موبايل",
+                    "تليفون",
+                    "فون",
+                    "mobile",
+                    "phone"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "cctv",
+        "category": {
+            "slug": "fitting_room",
+            "name_ar": "الفيتنج روم",
+            "name_en": "Fitting room",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "CCTV-FIT-OVER-5",
+                "label_ar": "دخول أكثر من 5 قطع",
+                "label_en": "More than 5 items taken in",
+                "keywords": [
+                    "فيتنج",
+                    "غرفة القياس",
+                    "قطع",
+                    "أكثر من 5",
+                    "fitting room",
+                    "items",
+                    "more than 5"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-FIT-BAG",
+                "label_ar": "دخول بشنطة غير شخصية",
+                "label_en": "Entering with a non-personal bag",
+                "keywords": [
+                    "فيتنج",
+                    "شنطة",
+                    "غرفة القياس",
+                    "fitting room",
+                    "bag"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "cctv",
+        "category": {
+            "slug": "stockroom",
+            "name_ar": "الاستوك",
+            "name_en": "Stockroom",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "CCTV-STOCK-TEAM-INSIDE",
+                "label_ar": "تواجد أغلب الفريق داخل الاستوك",
+                "label_en": "Most of the team inside the stockroom",
+                "keywords": [
+                    "استوك",
+                    "المخزن",
+                    "الفريق",
+                    "stockroom",
+                    "team",
+                    "floor empty"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "cctv",
+        "category": {
+            "slug": "cameras_dvr",
+            "name_ar": "الكاميرات والـ DVR",
+            "name_en": "Cameras & DVR",
+            "default_kind": "issue",
+            "risk": "critical",
+            "responsible": "it",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "CCTV-DVR-DISCONNECTED",
+                "label_ar": "فصل الـ DVR",
+                "label_en": "DVR disconnected",
+                "keywords": [
+                    "DVR",
+                    "دي في ار",
+                    "فصل",
+                    "تسجيل",
+                    "disconnected",
+                    "recording"
+                ],
+                "kind": "issue",
+                "risk": "critical",
+                "responsible": "it",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-CAMERA-DOWN",
+                "label_ar": "كاميرا معطلة",
+                "label_en": "Camera not working",
+                "keywords": [
+                    "كاميرا",
+                    "عطلانة",
+                    "معطلة",
+                    "camera",
+                    "down",
+                    "broken"
+                ],
+                "kind": "issue",
+                "risk": "critical",
+                "responsible": "it",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-CAMERA-BLOCKED",
+                "label_ar": "كاميرا محجوبة أو زاويتها متغيرة",
+                "label_en": "Camera blocked or angle changed",
+                "keywords": [
+                    "كاميرا",
+                    "محجوبة",
+                    "زاوية",
+                    "camera",
+                    "blocked",
+                    "angle"
+                ],
+                "kind": "issue",
+                "risk": "critical",
+                "responsible": "it",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "cctv",
+        "category": {
+            "slug": "other",
+            "name_ar": "أخرى",
+            "name_en": "Other",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": null,
+            "cc": []
+        },
+        "items": []
+    },
+    {
+        "department": "stock_control",
+        "category": {
+            "slug": "damaged_goods",
+            "name_ar": "البضاعة التالفة",
+            "name_en": "Damaged goods",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "STK-DMG-DEFECTS-UNREVIEWED",
+                "label_ar": "ديفوهات غير مراجعة",
+                "label_en": "Defective items not reviewed",
+                "keywords": [
+                    "ديفوه",
+                    "ديفوهات",
+                    "تالف",
+                    "defect",
+                    "damaged"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "STK-DMG-DRYCLEAN-UNREVIEWED",
+                "label_ar": "دراي كلين غير مراجع",
+                "label_en": "Dry-clean items not reviewed",
+                "keywords": [
+                    "دراي كلين",
+                    "تنظيف",
+                    "dry clean",
+                    "dry-clean"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "STK-DMG-NOT-SEPARATED",
+                "label_ar": "بضاعة تالفة غير معزولة عن السليمة",
+                "label_en": "Damaged goods not separated from sound stock",
+                "keywords": [
+                    "تالف",
+                    "عزل",
+                    "سليم",
+                    "damaged",
+                    "separate"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "stock_control",
+        "category": {
+            "slug": "barcode_pricing",
+            "name_ar": "الباركود والتسعير",
+            "name_en": "Barcode & pricing",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "STK-BAR-NO-CODE",
+                "label_ar": "قطع بدون كود",
+                "label_en": "Items without a barcode",
+                "keywords": [
+                    "باركود",
+                    "كود",
+                    "بدون كود",
+                    "barcode",
+                    "code",
+                    "tag"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "STK-BAR-NO-PRICE",
+                "label_ar": "قطع بدون سعر",
+                "label_en": "Items without a price",
+                "keywords": [
+                    "سعر",
+                    "بدون سعر",
+                    "تيكت السعر",
+                    "price",
+                    "price tag"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "stock_control",
+        "category": {
+            "slug": "stockroom_organization",
+            "name_ar": "تنظيم المخزن",
+            "name_en": "Stockroom organization",
+            "default_kind": "issue",
+            "risk": "low",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "STK-ORG-UNORGANIZED",
+                "label_ar": "مخزن غير منظم",
+                "label_en": "Stockroom not organized",
+                "keywords": [
+                    "مخزن",
+                    "تنظيم",
+                    "ترتيب",
+                    "stockroom",
+                    "organize",
+                    "messy"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "stock_control",
+        "category": {
+            "slug": "count_readiness",
+            "name_ar": "جاهزية الجرد",
+            "name_en": "Stock-count readiness",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "STK-COUNT-NOT-READY",
+                "label_ar": "غير مجهز للجرد",
+                "label_en": "Not ready for stock count",
+                "keywords": [
+                    "جرد",
+                    "تجهيز",
+                    "جاهزية",
+                    "stock count",
+                    "inventory",
+                    "readiness"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "stock_control",
+        "category": {
+            "slug": "document_cycle",
+            "name_ar": "الدورة المستندية",
+            "name_en": "Document cycle",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "STK-DOC-NOT-FILED",
+                "label_ar": "مستندات غير محفوظة",
+                "label_en": "Documents not filed",
+                "keywords": [
+                    "مستندات",
+                    "أوراق",
+                    "حفظ",
+                    "documents",
+                    "paperwork",
+                    "filing"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "stock_control",
+        "category": {
+            "slug": "goods_receiving",
+            "name_ar": "استلام البضاعة",
+            "name_en": "Goods receiving",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "STK-RCV-SHEET-VIOLATION",
+                "label_ar": "مخالفة شيت الاستلام",
+                "label_en": "Receiving sheet not followed",
+                "keywords": [
+                    "استلام",
+                    "شيت الاستلام",
+                    "بضاعة",
+                    "receiving",
+                    "sheet"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "stock_control",
+        "category": {
+            "slug": "training",
+            "name_ar": "تدريب",
+            "name_en": "Training",
+            "default_kind": "activity",
+            "risk": "none",
+            "responsible": null,
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "STK-TRN-RECEIVING-SHEET",
+                "label_ar": "تدريب على شيت الاستلام",
+                "label_en": "Training on the receiving sheet",
+                "keywords": [
+                    "تدريب",
+                    "شيت",
+                    "استلام",
+                    "training",
+                    "receiving sheet"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": null,
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "STK-TRN-COUNT-SHEET",
+                "label_ar": "تدريب على شيت الجرد",
+                "label_en": "Training on the stock-count sheet",
+                "keywords": [
+                    "تدريب",
+                    "شيت",
+                    "جرد",
+                    "training",
+                    "count sheet"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": null,
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "stock_control",
+        "category": {
+            "slug": "other",
+            "name_ar": "أخرى",
+            "name_en": "Other",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": null,
+            "cc": []
+        },
+        "items": []
+    },
+    {
+        "department": "finance",
+        "category": {
+            "slug": "financial_compliance",
+            "name_ar": "الالتزام المالي",
+            "name_en": "Financial compliance",
+            "default_kind": "issue",
+            "risk": "high",
+            "responsible": "operation",
+            "cc": [
+                "lp"
+            ]
+        },
+        "items": [
+            {
+                "code": "FIN-RETURNS-NO-INVOICE",
+                "label_ar": "مرتجعات بدون فواتير",
+                "label_en": "Returns without invoices",
+                "keywords": [
+                    "مرتجع",
+                    "مرتجعات",
+                    "فاتورة",
+                    "returns",
+                    "invoice"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": []
+            },
+            {
+                "code": "FIN-JOURNALS-NEGLECTED",
+                "label_ar": "إهمال اليوميات",
+                "label_en": "Daily journals neglected",
+                "keywords": [
+                    "يوميات",
+                    "يومية",
+                    "إهمال",
+                    "journal",
+                    "daily report"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": []
+            },
+            {
+                "code": "FIN-EMAILS-NOT-SENT",
+                "label_ar": "عدم إرسال الإيميلات",
+                "label_en": "Required emails not sent",
+                "keywords": [
+                    "إيميل",
+                    "ايميلات",
+                    "إرسال",
+                    "email",
+                    "not sent"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "finance",
+        "category": {
+            "slug": "cash_violation",
+            "name_ar": "مخالفة نقدية",
+            "name_en": "Cash violation",
+            "default_kind": "issue",
+            "risk": "critical",
+            "responsible": "lp",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "FIN-CASH-PERSONAL-PAYMENT",
+                "label_ar": "سداد شخصي من الموظف",
+                "label_en": "Personal payment by the employee",
+                "keywords": [
+                    "سداد",
+                    "شخصي",
+                    "دفع",
+                    "personal payment",
+                    "cash"
+                ],
+                "kind": "issue",
+                "risk": "critical",
+                "responsible": "lp",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "FIN-CASH-SHORTAGE",
+                "label_ar": "عجز نقدية",
+                "label_en": "Cash shortage",
+                "keywords": [
+                    "عجز",
+                    "نقدية",
+                    "كاش",
+                    "shortage",
+                    "cash"
+                ],
+                "kind": "issue",
+                "risk": "critical",
+                "responsible": "lp",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "finance",
+        "category": {
+            "slug": "other",
+            "name_ar": "أخرى",
+            "name_en": "Other",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": null,
+            "cc": []
+        },
+        "items": []
+    },
+    {
+        "department": "merchandise",
+        "category": {
+            "slug": "vm",
+            "name_ar": "العرض المرئي (VM)",
+            "name_en": "VM",
+            "default_kind": "issue",
+            "risk": "low",
+            "responsible": "vm",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "MRC-VM-NEW-WITH-SALE",
+                "label_ar": "قطعة New معروضة مع Sale",
+                "label_en": "New item displayed with Sale",
+                "keywords": [
+                    "نيو",
+                    "سيل",
+                    "عرض",
+                    "new",
+                    "sale",
+                    "display"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "vm",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MRC-VM-DISPLAY-HANDLING",
+                "label_ar": "عرض يحتاج هندلة",
+                "label_en": "Display needs handling",
+                "keywords": [
+                    "عرض",
+                    "هندلة",
+                    "ترتيب العرض",
+                    "display",
+                    "handling",
+                    "vm"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "vm",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "merchandise",
+        "category": {
+            "slug": "quality",
+            "name_ar": "الجودة",
+            "name_en": "Quality",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "MRC-QLT-MAKEUP-STAINS",
+                "label_ar": "آثار ميك أب أو روج",
+                "label_en": "Makeup or lipstick stains",
+                "keywords": [
+                    "ميك أب",
+                    "روج",
+                    "بقع",
+                    "makeup",
+                    "lipstick",
+                    "stain"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MRC-QLT-MISSING-BUTTON",
+                "label_ar": "زرار واقع",
+                "label_en": "Missing button",
+                "keywords": [
+                    "زرار",
+                    "زر",
+                    "واقع",
+                    "button",
+                    "missing"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MRC-QLT-PULLED-THREAD",
+                "label_ar": "تنتيش في القماش",
+                "label_en": "Pulled threads in the fabric",
+                "keywords": [
+                    "تنتيش",
+                    "قماش",
+                    "خيط",
+                    "pulled thread",
+                    "snag",
+                    "fabric"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "merchandise",
+        "category": {
+            "slug": "availability",
+            "name_ar": "التوافر",
+            "name_en": "Availability",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "warehouse",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "MRC-AVL-PARTIAL-COLORS",
+                "label_ar": "معروض جزء من ألوان الموديل",
+                "label_en": "Only some colours of the model displayed",
+                "keywords": [
+                    "ألوان",
+                    "لون",
+                    "معروض",
+                    "colours",
+                    "colors",
+                    "availability"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "warehouse",
+                "cc": [],
+                "extra_fields": [
+                    {
+                        "key": "displayed_colors",
+                        "type": "number",
+                        "label_ar": "عدد الألوان المعروضة",
+                        "label_en": "Colours displayed",
+                        "required": false
+                    },
+                    {
+                        "key": "total_colors",
+                        "type": "number",
+                        "label_ar": "إجمالي ألوان الموديل",
+                        "label_en": "Total colours",
+                        "required": false
+                    }
+                ]
+            },
+            {
+                "code": "MRC-AVL-MODEL-NOT-DISPLAYED",
+                "label_ar": "موديل غير معروض",
+                "label_en": "Model not displayed",
+                "keywords": [
+                    "موديل",
+                    "غير معروض",
+                    "مش معروض",
+                    "model",
+                    "not displayed"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "warehouse",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "merchandise",
+        "category": {
+            "slug": "pricing",
+            "name_ar": "التسعير",
+            "name_en": "Pricing",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "MRC-PRC-NO-PRICE",
+                "label_ar": "قطعة بدون سعر",
+                "label_en": "Item without a price",
+                "keywords": [
+                    "سعر",
+                    "بدون سعر",
+                    "تيكت",
+                    "price",
+                    "no price"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MRC-PRC-WRONG-PRICE",
+                "label_ar": "سعر غير مطابق",
+                "label_en": "Price does not match",
+                "keywords": [
+                    "سعر",
+                    "غلط",
+                    "غير مطابق",
+                    "price",
+                    "wrong price",
+                    "mismatch"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "merchandise",
+        "category": {
+            "slug": "storage",
+            "name_ar": "التخزين",
+            "name_en": "Storage",
+            "default_kind": "issue",
+            "risk": "low",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "MRC-STR-NO-PROTECTIVE-BAG",
+                "label_ar": "بدون كيس حماية",
+                "label_en": "No protective bag",
+                "keywords": [
+                    "كيس",
+                    "كيس حماية",
+                    "تغليف",
+                    "protective bag",
+                    "cover"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MRC-STR-STOCKROOM-UNTIDY",
+                "label_ar": "مخزن يحتاج ترتيب",
+                "label_en": "Stockroom needs tidying",
+                "keywords": [
+                    "مخزن",
+                    "ترتيب",
+                    "stockroom",
+                    "tidy"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "merchandise",
+        "category": {
+            "slug": "knowledge",
+            "name_ar": "معرفة الفريق",
+            "name_en": "Knowledge",
+            "default_kind": "issue",
+            "risk": "low",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "MRC-KNW-URGENT-SHEET",
+                "label_ar": "الفريق لا يعرف شيت Urgent",
+                "label_en": "Team unaware of the Urgent sheet",
+                "keywords": [
+                    "شيت",
+                    "أرجنت",
+                    "معرفة",
+                    "urgent",
+                    "sheet",
+                    "knowledge"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MRC-KNW-TOP-LIST",
+                "label_ar": "الفريق لا يعرف شيت Top List",
+                "label_en": "Team unaware of the Top List sheet",
+                "keywords": [
+                    "شيت",
+                    "توب ليست",
+                    "معرفة",
+                    "top list",
+                    "sheet",
+                    "knowledge"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "merchandise",
+        "category": {
+            "slug": "delivery_replenishment",
+            "name_ar": "الاستلام والتزويد",
+            "name_en": "Delivery / Replenishment",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "warehouse",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "MRC-DLV-NOT-RECEIVED",
+                "label_ar": "لم يتم الاستلام",
+                "label_en": "Delivery not received",
+                "keywords": [
+                    "استلام",
+                    "شحنة",
+                    "توريد",
+                    "delivery",
+                    "not received"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "warehouse",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MRC-DLV-NOT-REPLENISHED",
+                "label_ar": "لم يتم عمل Replenishment",
+                "label_en": "Replenishment not done",
+                "keywords": [
+                    "تزويد",
+                    "ريبلنش",
+                    "نواقص",
+                    "replenishment",
+                    "restock"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "warehouse",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "merchandise",
+        "category": {
+            "slug": "other",
+            "name_ar": "أخرى",
+            "name_en": "Other",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": null,
+            "cc": []
+        },
+        "items": []
+    },
+    {
+        "department": "maintenance",
+        "category": {
+            "slug": "maintenance_works",
+            "name_ar": "أعمال صيانة",
+            "name_en": "Maintenance works",
+            "default_kind": "activity",
+            "risk": "none",
+            "responsible": "maintenance",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "MTN-ELECTRICAL",
+                "label_ar": "كهرباء",
+                "label_en": "Electrical",
+                "keywords": [
+                    "كهرباء",
+                    "كهربا",
+                    "لمبة",
+                    "فيشة",
+                    "electrical",
+                    "lighting"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": "maintenance",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MTN-CARPENTRY",
+                "label_ar": "نجارة",
+                "label_en": "Carpentry",
+                "keywords": [
+                    "نجارة",
+                    "خشب",
+                    "رف",
+                    "carpentry",
+                    "wood",
+                    "shelf"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": "maintenance",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MTN-PAINTING",
+                "label_ar": "نقاشة",
+                "label_en": "Painting",
+                "keywords": [
+                    "نقاشة",
+                    "دهان",
+                    "حيطة",
+                    "painting",
+                    "paint",
+                    "wall"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": "maintenance",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MTN-PLUMBING",
+                "label_ar": "سباكة",
+                "label_en": "Plumbing",
+                "keywords": [
+                    "سباكة",
+                    "مية",
+                    "تسريب",
+                    "حمام",
+                    "plumbing",
+                    "leak",
+                    "water"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": "maintenance",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MTN-AC",
+                "label_ar": "تكييف",
+                "label_en": "Air conditioning",
+                "keywords": [
+                    "تكييف",
+                    "تكييفات",
+                    "تبريد",
+                    "ac",
+                    "air conditioning"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": "maintenance",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MTN-DOORS",
+                "label_ar": "أبواب",
+                "label_en": "Doors",
+                "keywords": [
+                    "باب",
+                    "أبواب",
+                    "كالون",
+                    "قفل",
+                    "door",
+                    "lock"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": "maintenance",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MTN-STEAM-IRON",
+                "label_ar": "مكوة",
+                "label_en": "Steam iron",
+                "keywords": [
+                    "مكوة",
+                    "مكواة",
+                    "بخار",
+                    "steam iron",
+                    "iron"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": "maintenance",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MTN-FIXTURES",
+                "label_ar": "تركيبات",
+                "label_en": "Installations & fixtures",
+                "keywords": [
+                    "تركيبات",
+                    "تركيب",
+                    "استاند",
+                    "fixtures",
+                    "installation"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": "maintenance",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "MTN-URGENT",
+                "label_ar": "صيانة عاجلة",
+                "label_en": "Urgent maintenance",
+                "keywords": [
+                    "عاجل",
+                    "طارئ",
+                    "صيانة",
+                    "urgent",
+                    "emergency",
+                    "maintenance"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "maintenance",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "maintenance",
+        "category": {
+            "slug": "other",
+            "name_ar": "أخرى",
+            "name_en": "Other",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": null,
+            "cc": []
+        },
+        "items": []
+    },
+    {
+        "department": "hr",
+        "category": {
+            "slug": "operational_followup",
+            "name_ar": "متابعة تشغيلية",
+            "name_en": "Operational follow-up",
+            "default_kind": "issue",
+            "risk": "low",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "HR-BM-ATTENDANCE-WEAK",
+                "label_ar": "ضعف دور مدير الفرع في الحضور",
+                "label_en": "Weak branch-manager control of attendance",
+                "keywords": [
+                    "حضور",
+                    "مدير الفرع",
+                    "انصراف",
+                    "attendance",
+                    "branch manager"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "hr",
+        "category": {
+            "slug": "other",
+            "name_ar": "أخرى",
+            "name_en": "Other",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": null,
+            "cc": []
+        },
+        "items": []
+    },
+    {
+        "department": "it",
+        "category": {
+            "slug": "operational_followup",
+            "name_ar": "متابعة تشغيلية",
+            "name_en": "Operational follow-up",
+            "default_kind": "issue",
+            "risk": "low",
+            "responsible": "it",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "IT-NETWORK",
+                "label_ar": "مشكلة في الشبكة",
+                "label_en": "Network problem",
+                "keywords": [
+                    "شبكة",
+                    "نت",
+                    "إنترنت",
+                    "واي فاي",
+                    "network",
+                    "internet",
+                    "wifi"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "it",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "IT-DEVICES",
+                "label_ar": "مشكلة في الأجهزة",
+                "label_en": "Device problem",
+                "keywords": [
+                    "جهاز",
+                    "أجهزة",
+                    "كمبيوتر",
+                    "device",
+                    "computer",
+                    "hardware"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "it",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "IT-POS-DEVICE",
+                "label_ar": "جهاز الكاشير لا يعمل",
+                "label_en": "Cashier POS not working",
+                "keywords": [
+                    "كاشير",
+                    "POS",
+                    "سيستم",
+                    "cashier",
+                    "pos",
+                    "system"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "it",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "IT-PRINTER",
+                "label_ar": "طابعة الفواتير لا تعمل",
+                "label_en": "Receipt printer not working",
+                "keywords": [
+                    "طابعة",
+                    "برينتر",
+                    "فواتير",
+                    "printer",
+                    "receipt"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "it",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "it",
+        "category": {
+            "slug": "other",
+            "name_ar": "أخرى",
+            "name_en": "Other",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": null,
+            "cc": []
+        },
+        "items": []
+    },
+    {
+        "department": "lp",
+        "category": {
+            "slug": "training",
+            "name_ar": "تدريب",
+            "name_en": "Training",
+            "default_kind": "activity",
+            "risk": "none",
+            "responsible": null,
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "LP-TRN-SOP",
+                "label_ar": "تدريب على الـ SOP",
+                "label_en": "SOP training",
+                "keywords": [
+                    "تدريب",
+                    "إجراءات",
+                    "SOP",
+                    "training",
+                    "procedures"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": null,
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "LP-TRN-CASHIER",
+                "label_ar": "تدريب الكاشير",
+                "label_en": "Cashier training",
+                "keywords": [
+                    "تدريب",
+                    "كاشير",
+                    "training",
+                    "cashier"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": null,
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "LP-TRN-OPEN-CLOSE",
+                "label_ar": "تدريب الفتح والغلق",
+                "label_en": "Opening & closing training",
+                "keywords": [
+                    "تدريب",
+                    "فتح",
+                    "غلق",
+                    "training",
+                    "open",
+                    "close"
+                ],
+                "kind": "activity",
+                "risk": "none",
+                "responsible": null,
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "lp",
+        "category": {
+            "slug": "other",
+            "name_ar": "أخرى",
+            "name_en": "Other",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": null,
+            "cc": []
+        },
+        "items": []
+    },
+    {
+        "department": "operation",
+        "category": {
+            "slug": "other",
+            "name_ar": "أخرى",
+            "name_en": "Other",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": null,
+            "cc": []
+        },
+        "items": []
+    },
+    {
+        "department": "vm",
+        "category": {
+            "slug": "other",
+            "name_ar": "أخرى",
+            "name_en": "Other",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": null,
+            "cc": []
+        },
+        "items": []
+    }
+]
