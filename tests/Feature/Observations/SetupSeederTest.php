@@ -59,6 +59,25 @@ class SetupSeederTest extends TestCase
         $this->assertSame($first, $this->snapshot());
     }
 
+    public function test_seeder_preserves_admin_state_on_rerun(): void
+    {
+        $this->seed(ObservationSetupSeeder::class);
+
+        RiskLevel::bySlug('high')->update(['active' => false]);
+        ObservationCatalogItem::where('code', 'CCTV-OPEN-LATE')->first()->update(['usage_count' => 5, 'active' => false]);
+        $custom = Area::create(['name' => 'Custom Area', 'slug' => 'custom-area']);
+        $branch = Branch::where('branch_name', 'Nasr City - One')->first();
+        $branch->update(['area_id' => $custom->id]);
+
+        $this->seed(ObservationSetupSeeder::class);
+
+        $this->assertFalse(RiskLevel::bySlug('high')->active);
+        $item = ObservationCatalogItem::where('code', 'CCTV-OPEN-LATE')->first();
+        $this->assertSame(5, (int) $item->usage_count);
+        $this->assertFalse($item->active);
+        $this->assertSame($custom->id, $branch->fresh()->area_id);
+    }
+
     private function snapshot(): array
     {
         return [

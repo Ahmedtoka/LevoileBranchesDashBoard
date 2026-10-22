@@ -47,7 +47,14 @@ class ObservationSetupSeeder extends Seeder
     private function seedRiskLevels(): void
     {
         foreach (self::RISK_LEVELS as $level) {
-            RiskLevel::updateOrCreate(['slug' => $level['slug']], $level + ['active' => true]);
+            $model = RiskLevel::firstOrNew(['slug' => $level['slug']]);
+
+            // Active only on creation, so an admin's deactivation survives a re-run.
+            if (! $model->exists) {
+                $model->active = true;
+            }
+
+            $model->fill($level)->save();
         }
 
         $this->command?->info('Risk levels: '.RiskLevel::count());
