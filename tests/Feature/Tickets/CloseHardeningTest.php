@@ -4,6 +4,7 @@ namespace Tests\Feature\Tickets;
 
 use App\Events\TicketStatusChanged;
 use App\Exceptions\TicketTransitionDenied;
+use App\Models\Area;
 use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Notification;
@@ -210,6 +211,79 @@ class CloseHardeningTest extends TestCase
             ->assertStatus(422)
             ->assertJsonPath('message', dt('لا يمكن الإقفال بدون صورة بعد الإصلاح.', 'Cannot close without an after photo.'));
         $this->assertSame('waiting_approval', $noPhoto->fresh()->status);
+    }
+
+    public function test_area_manager_of_branch_can_close(): void
+    {
+        $maintenance = Seeds::department('maintenance');
+        $creator = Seeds::user('store_manager');
+
+        // (a) areas.manager_id of the branch's area, no branch_user row.
+        $areaManager = Seeds::user('area_manager');
+        $east = Area::create(['name' => 'East', 'slug' => 'east', 'manager_id' => $areaManager->id]);
+        // The legacy `branches.area` text column is filled, as it is on live branches.
+        $heliopolis = Seeds::branch('Heliopolis', ['area_id' => $east->id, 'area' => 'East']);
+        $first = $this->withAfterEvidence($this->ticket($heliopolis, $maintenance, $creator, 'waiting_approval'), $creator);
+
+        $this->service()->changeStatus($first, 'closed', $areaManager);
+        $this->assertSame('closed', $first->fresh()->status);
+
+        // (b) only a branch_user row for the branch.
+        $coverer = Seeds::user('area_manager');
+        $maadi = Seeds::branch('Maadi');
+        $coverer->branches()->attach($maadi->id);
+        $second = $this->withAfterEvidence($this->ticket($maadi, $maintenance, $creator, 'waiting_approval'), $creator);
+
+        $this->service()->changeStatus($second, 'closed', $coverer);
+        $this->assertSame('closed', $second->fresh()->status);
+
+        // (c) area manager of a different area, no branch_user row: denied.
+        $westManager = Seeds::user('area_manager');
+        Area::create(['name' => 'West', 'slug' => 'west', 'manager_id' => $westManager->id]);
+        $third = $this->withAfterEvidence($this->ticket($heliopolis, $maintenance, $creator, 'waiting_approval'), $creator);
+
+        $this->assertDenied(fn () => $this->service()->changeStatus($third, 'closed', $westManager), 403);
+        $this->assertSame('waiting_approval', $third->fresh()->status);
+    }
+
+    public function test_dept_status_endpoint_respects_transition(): void
+    {
+        $maintenance = Seeds::department('maintenance');
+        $branch = Seeds::branch('Heliopolis');
+        $creator = Seeds::user('store_manager', ['branch_id' => $branch->id]);
+        $manager = Seeds::user('department_manager', ['department_id' => $maintenance->id, 'is_department_manager' => true]);
+        Sanctum::actingAs($manager);
+
+        $working = $this->withAfterEvidence($this->ticket($branch, $maintenance, $creator, 'in_progress'), $creator);
+        $this->postJson('/api/departments/ticket/'.$working->id.'/status', ['status' => 'closed'])
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'انتقال غير مسموح في دورة الحالة.');
+        $this->assertSame('in_progress', $working->fresh()->status);
+
+        $this->postJson('/api/departments/ticket/'.$working->id.'/status', ['status' => 'waiting_approval'])
+            ->assertOk()
+            ->assertJsonPath('ticket.status', 'waiting_approval');
+        $this->assertSame('waiting_approval', $working->fresh()->status);
+    }
+
+    public function test_web_transition_flashes_denial(): void
+    {
+        $maintenance = Seeds::department('maintenance');
+        $branch = Seeds::branch('Heliopolis');
+        $creator = Seeds::user('store_manager', ['branch_id' => $branch->id]);
+        $ticket = $this->ticket($branch, $maintenance, $creator, 'waiting_approval');
+
+        // The web SetLocale middleware defaults to Arabic.
+        $denial = 'لا يمكن الإقفال بدون صورة بعد الإصلاح.';
+
+        $this->actingAs($creator)
+            ->from('/tickets/'.$ticket->id)
+            ->post('/tickets/'.$ticket->id.'/transition', ['status' => 'closed'])
+            ->assertRedirect('/tickets/'.$ticket->id)
+            ->assertSessionHas('status', $denial)
+            ->assertSessionHasErrors(['status' => $denial]);
+
+        $this->assertSame('waiting_approval', $ticket->fresh()->status);
     }
 
     public function test_status_change_fires_event(): void

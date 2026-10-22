@@ -153,7 +153,7 @@ class TicketController extends Controller
         try {
             $this->service->changeStatus($ticket, $data['status'], $request->user(), $data['note'] ?? null);
         } catch (TicketTransitionDenied $e) {
-            return back()->withErrors(['status' => $e->getMessage()]);
+            return back()->withErrors(['status' => $e->getMessage()])->with('status', $e->getMessage());
         }
 
         return back()->with('status', 'تم تحديث حالة التذكرة.');

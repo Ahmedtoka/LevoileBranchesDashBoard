@@ -147,7 +147,8 @@ class TicketService
             }
 
             if ($user->hasRole('area_manager')) {
-                $areaManagerId = $branch->area?->manager_id;
+                // Query the relation: $branch->area resolves to the legacy `branches.area` text column.
+                $areaManagerId = $branch->area()->value('manager_id');
                 if ($areaManagerId !== null && (int) $areaManagerId === $userId) {
                     return true;
                 }
@@ -255,8 +256,6 @@ class TicketService
 
         $this->log($ticket, optional($actor)->id, 'status_change', $from, $status, $note);
 
-        event(new TicketStatusChanged($ticket, $from, $status));
-
         // Notify the visit creator when work is finished and awaiting approval.
         if ($status === 'waiting_approval' && $ticket->created_by) {
             $this->notify($ticket->created_by, 'ticket_approval', 'Ticket waiting approval',
@@ -268,6 +267,8 @@ class TicketService
             $this->notify($ticket->assigned_to, 'ticket_rejected', 'Ticket reopened',
                 $ticket->reference.' was rejected and reopened.', $ticket->id);
         }
+
+        event(new TicketStatusChanged($ticket, $from, $status));
 
         return $ticket;
     }
