@@ -11,6 +11,9 @@ use App\Models\RiskLevel;
 use App\Policies\ObservationCatalogPolicy;
 use App\Policies\ObservationPolicy;
 use App\Policies\ObservationVisitPolicy;
+use App\Services\Observations\Ai\AnthropicClassifier;
+use App\Services\Observations\Ai\ClassifierContract;
+use App\Services\Observations\Ai\NullClassifier;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -20,6 +23,15 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // dt() and t() helpers are autoloaded from app/helpers.php (composer "files").
+
+        // Observation classifier: Claude when a key is configured, otherwise manual classification.
+        $this->app->bind(ClassifierContract::class, fn () => filled(config('services.anthropic.key'))
+            ? new AnthropicClassifier(
+                (string) config('services.anthropic.key'),
+                (string) config('services.anthropic.model', 'claude-opus-5-5'),
+                (int) config('services.anthropic.timeout', 30),
+            )
+            : new NullClassifier);
     }
 
     public function boot(): void
