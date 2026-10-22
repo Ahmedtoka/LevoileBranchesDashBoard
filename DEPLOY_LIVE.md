@@ -55,6 +55,7 @@ php artisan storage:link                             # لو مش معمول قب
 # استيراد الإدارات الجديدة + الشيك ليستات النهائية (مدير الفرع + الأريا مانجر)
 php artisan db:seed --class=DepartmentSeeder --force
 php artisan db:seed --class=RealChecklistSeeder --force
+php artisan db:seed --class=ObservationSetupSeeder --force   # درجات الريسك، المناطق، كتالوج الملاحظات (idempotent)
 
 php artisan optimize:clear                           # يمسح كاش الراوت/الكونفيج/الفيوز
 ```
