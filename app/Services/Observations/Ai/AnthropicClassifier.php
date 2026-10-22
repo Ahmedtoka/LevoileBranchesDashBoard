@@ -10,6 +10,7 @@ use Anthropic\Core\Exceptions\AuthenticationException;
 use Anthropic\Core\Exceptions\RateLimitException;
 use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Support\Facades\Log;
+use Psr\Http\Client\ClientInterface;
 
 /**
  * Claude driver of the observation classifier (spec section 8).
@@ -41,6 +42,7 @@ class AnthropicClassifier implements ClassifierContract
         private readonly string $model,
         int $timeout,
         private readonly PromptBuilder $prompts = new PromptBuilder,
+        ?ClientInterface $transporter = null,
     ) {
         $this->client = new Client(
             apiKey: $apiKey,
@@ -48,7 +50,8 @@ class AnthropicClassifier implements ClassifierContract
                 // The SDK does not enforce `timeout` itself; the PSR-18 transport does.
                 'timeout' => (float) $timeout,
                 'maxRetries' => 0,
-                'transporter' => new GuzzleClient(['timeout' => $timeout, 'connect_timeout' => min(10, $timeout)]),
+                // Tests inject a mock transport; production uses Guzzle with the hard timeout.
+                'transporter' => $transporter ?? new GuzzleClient(['timeout' => $timeout, 'connect_timeout' => min(10, $timeout)]),
             ],
         );
     }
