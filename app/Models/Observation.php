@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 
 class Observation extends Model
 {
@@ -42,13 +43,14 @@ class Observation extends Model
         });
     }
 
-    /** Next OB-00001 style reference, derived from the highest existing reference (not the auto-increment id). */
+    /** Next OB-00001 style reference, derived from the highest existing number (not the auto-increment id or the newest row). */
     public static function nextReference(): string
     {
-        $last = static::where('reference', 'like', 'OB-%')->orderByDesc('id')->value('reference');
-        $n = $last ? (int) preg_replace('/\D/', '', substr($last, 3)) : 0;
+        $max = (int) static::query()
+            ->where('reference', 'like', 'OB-%')
+            ->max(DB::raw('CAST(SUBSTRING(reference, 4) AS UNSIGNED)'));
 
-        return 'OB-'.str_pad($n + 1, 5, '0', STR_PAD_LEFT);
+        return 'OB-'.str_pad($max + 1, 5, '0', STR_PAD_LEFT);
     }
 
     public function visit(): BelongsTo

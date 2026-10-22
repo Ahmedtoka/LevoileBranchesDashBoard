@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class ObservationVisit extends Model
 {
@@ -36,13 +37,14 @@ class ObservationVisit extends Model
         });
     }
 
-    /** Next OV-00001 style code, derived from the highest existing code (not the auto-increment id). */
+    /** Next OV-00001 style code, derived from the highest existing number (not the auto-increment id or the newest row). */
     public static function nextCode(): string
     {
-        $last = static::where('code', 'like', 'OV-%')->orderByDesc('id')->value('code');
-        $n = $last ? (int) preg_replace('/\D/', '', substr($last, 3)) : 0;
+        $max = (int) static::query()
+            ->where('code', 'like', 'OV-%')
+            ->max(DB::raw('CAST(SUBSTRING(code, 4) AS UNSIGNED)'));
 
-        return 'OV-'.str_pad($n + 1, 5, '0', STR_PAD_LEFT);
+        return 'OV-'.str_pad($max + 1, 5, '0', STR_PAD_LEFT);
     }
 
     public function department(): BelongsTo

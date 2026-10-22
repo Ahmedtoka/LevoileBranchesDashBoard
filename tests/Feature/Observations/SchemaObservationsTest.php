@@ -48,6 +48,41 @@ class SchemaObservationsTest extends TestCase
         $this->assertSame('manual', $first->fresh()->classification_status);
     }
 
+    public function test_next_numbers_derive_from_highest_existing_number(): void
+    {
+        $department = Seeds::department('cctv');
+        $branch = Seeds::branch('Heliopolis');
+        $user = Seeds::user('department_employee', ['department_id' => $department->id]);
+
+        $visitAttrs = [
+            'type' => 'field',
+            'department_id' => $department->id,
+            'branch_id' => $branch->id,
+            'user_id' => $user->id,
+            'visit_date' => now()->toDateString(),
+            'source' => 'import',
+        ];
+
+        $imported = ObservationVisit::create($visitAttrs + ['code' => 'OV-00010']);
+        ObservationVisit::create($visitAttrs + ['code' => 'OV-00003']);
+        $this->assertSame('OV-00011', ObservationVisit::create($visitAttrs)->code);
+
+        $attrs = [
+            'observation_visit_id' => $imported->id,
+            'branch_id' => $branch->id,
+            'reporting_department_id' => $department->id,
+            'kind' => 'issue',
+            'title' => 'Imported',
+            'description' => 'Imported row',
+            'event_date' => now()->toDateString(),
+            'created_by' => $user->id,
+        ];
+
+        Observation::create($attrs + ['reference' => 'OB-00010']);
+        Observation::create($attrs + ['reference' => 'OB-00003']);
+        $this->assertSame('OB-00011', Observation::create($attrs)->reference);
+    }
+
     public function test_ticket_source_backfill(): void
     {
         $branch = Seeds::branch('Nasr City');
