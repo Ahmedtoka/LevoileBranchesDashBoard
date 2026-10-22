@@ -134,20 +134,28 @@ class PolicyTest extends TestCase
 
         $toOperation = $this->observation($branch, $cctv, $creator);
         $toMaintenance = $this->observation($branch, $cctv, $creator);
+        $reopened = $this->observation($branch, $cctv, $creator);
 
-        foreach ([[$toOperation, $operation, 'TK-T0001'], [$toMaintenance, $maintenance, 'TK-T0002']] as [$obs, $dept, $ref]) {
-            $ticket = Ticket::create([
-                'reference' => $ref,
-                'title' => 'Ticket',
-                'branch_id' => $branch->id,
-                'department_id' => $dept->id,
-                'status' => 'open',
-            ]);
-            $obs->update(['ticket_id' => $ticket->id]);
-        }
+        $ticket = fn (Observation $obs, Department $dept, string $ref) => Ticket::create([
+            'reference' => $ref,
+            'title' => 'Ticket',
+            'branch_id' => $branch->id,
+            'department_id' => $dept->id,
+            'status' => 'open',
+            'observation_id' => $obs->id,
+        ]);
 
-        $this->assertSame([$toOperation->id], $this->scopedIds($manager));
+        // Current tickets, linked both ways.
+        $toOperation->update(['ticket_id' => $ticket($toOperation, $operation, 'TK-T0001')->id]);
+        $toMaintenance->update(['ticket_id' => $ticket($toMaintenance, $maintenance, 'TK-T0002')->id]);
+
+        // An older ticket for operation, linked only through tickets.observation_id; no current ticket.
+        $ticket($reopened, $operation, 'TK-T0003');
+        $this->assertNull($reopened->fresh()->ticket_id);
+
+        $this->assertSame([$toOperation->id, $reopened->id], $this->scopedIds($manager));
         $this->assertTrue($manager->can('view', $toOperation));
+        $this->assertTrue($manager->can('view', $reopened));
         $this->assertFalse($manager->can('view', $toMaintenance));
     }
 }

@@ -32,8 +32,8 @@ class ObservationScope
             return $q->where(function (Builder $w) use ($model, $reporting, $departmentId) {
                 $w->where($reporting, $departmentId);
 
-                if (method_exists($model, 'ticket')) {
-                    $w->orWhereHas('ticket', fn (Builder $t) => $t->where($t->qualifyColumn('department_id'), $departmentId));
+                if (method_exists($model, 'tickets')) {
+                    $w->orWhereHas('tickets', fn (Builder $t) => $t->where($t->qualifyColumn('department_id'), $departmentId));
                 }
             });
         }
