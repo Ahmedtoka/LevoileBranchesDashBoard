@@ -15,6 +15,8 @@ class Ticket extends Model
 
     public const PRIORITIES = ['low', 'medium', 'high', 'critical'];
 
+    public const SOURCES = ['checklist', 'maintenance', 'observation'];
+
     /** Arabic status labels. */
     public const STATUS_AR = [
         'open' => 'جديدة', 'assigned' => 'معيّنة', 'on_the_way' => 'مقبولة', 'in_progress' => 'جاري التنفيذ',
@@ -61,6 +63,7 @@ class Ticket extends Model
         'visit_id', 'visit_answer_id', 'checklist_question_id', 'created_by',
         'assigned_to', 'status', 'priority', 'sla_hours', 'due_at',
         'assigned_at', 'scheduled_at', 'resolved_at', 'closed_at', 'reopen_count', 'category',
+        'source', 'observation_id',
     ];
 
     protected $casts = [
@@ -91,6 +94,11 @@ class Ticket extends Model
     public function visit(): BelongsTo
     {
         return $this->belongsTo(Visit::class);
+    }
+
+    public function observation(): BelongsTo
+    {
+        return $this->belongsTo(Observation::class);
     }
 
     public function answer(): BelongsTo
