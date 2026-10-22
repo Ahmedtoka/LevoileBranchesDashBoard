@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Exceptions\TicketTransitionDenied;
 use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\Ticket;
@@ -149,7 +150,11 @@ class TicketController extends Controller
             return back()->with('status', 'انتقال غير مسموح في دورة الحالة.');
         }
 
-        $this->service->changeStatus($ticket, $data['status'], $request->user(), $data['note'] ?? null);
+        try {
+            $this->service->changeStatus($ticket, $data['status'], $request->user(), $data['note'] ?? null);
+        } catch (TicketTransitionDenied $e) {
+            return back()->withErrors(['status' => $e->getMessage()]);
+        }
 
         return back()->with('status', 'تم تحديث حالة التذكرة.');
     }

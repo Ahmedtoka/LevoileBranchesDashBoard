@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Events\TicketStatusChanged;
+use App\Exceptions\TicketTransitionDenied;
 use App\Models\ChecklistQuestion;
+use App\Models\Department;
 use App\Models\Notification;
 use App\Models\Ticket;
 use App\Models\TicketUpdate;
@@ -93,22 +96,72 @@ class TicketService
     /** Reference using the responsible department's 3-letter prefix (own running serial). */
     public function referenceForDept(?int $deptId): string
     {
-        $prefix = $deptId ? \App\Models\Department::where('id', $deptId)->value('ticket_prefix') : null;
+        $prefix = $deptId ? Department::where('id', $deptId)->value('ticket_prefix') : null;
 
         return Ticket::nextReference($prefix ?: 'GEN');
     }
 
-    public function createManual(array $attrs, ?int $actorId = null): Ticket
+    /** Options: 'silent' => true creates and logs the ticket without notifying the manager or auto-assigning. */
+    public function createManual(array $attrs, ?int $actorId = null, array $options = []): Ticket
     {
         $attrs['reference'] = $attrs['reference'] ?? $this->referenceForDept($attrs['department_id'] ?? null);
         $attrs['status'] = $attrs['status'] ?? 'open';
         $ticket = Ticket::create($attrs);
 
         $this->log($ticket, $actorId, 'created', null, $ticket->status, 'تم إنشاء الطلب.');
-        $this->notifyDepartmentManager($ticket);
-        $this->autoAssign($ticket);
+
+        if (! ($options['silent'] ?? false)) {
+            $this->notifyDepartmentManager($ticket);
+            $this->autoAssign($ticket);
+        }
 
         return $ticket;
+    }
+
+    /**
+     * May this user move the ticket to closed: its creator, super_admin / ops_manager, the branch's
+     * store manager, the area manager of the branch, or the manager of the ticket's department.
+     */
+    public function canClose(Ticket $ticket, User $user): bool
+    {
+        $userId = (int) $user->id;
+
+        if ($ticket->created_by !== null && (int) $ticket->created_by === $userId) {
+            return true;
+        }
+
+        if ($user->hasRole(['super_admin', 'ops_manager'])) {
+            return true;
+        }
+
+        $branch = $ticket->branch;
+
+        if ($branch) {
+            if ($branch->manager_id !== null && (int) $branch->manager_id === $userId) {
+                return true;
+            }
+
+            if ($user->branch_id !== null && (int) $user->branch_id === (int) $ticket->branch_id
+                && $user->hasRole(['store_manager', 'branch_manager'])) {
+                return true;
+            }
+
+            if ($user->hasRole('area_manager')) {
+                $areaManagerId = $branch->area?->manager_id;
+                if ($areaManagerId !== null && (int) $areaManagerId === $userId) {
+                    return true;
+                }
+
+                if ($user->branches()->where('branches.id', $branch->id)->exists()) {
+                    return true;
+                }
+            }
+        }
+
+        return $user->is_department_manager
+            && $user->department_id !== null
+            && $ticket->department_id !== null
+            && (int) $user->department_id === (int) $ticket->department_id;
     }
 
     /**
@@ -168,6 +221,20 @@ class TicketService
 
     public function changeStatus(Ticket $ticket, string $status, ?User $actor = null, ?string $note = null): Ticket
     {
+        // Closing is guarded before any write: authorised actor (system calls pass null) and an after photo.
+        if ($status === 'closed') {
+            if ($actor !== null && ! $this->canClose($ticket, $actor)) {
+                throw TicketTransitionDenied::notAllowed();
+            }
+
+            $hasAfterEvidence = TicketUpdate::where('ticket_id', $ticket->id)
+                ->where('evidence_kind', 'after')
+                ->exists();
+            if (! $hasAfterEvidence) {
+                throw TicketTransitionDenied::afterEvidenceRequired();
+            }
+        }
+
         $from = $ticket->status;
 
         $attrs = ['status' => $status];
@@ -187,6 +254,8 @@ class TicketService
         $ticket->update($attrs);
 
         $this->log($ticket, optional($actor)->id, 'status_change', $from, $status, $note);
+
+        event(new TicketStatusChanged($ticket, $from, $status));
 
         // Notify the visit creator when work is finished and awaiting approval.
         if ($status === 'waiting_approval' && $ticket->created_by) {

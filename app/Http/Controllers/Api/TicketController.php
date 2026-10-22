@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\TicketTransitionDenied;
 use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\User;
@@ -169,7 +170,11 @@ class TicketController extends Controller
             $note = $note ? $note.' · '.$loc : $loc;
         }
 
-        $this->service->changeStatus($ticket, $data['status'], $request->user(), $note);
+        try {
+            $this->service->changeStatus($ticket, $data['status'], $request->user(), $note);
+        } catch (TicketTransitionDenied $e) {
+            return response()->json(['message' => $e->getMessage()], $e->status);
+        }
 
         return response()->json(['message' => 'Ticket updated.', 'ticket' => $this->item($ticket->fresh())]);
     }
@@ -200,8 +205,16 @@ class TicketController extends Controller
     /** POST /api/tickets/{ticket}/send-for-approval */
     public function sendForApproval(Request $request, Ticket $ticket): JsonResponse
     {
-        $this->service->changeStatus($ticket, 'waiting_approval', $request->user(),
-            $request->input('note', 'Marked fixed, waiting approval.'));
+        if (! Ticket::canTransition($ticket->status, 'waiting_approval')) {
+            return response()->json(['message' => 'انتقال غير مسموح في دورة الحالة.'], 422);
+        }
+
+        try {
+            $this->service->changeStatus($ticket, 'waiting_approval', $request->user(),
+                $request->input('note', 'Marked fixed, waiting approval.'));
+        } catch (TicketTransitionDenied $e) {
+            return response()->json(['message' => $e->getMessage()], $e->status);
+        }
 
         return response()->json(['message' => 'Sent for approval.']);
     }
@@ -209,8 +222,16 @@ class TicketController extends Controller
     /** POST /api/tickets/{ticket}/approve */
     public function approve(Request $request, Ticket $ticket): JsonResponse
     {
-        $this->service->changeStatus($ticket, 'closed', $request->user(),
-            $request->input('note', 'Approved and closed.'));
+        if (! Ticket::canTransition($ticket->status, 'closed')) {
+            return response()->json(['message' => 'انتقال غير مسموح في دورة الحالة.'], 422);
+        }
+
+        try {
+            $this->service->changeStatus($ticket, 'closed', $request->user(),
+                $request->input('note', 'Approved and closed.'));
+        } catch (TicketTransitionDenied $e) {
+            return response()->json(['message' => $e->getMessage()], $e->status);
+        }
 
         return response()->json(['message' => 'Ticket approved and closed.']);
     }
@@ -219,8 +240,17 @@ class TicketController extends Controller
     public function reject(Request $request, Ticket $ticket): JsonResponse
     {
         $data = $request->validate(['note' => ['nullable', 'string']]);
-        $this->service->changeStatus($ticket, 'rejected', $request->user(),
-            $data['note'] ?? 'Rejected and reopened.');
+
+        if (! Ticket::canTransition($ticket->status, 'rejected')) {
+            return response()->json(['message' => 'انتقال غير مسموح في دورة الحالة.'], 422);
+        }
+
+        try {
+            $this->service->changeStatus($ticket, 'rejected', $request->user(),
+                $data['note'] ?? 'Rejected and reopened.');
+        } catch (TicketTransitionDenied $e) {
+            return response()->json(['message' => $e->getMessage()], $e->status);
+        }
 
         return response()->json(['message' => 'Ticket reopened.']);
     }
@@ -399,7 +429,15 @@ class TicketController extends Controller
             'note' => ['nullable', 'string'],
         ]);
 
-        $this->service->changeStatus($ticket, $data['status'], $user, $data['note'] ?? null);
+        if (! Ticket::canTransition($ticket->status, $data['status'])) {
+            return response()->json(['message' => 'انتقال غير مسموح في دورة الحالة.'], 422);
+        }
+
+        try {
+            $this->service->changeStatus($ticket, $data['status'], $user, $data['note'] ?? null);
+        } catch (TicketTransitionDenied $e) {
+            return response()->json(['message' => $e->getMessage()], $e->status);
+        }
 
         return response()->json(['message' => 'تم التحديث.', 'ticket' => $this->item($ticket->fresh())]);
     }
