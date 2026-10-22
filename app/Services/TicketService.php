@@ -206,6 +206,8 @@ class TicketService
         $this->notify($employee->id, 'ticket_assigned', 'New ticket assigned',
             $ticket->reference.' — '.$ticket->title, $ticket->id);
 
+        event(new TicketStatusChanged($ticket, $from, 'assigned'));
+
         return $ticket;
     }
 
@@ -216,6 +218,8 @@ class TicketService
         $ticket->update(['status' => 'rejected', 'assigned_to' => null]);
         $this->log($ticket, $tech->id, 'declined', $from, 'rejected', 'رفض الفني: '.$note);
         $this->notifyDepartmentManager($ticket);
+
+        event(new TicketStatusChanged($ticket, $from, 'rejected'));
 
         return $ticket;
     }

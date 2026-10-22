@@ -302,4 +302,29 @@ class CloseHardeningTest extends TestCase
             && $e->to === 'in_progress');
         Event::assertDispatchedTimes(TicketStatusChanged::class, 1);
     }
+
+    public function test_assign_and_decline_fire_status_event(): void
+    {
+        Event::fake([TicketStatusChanged::class]);
+
+        $maintenance = Seeds::department('maintenance');
+        $branch = Seeds::branch('Heliopolis');
+        $creator = Seeds::user('store_manager', ['branch_id' => $branch->id]);
+        $tech = Seeds::user('department_employee', ['department_id' => $maintenance->id, 'is_department_manager' => false]);
+        $ticket = $this->ticket($branch, $maintenance, $creator, 'open');
+
+        $this->service()->assign($ticket, $tech);
+
+        Event::assertDispatched(TicketStatusChanged::class, fn (TicketStatusChanged $e) => $e->ticket->id === $ticket->id
+            && $e->from === 'open'
+            && $e->to === 'assigned');
+
+        $this->service()->declineByTechnician($ticket->fresh(), $tech, 'busy');
+
+        Event::assertDispatched(TicketStatusChanged::class, fn (TicketStatusChanged $e) => $e->ticket->id === $ticket->id
+            && $e->from === 'assigned'
+            && $e->to === 'rejected');
+        Event::assertDispatchedTimes(TicketStatusChanged::class, 2);
+        $this->assertSame('rejected', $ticket->fresh()->status);
+    }
 }

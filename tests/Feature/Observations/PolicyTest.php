@@ -113,6 +113,19 @@ class PolicyTest extends TestCase
         $this->assertFalse($manager->isReportingUser());
     }
 
+    public function test_sales_role_has_no_module_access(): void
+    {
+        $cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $own = Seeds::branch('Own Branch');
+        $sales = Seeds::user('sales', ['branch_id' => $own->id]);
+        $this->observation($own, $cctv, Seeds::user('department_employee', ['department_id' => $cctv->id]));
+
+        // Spec section 5 grants sales nothing, even with a branch set.
+        $this->assertFalse($sales->can('viewAny', Observation::class));
+        $this->assertSame([], $sales->scopedBranchIds());
+        $this->assertSame([], $this->scopedIds($sales));
+    }
+
     public function test_department_manager_can_manage_only_own_categories(): void
     {
         $cctv = Seeds::department('cctv', ['is_reporting' => true]);

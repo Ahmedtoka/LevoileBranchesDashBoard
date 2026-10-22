@@ -56,6 +56,9 @@ php artisan storage:link                             # لو مش معمول قب
 php artisan db:seed --class=DepartmentSeeder --force
 php artisan db:seed --class=RealChecklistSeeder --force
 php artisan db:seed --class=ObservationSetupSeeder --force   # درجات الريسك، المناطق، كتالوج الملاحظات (idempotent)
+# ⚠️ بعد التحديث ده الـ API بيفرض دورة حالة الطلب على /api/departments/ticket/{id}/status و approve و reject و send-for-approval:
+#    شاشة مدير الإدارة الحالية في الموبايل (أزرار بدء / تم / رفض) هترجع 422 لحد ما الـ APK الجديد من Plan E يتنزّل.
+#    متنزّلش master على اللايف قبل ما الـ APK ده يكون جاهز، إلا لو المالك قرر يسمح بقفزات المدير فقط في deptSetStatus.
 
 php artisan optimize:clear                           # يمسح كاش الراوت/الكونفيج/الفيوز
 ```

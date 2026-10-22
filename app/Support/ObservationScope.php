@@ -13,7 +13,7 @@ class ObservationScope
     public const UNRESTRICTED_ROLES = ['super_admin', 'ops_manager', 'branch_director', 'vm_manager'];
 
     /** Roles restricted to their own branch(es). */
-    public const BRANCH_ROLES = ['store_manager', 'branch_manager', 'sales'];
+    public const BRANCH_ROLES = ['store_manager', 'branch_manager'];
 
     public static function apply(Builder $q, User $u, string $branchColumn = 'branch_id', string $reportingColumn = 'reporting_department_id'): Builder
     {

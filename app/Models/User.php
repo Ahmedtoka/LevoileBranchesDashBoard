@@ -111,7 +111,7 @@ class User extends Authenticatable
         if ($this->hasRole('area_manager')) {
             $ids = Branch::whereIn('area_id', Area::where('manager_id', $this->id)->select('id'))->pluck('id')
                 ->merge(DB::table('branch_user')->where('user_id', $this->id)->pluck('branch_id'));
-        } elseif ($this->hasRole(['store_manager', 'branch_manager', 'sales'])) {
+        } elseif ($this->hasRole(['store_manager', 'branch_manager'])) {
             $ids = Branch::where('manager_id', $this->id)->pluck('id')->push($this->branch_id)->filter();
         } elseif ($this->hasRole(['super_admin', 'ops_manager', 'branch_director', 'vm_manager', 'department_manager', 'department_employee'])
             || $this->is_department_manager) {
