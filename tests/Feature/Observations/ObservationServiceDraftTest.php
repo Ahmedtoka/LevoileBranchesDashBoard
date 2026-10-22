@@ -14,6 +14,7 @@ use App\Models\RiskLevel;
 use App\Models\User;
 use App\Services\Observations\ObservationService;
 use App\Services\Observations\RiskResolver;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Tests\Support\Seeds;
 use Tests\TestCase;
@@ -379,5 +380,40 @@ class ObservationServiceDraftTest extends TestCase
 
         $this->expectException(ValidationException::class);
         $service->deleteDraftObservation($o2->fresh());
+    }
+
+    public function test_upsert_retries_whole_transaction_on_duplicate_reference(): void
+    {
+        $service = new ObservationService;
+        $visit = $this->draftVisit();
+        $creatingCalls = 0;
+        $collided = false;
+
+        // Take the next reference ourselves and plant a row holding it (once) so the first
+        // insert hits the unique index. It lives inside the failed transaction, which is rolled back.
+        Observation::creating(function (Observation $o) use (&$creatingCalls, &$collided, $visit) {
+            $creatingCalls++;
+            if ($collided) {
+                return;
+            }
+            $collided = true;
+            $o->reference = Observation::nextReference(); // the model keeps a preset reference
+            DB::table('observations')->insert([
+                'reference' => $o->reference, 'observation_visit_id' => $visit->id,
+                'reporting_department_id' => $this->cctv->id, 'kind' => 'issue', 'title' => 't',
+                'description' => 'd', 'event_date' => now()->toDateString(), 'created_by' => $this->user->id,
+                'created_at' => now(), 'updated_at' => now(),
+            ]);
+        });
+
+        $saved = $service->upsertObservations($visit, [
+            ['kind' => 'issue', 'description' => 'one'],
+            ['kind' => 'issue', 'description' => 'two'],
+        ], $this->user);
+
+        $this->assertSame(3, $creatingCalls); // 1 collided attempt + 2 items on the retry
+        $this->assertCount(2, $saved);
+        $this->assertSame(2, Observation::count());
+        $this->assertCount(2, $saved->pluck('reference')->unique());
     }
 }

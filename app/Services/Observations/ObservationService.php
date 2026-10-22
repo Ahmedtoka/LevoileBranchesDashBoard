@@ -46,7 +46,9 @@ class ObservationService
             throw ValidationException::withMessages(['department_id' => dt('تعذّر تحديد الإدارة المُبلِّغة.', 'The reporting department could not be determined.')]);
         }
 
-        return $this->createWithRetry(fn () => ObservationVisit::create([
+        // Must run outside any transaction: under REPEATABLE READ a retry inside one re-reads the same
+        // snapshot and picks the same code again (see retryOnDuplicate).
+        return $this->retryOnDuplicate(fn () => ObservationVisit::create([
             'type' => $data['type'],
             'department_id' => $departmentId,
             'branch_id' => $data['branch_id'] ?? null,
@@ -71,14 +73,16 @@ class ObservationService
     {
         $this->assertDraft($v);
 
-        return DB::transaction(function () use ($v, $items, $u) {
+        // The whole transaction is the unit retried on a duplicate reference: the retry starts a new
+        // transaction with a fresh snapshot, so nextReference() sees the competing insert.
+        return $this->retryOnDuplicate(fn () => DB::transaction(function () use ($v, $items, $u) {
             $saved = [];
             foreach (array_values($items) as $i => $item) {
                 $saved[] = $this->saveItem($v, (array) $item, $i, $u);
             }
 
             return (new Collection($saved))->map(fn (Observation $o) => $o->fresh(['photos']));
-        });
+        }));
     }
 
     public function deleteDraftObservation(Observation $o): void
@@ -162,7 +166,7 @@ class ObservationService
             $observation = $existing;
         } else {
             $attributes['created_by'] = $u->id;
-            $observation = $this->createWithRetry(fn () => Observation::create($attributes));
+            $observation = Observation::create($attributes);
         }
 
         $this->addPhotos($observation, (array) ($item['photos'] ?? []), $item['photo_source'] ?? 'gallery', $u);
@@ -240,17 +244,22 @@ class ObservationService
         }
     }
 
-    /** Code / reference are max+1 without a lock: retry once if a concurrent insert took the number. */
-    private function createWithRetry(callable $create): mixed
+    /**
+     * Code / reference are max+1 without a lock, so a concurrent insert can take the number first
+     * (duplicate-key 1062). Retry the whole unit once. The unit must start its own transaction (or use
+     * none) and this method must not be called inside one: under InnoDB REPEATABLE READ a retry within
+     * the same transaction re-reads the same snapshot and collides again.
+     */
+    private function retryOnDuplicate(callable $unit): mixed
     {
         try {
-            return $create();
+            return $unit();
         } catch (QueryException $e) {
             if (($e->errorInfo[1] ?? null) !== 1062) {
                 throw $e;
             }
 
-            return $create();
+            return $unit();
         }
     }
 }
