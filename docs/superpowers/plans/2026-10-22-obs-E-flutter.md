@@ -71,5 +71,13 @@
 
 - [ ] Widget tests: reopen requires reason; buttons disabled in flight. Implement. Commit `feat(obs): branch observations and verification`.
 
-### Task 7: Hand-off
-- [ ] `flutter analyze` clean, `flutter test` green, build debug APK, smoke on emulator against local server. Commit `chore(obs): polish and strings`.
+### Task 7: Mobile quick-login and configurable base URL
+
+**Files:** `lib/config/api_config.dart` (read `String.fromEnvironment('API_BASE', defaultValue: <current live URL>)` and `bool.fromEnvironment('DEMO_LOGIN', defaultValue: false)`), `lib/services/auth_provider.dart` (`quickLogin(email)` = normal `/login` with password `password`), `lib/screens/login_screen.dart`.
+
+**Interfaces:** when `DEMO_LOGIN` is true, the login screen fetches `GET /api/demo-users` and renders one tappable card per user (name, role, hint) above the form; tapping logs in immediately. When the endpoint returns 404 the cards are hidden. The user list itself lives on the server (`README-observations.md` § Demo users).
+
+- [ ] Widget test: with a mocked list of 3 users, 3 cards render and tapping calls `quickLogin`. Implement. Commit `feat(obs): demo quick login and configurable API base`.
+
+### Task 8: Hand-off
+- [ ] `flutter analyze` clean, `flutter test` green. Build the debug APK against the laptop's LAN address: `flutter build apk --debug --dart-define=API_BASE=http://<LAN-IP>:8080/api --dart-define=DEMO_LOGIN=true` (find the IP with `ipconfig`; Plan G re-builds with the final IP). Copy to `C:\xampp\htdocs\LevoileBranches\build\levoile-observations-debug.apk`. Commit `chore(obs): polish and strings`.

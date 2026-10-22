@@ -27,6 +27,25 @@
 
 ---
 
+### Task 0: Demo users and web quick-login
+
+**Files:** `database/seeders/DemoUsersSeeder.php`, `config/app.php` (`'demo_login' => env('DEMO_LOGIN', false)`), `.env.example` (`DEMO_LOGIN=false`), `app/Http/Controllers/Api/DemoUserController.php` (`index`), `routes/api.php` (`GET /demo-users`, no auth, returns 404 when `demo_login` is false), modify `resources/views/auth/login.blade.php`, `app/Http/Controllers/Web/LoginController.php` (`quick(Request)`: `POST /login/quick {email}` → logs in that user only when `demo_login` is true and the email is in the seeded list), test `tests/Feature/Observations/Web/DemoLoginTest.php`.
+
+**Interfaces:** the user table in `README-observations.md` § Demo users is the single source; the seeder is idempotent (`updateOrCreate` by email), creates the `demo-cairo` area only if needed, and never touches users outside that list. The login page shows, under the form, a card "دخول سريع للتجربة" with one button per user (name, role, hint) only when `config('app.demo_login')`.
+
+- [ ] Tests `test_demo_users_endpoint_hidden_when_disabled` (404), `test_quick_login_logs_in_seeded_user`, `test_quick_login_refuses_unknown_email`, `test_seeder_idempotent`. FAIL → implement → PASS → Commit `feat(obs-web): demo users and quick login`.
+
+### Task 0b: Demo data buttons cover the new module (owner requirement)
+
+**Files:** modify `app/Http/Controllers/Web/DemoDataController.php` (`wipe`, `generate`), create `database/seeders/DemoObservationsSeeder.php`, modify `resources/views/dashboard/overview.blade.php` (the two existing buttons: label them "مسح كل البيانات" and "توليد بيانات تجريبية", show only to `super_admin`, each behind a confirm step built into the page since `confirm()` is unavailable in some viewers → use a small modal), test `tests/Feature/Observations/Web/DemoDataTest.php`.
+
+**Interfaces:**
+- `wipe` additionally deletes, in FK-safe order: `ai_classifications`, `observation_verifications`, `observation_photos` (and their files under `storage/app/public/evidence/observations`), `observations`, `observation_visits`, and tickets with `source='observation'` (+ their `ticket_updates`, notifications). It never deletes users, branches, areas, departments, risk levels, categories or catalog items.
+- `generate` keeps its current behaviour and then runs `DemoObservationsSeeder`, which (through Plan B's `ObservationService`, so all rules apply) creates: 3 submitted CCTV field visits by `cctv.emp` on زايد and سيتي ستارز (catalog items incl. one late-opening with `minutes_late=35`, one free-text `ai_pending_review`), 1 stock-control visit by `stock.emp` on مول العرب with a `poor` assessment, 1 desk HR visit on all branches (activities), 1 merchandising visit with a positive; then moves one ticket through assign → in_progress → after photo (a bundled placeholder image copied into storage) → waiting_approval → closed so one observation sits in `waiting_verification` and one is `verified_closed`; one observation reopened once. Dates spread over the last 10 days so the dashboard week comparison has data. Idempotent: it first deletes only rows whose `import_source = 'demo'` (set that on everything it creates).
+- `generate` also calls `DemoUsersSeeder` (so the quick-login users always exist) and `ObservationSetupSeeder` (so wiping never leaves the catalog empty).
+
+- [ ] Tests `test_wipe_removes_observation_data_but_keeps_setup_and_users`, `test_generate_creates_demo_observations_in_every_status` (asserts at least one observation in each of `open, in_progress, waiting_verification, verified_closed, reopened, positive, closed_no_action` and `ai_pending_review`), `test_generate_twice_does_not_duplicate`, `test_buttons_hidden_for_non_admin`. FAIL → implement → PASS → Commit `feat(obs-web): demo data wipe and generate cover observations`.
+
 ### Task 1: Observations register `/observations`
 
 **Files:** `app/Http/Controllers/Web/Observations/ObservationController.php` (`index, export`), `resources/views/dashboard/observations/index.blade.php`, `app/Support/ObservationFilters.php` (`fromRequest(Request): self`, `apply(Builder): Builder`, `toQueryString(): array`); routes `GET /observations`, `GET /observations/export.csv`; test `tests/Feature/Observations/Web/RegisterTest.php`.
