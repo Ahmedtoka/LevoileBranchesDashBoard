@@ -4,16 +4,21 @@ namespace App\Services\Observations;
 
 use App\Models\AiClassification;
 use App\Models\Branch;
+use App\Models\Department;
 use App\Models\Observation;
 use App\Models\ObservationCatalogItem;
 use App\Models\ObservationCategory;
 use App\Models\ObservationPhoto;
+use App\Models\ObservationVerification;
 use App\Models\ObservationVisit;
 use App\Models\RiskLevel;
 use App\Models\Ticket;
+use App\Models\TicketUpdate;
 use App\Models\User;
 use App\Services\TicketService;
+use App\Support\ObservationScope;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +26,9 @@ use Illuminate\Validation\ValidationException;
 
 class ObservationService
 {
+    /** Ticket statuses meaning someone is working on it: the observation shows `in_progress`. */
+    private const TICKET_WORKING = ['assigned', 'on_the_way', 'in_progress'];
+
     public function __construct(private ?RiskResolver $resolver = null, private ?TicketService $tickets = null)
     {
         $this->resolver ??= new RiskResolver;
@@ -172,10 +180,7 @@ class ObservationService
         $catalog = $o->catalog_item_id ? ObservationCatalogItem::find($o->catalog_item_id) : null;
         $category = $o->category_id ? ObservationCategory::find($o->category_id) : null;
         $risk = $o->risk_level_id ? RiskLevel::find($o->risk_level_id) : null;
-
-        // Same chain as RiskResolver (spec section 7), ending at the row's own risk instead of the policy default.
-        $sla = $catalog?->sla_hours ?? $category?->default_sla_hours ?? $risk?->default_sla_hours;
-        $sla = $sla === null ? null : (int) $sla;
+        $sla = $this->slaHours($catalog, $category, $risk);
 
         return [
             'source' => 'observation',
@@ -190,6 +195,273 @@ class ObservationService
             'category' => $catalog?->code ?? $category?->slug,
             'created_by' => $u->id,
         ];
+    }
+
+    /**
+     * Move an observation along with its CURRENT ticket (spec section 7); called by SyncObservationFromTicket.
+     * assigned / on_the_way / in_progress -> in_progress; closed (approved) -> waiting_verification, or
+     * verified_closed with an automatic verification by the approver when the risk needs no field check.
+     * Other ticket statuses, tickets outside the module and earlier (reopened) tickets change nothing.
+     */
+    public function syncFromTicket(Ticket $t, ?string $from, string $to): void
+    {
+        if ($t->observation_id === null) {
+            return;
+        }
+
+        DB::transaction(function () use ($t, $to) {
+            $observation = Observation::with('riskLevel')->whereKey($t->observation_id)->lockForUpdate()->first();
+            if ($observation === null || (int) $observation->ticket_id !== (int) $t->id) {
+                return;
+            }
+
+            if (in_array($to, self::TICKET_WORKING, true)) {
+                if (in_array($observation->status, ['open', 'in_progress'], true)) {
+                    $observation->update(['status' => 'in_progress']);
+                }
+
+                return;
+            }
+
+            if ($to !== 'closed' || ! in_array($observation->status, ['open', 'in_progress', 'reopened'], true)) {
+                return;
+            }
+
+            $this->copyAfterEvidence($observation, $t);
+
+            // A null risk (none) needs no field verification.
+            if ($observation->riskLevel?->requires_field_verification) {
+                $observation->update(['status' => 'waiting_verification']);
+
+                return;
+            }
+
+            // The approver is the actor of the closing log row, written just before the event fired.
+            $approverId = TicketUpdate::where('ticket_id', $t->id)->whereNotNull('user_id')->latest('id')->value('user_id')
+                ?? $t->created_by ?? $observation->created_by;
+            ObservationVerification::create([
+                'observation_id' => $observation->id,
+                'verified_by' => $approverId,
+                'result' => 'resolved',
+                'notes' => 'اعتماد بصورة بعد',
+                'verified_at' => now(),
+            ]);
+            $observation->update(['status' => 'verified_closed']);
+        });
+    }
+
+    /**
+     * Field verification of a `waiting_verification` observation (spec section 7). `resolved` closes it,
+     * `partially` keeps it waiting with the note, `not_resolved` (note required) reopens it with a new ticket.
+     * The caller authorizes with the `verify` policy; the check is repeated here so the service is safe alone.
+     */
+    public function verify(Observation $o, User $u, string $result, ?string $notes = null, ?string $photoPath = null, ?int $visitId = null): ObservationVerification
+    {
+        if (! $u->can('verify', $o)) {
+            throw new AuthorizationException(dt('غير مسموح لك بالتحقق من هذه الملاحظة.', 'You may not verify this observation.'));
+        }
+        if (! in_array($result, ObservationVerification::RESULTS, true)) {
+            throw ValidationException::withMessages(['result' => dt('نتيجة التحقق غير صحيحة.', 'Invalid verification result.')]);
+        }
+        $notes = trim((string) $notes) === '' ? null : trim((string) $notes);
+        if ($result === 'not_resolved' && $notes === null) {
+            throw ValidationException::withMessages(['notes' => dt('اكتب سبب عدم الحل.', 'A note is required when the issue is not resolved.')]);
+        }
+        $this->assertWaitingVerification($o);
+
+        // One transaction is the unit retried on a duplicate ticket reference (see retryOnDuplicate).
+        $verification = $this->retryOnDuplicate(fn () => DB::transaction(function () use ($o, $u, $result, $notes, $photoPath, $visitId) {
+            // The status check above is in memory: the lock closes the race with a concurrent verification.
+            $locked = Observation::whereKey($o->id)->lockForUpdate()->firstOrFail();
+            $this->assertWaitingVerification($locked);
+
+            $verification = ObservationVerification::create([
+                'observation_id' => $locked->id,
+                'verified_by' => $u->id,
+                'observation_visit_id' => $visitId,
+                'result' => $result,
+                'notes' => $notes,
+                'verified_at' => now(),
+            ]);
+
+            if ($photoPath !== null && $photoPath !== '') {
+                ObservationPhoto::create([
+                    'observation_id' => $locked->id, 'path' => $photoPath, 'kind' => 'after',
+                    'source' => 'camera', 'uploaded_by' => $u->id,
+                ]);
+            }
+
+            if ($result === 'resolved') {
+                $locked->update(['status' => 'verified_closed']);
+            } elseif ($result === 'not_resolved') {
+                $this->reopen($locked, $u);
+            }
+
+            return $verification;
+        }));
+
+        $o->refresh();
+
+        return $verification;
+    }
+
+    /** Observations of the branch waiting for field verification that the user may see. */
+    public function pendingVerification(Branch $b, User $u): Collection
+    {
+        return ObservationScope::apply(Observation::query(), $u)
+            ->where('observations.branch_id', $b->id)
+            ->where('observations.status', 'waiting_verification')
+            ->with(['riskLevel', 'category', 'catalogItem', 'responsibleDepartment', 'reportingDepartment', 'ticket', 'photos'])
+            ->orderBy('observations.id')
+            ->get();
+    }
+
+    /**
+     * Change the responsible department. A ticket that is not closed moves to the new department's board,
+     * unassigned (a working ticket goes back to `open`), and that department's manager is notified.
+     */
+    public function reroute(Observation $o, int $responsibleDepartmentId, User $u, ?string $reason = null): Observation
+    {
+        $department = Department::find($responsibleDepartmentId);
+        if ($department === null) {
+            throw ValidationException::withMessages(['responsible_department_id' => dt('الإدارة غير موجودة.', 'The department does not exist.')]);
+        }
+
+        DB::transaction(function () use ($o, $department, $u, $reason) {
+            $o->update(['responsible_department_id' => $department->id]);
+
+            $ticket = $o->ticket_id ? Ticket::whereKey($o->ticket_id)->lockForUpdate()->first() : null;
+            if ($ticket === null || $ticket->status === 'closed') {
+                return;
+            }
+
+            $from = $ticket->status;
+            $to = in_array($from, self::TICKET_WORKING, true) ? 'open' : $from;
+            $ticket->update(['department_id' => $department->id, 'assigned_to' => null, 'assigned_at' => null, 'status' => $to]);
+            $this->tickets->log($ticket, $u->id, 'status_change', $from, $to, trim('إعادة توجيه: '.(string) $reason));
+
+            if ($to === 'open' && $o->status === 'in_progress') {
+                $o->update(['status' => 'open']);
+            }
+
+            $managerId = User::where('department_id', $department->id)->where('is_department_manager', true)->orderBy('id')->value('id');
+            if ($managerId !== null) {
+                $this->tickets->notify((int) $managerId, 'ticket_new', 'New ticket in your board', $ticket->reference.' — '.$ticket->title, $ticket->id);
+            }
+        });
+
+        return $o->fresh();
+    }
+
+    /**
+     * Raise the risk (only to a more severe level, lower sort_order). A ticket that is not closed takes the
+     * new priority and SLA, its due date counted from the ticket's creation.
+     */
+    public function raiseRisk(Observation $o, RiskLevel $to, User $u, string $reason): Observation
+    {
+        $reason = trim($reason);
+        if ($reason === '') {
+            throw ValidationException::withMessages(['risk_override_reason' => dt('سبب رفع درجة الخطورة مطلوب.', 'A reason is required to raise the risk level.')]);
+        }
+        $current = $o->risk_level_id ? RiskLevel::find($o->risk_level_id) : null;
+        if ($current !== null && (int) $to->sort_order >= (int) $current->sort_order) {
+            throw ValidationException::withMessages(['risk_level_id' => dt('الدرجة الجديدة لازم تكون أعلى من الحالية.', 'The new risk level must be more severe than the current one.')]);
+        }
+
+        DB::transaction(function () use ($o, $to, $u, $reason) {
+            $o->update(['risk_level_id' => $to->id, 'risk_override_reason' => $reason]);
+
+            $ticket = $o->ticket_id ? Ticket::whereKey($o->ticket_id)->lockForUpdate()->first() : null;
+            if ($ticket === null || $ticket->status === 'closed') {
+                return;
+            }
+
+            $catalog = $o->catalog_item_id ? ObservationCatalogItem::find($o->catalog_item_id) : null;
+            $category = $o->category_id ? ObservationCategory::find($o->category_id) : null;
+            $sla = $this->slaHours($catalog, $category, $to);
+            $oldPriority = $ticket->priority;
+            $newPriority = $to->ticket_priority ?: 'medium';
+
+            $ticket->update([
+                'priority' => $newPriority,
+                'sla_hours' => $sla,
+                'due_at' => $sla ? $ticket->created_at->copy()->addHours($sla) : null,
+            ]);
+            $this->tickets->log($ticket, $u->id, 'priority', $oldPriority, $newPriority, 'رفع درجة الريسك: '.$reason);
+        });
+
+        return $o->fresh();
+    }
+
+    /** Same chain as RiskResolver (spec section 7), ending at the row's own risk instead of the policy default. */
+    private function slaHours(?ObservationCatalogItem $catalog, ?ObservationCategory $category, ?RiskLevel $risk): ?int
+    {
+        $sla = $catalog?->sla_hours ?? $category?->default_sla_hours ?? $risk?->default_sla_hours;
+
+        return $sla === null ? null : (int) $sla;
+    }
+
+    /** Copy the ticket's after photos to the observation, skipping paths it already has. */
+    private function copyAfterEvidence(Observation $o, Ticket $t): void
+    {
+        $present = $o->photos()->pluck('path')->all();
+        $rows = TicketUpdate::where('ticket_id', $t->id)
+            ->where('evidence_kind', 'after')
+            ->whereNotNull('evidence_path')
+            ->orderBy('id')
+            ->get(['evidence_path', 'user_id']);
+
+        foreach ($rows as $row) {
+            if (in_array($row->evidence_path, $present, true)) {
+                continue;
+            }
+            $present[] = $row->evidence_path;
+            ObservationPhoto::create([
+                'observation_id' => $o->id,
+                'path' => $row->evidence_path,
+                'kind' => 'after',
+                'source' => 'gallery',
+                'uploaded_by' => $row->user_id ?? $t->created_by ?? $o->created_by,
+            ]);
+        }
+    }
+
+    /**
+     * `not_resolved`: reopen with a new ticket (the previous one stays closed), one more repeat and the
+     * escalation check. Original dates are never touched. Runs inside verify()'s transaction.
+     */
+    private function reopen(Observation $o, User $u): void
+    {
+        $previous = $o->ticket_id ? Ticket::find($o->ticket_id) : null;
+
+        $o->status = 'reopened';
+        $this->applyRepeatEscalation($o, (int) $o->repeat_count + 1);
+        $o->save();
+
+        $attributes = $this->ticketAttributesFor($o, $u);
+        $attributes['title'] = mb_substr('إعادة فتح: '.$attributes['title'], 0, 255);
+        $attributes['reopen_count'] = (int) ($previous?->reopen_count ?? 0) + 1;
+        // Not silent: the department manager gets ticket_new and the ticket may be auto-assigned. The
+        // assignment event is a no-op here because the observation still points to the previous ticket.
+        $ticket = $this->tickets->createManual($attributes, $u->id);
+        $o->update(['ticket_id' => $ticket->id]);
+
+        foreach ($o->photos()->where('kind', 'before')->orderBy('id')->pluck('path') as $path) {
+            $this->tickets->addEvidence($ticket, $path, 'before', $u);
+        }
+
+        if ($previous?->assigned_to) {
+            $this->tickets->notify((int) $previous->assigned_to, 'observation_reopened',
+                dt('إعادة فتح ملاحظة لم تُحل', 'Observation reopened: not resolved'),
+                $ticket->reference.' — '.$ticket->title, $ticket->id);
+        }
+    }
+
+    private function assertWaitingVerification(Observation $o): void
+    {
+        if ($o->status !== 'waiting_verification') {
+            throw ValidationException::withMessages(['status' => dt('الملاحظة ليست بانتظار التحقق.', 'The observation is not waiting for verification.')]);
+        }
     }
 
     private function needsTicket(Observation $o): bool
@@ -237,7 +509,13 @@ class ObservationService
         $o->save();
 
         $ticket = $this->tickets->createManual($this->ticketAttributesFor($o, $u, $dueFrom), $u->id, ['silent' => $silent]);
-        $o->update(['ticket_id' => $ticket->id, 'status' => 'open']);
+        // createManual may have auto-assigned a fresh copy of the ticket; its assignment event ran before
+        // ticket_id was linked, so the status is derived here from the saved ticket.
+        $ticket->refresh();
+        $o->update([
+            'ticket_id' => $ticket->id,
+            'status' => in_array($ticket->status, self::TICKET_WORKING, true) ? 'in_progress' : 'open',
+        ]);
 
         foreach ($o->photos()->where('kind', 'before')->orderBy('id')->pluck('path') as $path) {
             $this->tickets->addEvidence($ticket, $path, 'before', $u);
@@ -252,23 +530,30 @@ class ObservationService
 
     /**
      * Same catalog item (or same category for a free row) in the same branch within 30 days: the third
-     * occurrence raises the risk one level (spec section 7). Sets the attributes; the caller saves.
+     * occurrence raises the risk one level (spec section 7). A reopen passes its own `$repeatCount`
+     * (previous count + 1) instead of the query. The risk is raised at most once per observation.
+     * Sets the attributes; the caller saves.
      */
-    private function applyRepeatEscalation(Observation $o): bool
+    private function applyRepeatEscalation(Observation $o, ?int $repeatCount = null): bool
     {
-        if ($o->catalog_item_id === null && $o->category_id === null) {
-            return false;
+        if ($repeatCount !== null) {
+            $o->repeat_count = $repeatCount;
+        } else {
+            if ($o->catalog_item_id === null && $o->category_id === null) {
+                return false;
+            }
+
+            $query = Observation::where('branch_id', $o->branch_id)
+                ->whereKeyNot($o->id)
+                ->where('created_at', '>=', now()->subDays(30));
+            $o->catalog_item_id !== null
+                ? $query->where('catalog_item_id', $o->catalog_item_id)
+                : $query->whereNull('catalog_item_id')->where('category_id', $o->category_id);
+
+            $o->repeat_count = $query->count();
         }
 
-        $query = Observation::where('branch_id', $o->branch_id)
-            ->whereKeyNot($o->id)
-            ->where('created_at', '>=', now()->subDays(30));
-        $o->catalog_item_id !== null
-            ? $query->where('catalog_item_id', $o->catalog_item_id)
-            : $query->whereNull('catalog_item_id')->where('category_id', $o->category_id);
-
-        $o->repeat_count = $query->count();
-        if ($o->repeat_count < 2 || $o->risk_level_id === null) {
+        if ($o->repeat_count < 2 || $o->risk_level_id === null || $o->escalated_from_risk_level_id !== null) {
             return false;
         }
 

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Events\TicketStatusChanged;
+use App\Listeners\SyncObservationFromTicket;
 use App\Models\Area;
 use App\Models\Observation;
 use App\Models\ObservationCatalogItem;
@@ -14,6 +16,7 @@ use App\Policies\ObservationVisitPolicy;
 use App\Services\Observations\Ai\AnthropicClassifier;
 use App\Services\Observations\Ai\ClassifierContract;
 use App\Services\Observations\Ai\NullClassifier;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -45,5 +48,8 @@ class AppServiceProvider extends ServiceProvider
         foreach ([ObservationCategory::class, ObservationCatalogItem::class, Area::class, RiskLevel::class] as $model) {
             Gate::policy($model, ObservationCatalogPolicy::class);
         }
+
+        // Explicit registration; listener discovery is disabled in bootstrap/app.php so it runs once.
+        Event::listen(TicketStatusChanged::class, SyncObservationFromTicket::class);
     }
 }

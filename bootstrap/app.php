@@ -13,6 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    // Listeners are registered explicitly in AppServiceProvider; discovery would register them twice.
+    ->withEvents(discover: false)
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
