@@ -15,8 +15,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
- * Writes one visit group through ObservationService (createVisit -> upsertObservations -> submitVisit with
- * `silent` and `due_from`), so the same rules apply as live entry. Rows already imported (same
+ * Writes one visit group through ObservationService (createVisit -> upsertObservations -> submitVisit ->
+ * approveVisit with `silent` and `due_from`), so the same rules apply as live entry. Imported visits are
+ * finished work, so the import user approves them at once (the tickets are created at approval, Plan H). Rows already imported (same
  * import_source + import_row) are skipped. A failure removes the group's draft visit again.
  */
 class ImportWriter
@@ -92,8 +93,9 @@ class ImportWriter
                 ? Carbon::parse($group['visit_date'])->startOfDay()
                 : Carbon::parse($rows[0]['week_end'])->startOfDay();
 
-            $submitted = $this->observations->submitVisit($visit, $importUser, ['silent' => true, 'due_from' => $dueFrom]);
-            $result['tickets'] = count($submitted['created_tickets']);
+            $this->observations->submitVisit($visit, $importUser, ['silent' => true, 'due_from' => $dueFrom]);
+            $approved = $this->observations->approveVisit($visit->fresh(), $importUser, ['silent' => true, 'due_from' => $dueFrom]);
+            $result['tickets'] = count($approved['created_tickets']);
 
             $this->closePendingVerification($saved, $rows, $importUser);
 
@@ -195,12 +197,12 @@ class ImportWriter
         }
     }
 
-    /** Remove a draft visit the import created and could not complete (its observations have no tickets yet). */
+    /** Remove a visit the import created and could not approve (its observations have no tickets yet). */
     private function discard(ObservationVisit $visit): void
     {
         try {
             $fresh = ObservationVisit::find($visit->id);
-            if ($fresh === null || $fresh->status !== 'draft') {
+            if ($fresh === null || $fresh->status === 'approved') {
                 return;
             }
             $ids = Observation::where('observation_visit_id', $fresh->id)->pluck('id');

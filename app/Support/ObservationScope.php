@@ -47,6 +47,31 @@ class ObservationScope
         return $q->whereRaw('0 = 1');
     }
 
+    /**
+     * Reporting departments whose submitted visits the user approves (Plan H): null = every reporting
+     * department (super_admin, ops_manager), [id] for the manager of a reporting department, [] otherwise.
+     *
+     * @return list<int>|null
+     */
+    public static function approvableDepartmentIds(User $u): ?array
+    {
+        if ($u->hasRole(['super_admin', 'ops_manager'])) {
+            return null;
+        }
+
+        $id = self::managedReportingDepartmentId($u);
+
+        return $id === null ? [] : [$id];
+    }
+
+    /** True when the user may approve / classify visits of this reporting department. */
+    public static function approvesDepartment(User $u, ?int $departmentId): bool
+    {
+        $ids = self::approvableDepartmentIds($u);
+
+        return $ids === null || ($departmentId !== null && in_array((int) $departmentId, $ids, true));
+    }
+
     /** Department manager (flag or role) of a reporting department: that department's id, else null. */
     public static function managedReportingDepartmentId(User $u): ?int
     {

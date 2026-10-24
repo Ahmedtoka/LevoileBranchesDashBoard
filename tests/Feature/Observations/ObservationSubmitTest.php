@@ -47,6 +47,8 @@ class ObservationSubmitTest extends TestCase
         parent::setUp();
 
         Carbon::setTestNow('2026-10-22 10:00:00');
+        // These tests cover the pre-Plan-H behaviour: tickets at submit (visit approved by the submitter).
+        config(['observations.manager_approval' => false]);
 
         $this->cctv = Seeds::department('cctv', ['is_reporting' => true]);
         $this->operation = Seeds::department('operation', ['is_reporting' => true]);
@@ -147,9 +149,10 @@ class ObservationSubmitTest extends TestCase
 
         $this->assertSame(2, Ticket::count());
         $this->assertCount(2, $result['created_tickets']);
-        $this->assertSame('submitted', $result['visit']->status);
+        $this->assertSame('approved', $result['visit']->status);
         $this->assertNotNull($result['visit']->submitted_at);
-        $this->assertSame('submitted', $visit->fresh()->status);
+        $this->assertSame('approved', $visit->fresh()->status);
+        $this->assertSame($this->recorder->id, $visit->fresh()->approved_by);
 
         $fromCatalog->refresh();
         $ticket = Ticket::findOrFail($fromCatalog->ticket_id);
@@ -195,7 +198,7 @@ class ObservationSubmitTest extends TestCase
         $this->assertSame($notifications, Notification::count());
         $this->assertSame($first['created_tickets'], $second['created_tickets']);
         $this->assertSame($observation->fresh()->ticket_id, $second['created_tickets'][0]['ticket_id']);
-        $this->assertSame('submitted', $second['visit']->status);
+        $this->assertSame('approved', $second['visit']->status);
 
         // A stale in-memory draft (submitted elsewhere meanwhile) is caught by the locked re-read.
         $stale = $visit->fresh();
@@ -250,7 +253,7 @@ class ObservationSubmitTest extends TestCase
         $this->assertSame('assessment', $good->fresh()->kind);
         $this->assertSame('closed_no_action', $average->fresh()->status);
         $this->assertSame(1, (int) $item->fresh()->usage_count);
-        $this->assertSame('submitted', $visit->fresh()->status);
+        $this->assertSame('approved', $visit->fresh()->status);
     }
 
     public function test_poor_assessment_becomes_issue(): void

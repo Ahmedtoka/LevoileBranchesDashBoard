@@ -117,6 +117,7 @@ class VerificationTest extends TestCase
         ObservationPhoto::create(['observation_id' => $observation->id, 'path' => 'obs/before.jpg', 'kind' => 'before', 'source' => 'camera', 'uploaded_by' => $this->recorder->id]);
 
         $this->service()->submitVisit($visit, $this->recorder, ['silent' => $silent]);
+        $this->service()->approveVisit($visit->fresh(), $this->operationManager, ['silent' => $silent]);
 
         return $observation->fresh();
     }
