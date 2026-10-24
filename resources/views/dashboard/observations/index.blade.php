@@ -10,7 +10,10 @@
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
     <h4 class="fw-bold mb-0">{{ dt('الملاحظات', 'Observations') }}</h4>
     <span class="badge text-bg-light border">{{ $observations->total() }}</span>
-    <a href="{{ route('observations.export', $qs) }}" class="btn btn-sm btn-outline-success ms-auto">
+    <a href="{{ route('observations.beforeAfter') }}" class="btn btn-sm btn-outline-primary ms-auto">
+        <i class="bi bi-images"></i> {{ dt('كنا وبقينا', 'Before & after') }}
+    </a>
+    <a href="{{ route('observations.export', $qs) }}" class="btn btn-sm btn-outline-success">
         <i class="bi bi-filetype-csv"></i> {{ dt('تصدير CSV', 'Export CSV') }}
     </a>
 </div>

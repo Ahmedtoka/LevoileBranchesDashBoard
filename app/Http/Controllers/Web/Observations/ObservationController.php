@@ -126,6 +126,49 @@ class ObservationController extends Controller
         ]);
     }
 
+    /** Statuses the before/after page covers: still being worked on, or verified. */
+    public const BEFORE_AFTER_STATUSES = ['open', 'in_progress', 'waiting_verification', 'verified_closed', 'reopened'];
+
+    /**
+     * GET /observations/before-after ("كنا وبقينا", spec 10): one branch, its open and verified observations
+     * with the before / after photos side by side. Needs ?branch_id=; without it only the branch select shows.
+     */
+    public function beforeAfter(Request $request)
+    {
+        Gate::authorize('viewAny', Observation::class);
+
+        $user = $request->user();
+        $scoped = $user->scopedBranchIds();
+        $branches = Branch::where('active', true)
+            ->when($scoped !== null, fn ($q) => $q->whereIn('id', $scoped))
+            ->orderBy('branch_name')->get();
+
+        $branchId = $request->query('branch_id');
+        $branchId = is_scalar($branchId) && ctype_digit((string) $branchId) ? (int) $branchId : null;
+        abort_if($branchId !== null && ! $branches->contains('id', $branchId), 403);
+
+        $status = $request->query('status');
+        $status = is_string($status) && in_array($status, self::BEFORE_AFTER_STATUSES, true) ? $status : null;
+
+        $observations = null;
+        if ($branchId !== null) {
+            $observations = ObservationScope::apply(Observation::query(), $user)
+                ->where('observations.branch_id', $branchId)
+                ->whereIn('observations.status', $status ? [$status] : self::BEFORE_AFTER_STATUSES)
+                ->with(['catalogItem', 'category', 'riskLevel', 'ticket.updates', 'verifications.verifier', 'photos'])
+                ->orderByDesc('observations.event_date')->orderByDesc('observations.id')
+                ->paginate(30)->withQueryString();
+        }
+
+        return view('dashboard.observations.before-after', [
+            'branches' => $branches,
+            'branchId' => $branchId,
+            'status' => $status,
+            'statuses' => self::BEFORE_AFTER_STATUSES,
+            'observations' => $observations,
+        ]);
+    }
+
     public function show(Observation $observation)
     {
         Gate::authorize('view', $observation);
