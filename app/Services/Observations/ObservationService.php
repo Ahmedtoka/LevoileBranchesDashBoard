@@ -1046,7 +1046,12 @@ class ObservationService
             throw ValidationException::withMessages(["{$key}.description" => dt('وصف الملاحظة مطلوب.', 'The description is required.')]);
         }
 
-        [$riskLevelId, $overrideReason] = $this->decideRisk($item, $resolved['risk_level_id'], $key);
+        [$riskLevelId, $overrideReason] = $this->decideRisk(
+            $item,
+            $resolved['risk_level_id'],
+            $key,
+            $catalog?->risk_level_id ?? $category?->default_risk_level_id
+        );
 
         $attributes = [
             'observation_visit_id' => $v->id,
@@ -1128,7 +1133,7 @@ class ObservationService
      *
      * @return array{0:?int, 1:?string} [risk_level_id, risk_override_reason]
      */
-    private function decideRisk(array $item, ?int $resolvedId, string $key): array
+    private function decideRisk(array $item, ?int $resolvedId, string $key, ?int $baseDefaultId = null): array
     {
         $slug = $item['risk_level_slug'] ?? null;
         if (! $slug) {
@@ -1141,6 +1146,11 @@ class ObservationService
         }
         if ($resolvedId === null || $chosen->id === $resolvedId) {
             return [$chosen->id, null];
+        }
+        // The client pre-fills the catalog/category default; when the escalation rule moves the
+        // resolved level away from that default, the employee did not override anything.
+        if ($baseDefaultId !== null && $chosen->id === $baseDefaultId) {
+            return [$resolvedId, null];
         }
 
         $reason = trim((string) ($item['risk_override_reason'] ?? ''));
