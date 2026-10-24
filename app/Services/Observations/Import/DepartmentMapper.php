@@ -38,6 +38,12 @@ class DepartmentMapper
         return self::SLUGS[$key];
     }
 
+    /** Id of a department by its slug (not a workbook label); null when the department is missing. */
+    public function idForSlug(string $slug): ?int
+    {
+        return isset($this->slugToId[$slug]) ? (int) $this->slugToId[$slug] : null;
+    }
+
     public function toDepartmentId(string $raw): int
     {
         $slug = $this->toSlug($raw);
