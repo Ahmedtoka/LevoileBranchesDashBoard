@@ -784,6 +784,12 @@ class ObservationService
         $categoryId = ! empty($item['category_id']) ? (int) $item['category_id'] : $catalog?->category_id;
         $category = $catalog?->category_id === $categoryId ? $catalog?->category : ($categoryId ? ObservationCategory::find($categoryId) : null);
 
+        // An update that omits the cc key (a resumed draft re-sends rows without it) keeps the row's own cc;
+        // an explicit empty array still clears it. Catalog / category cc keep their precedence in the resolver.
+        if ($existing !== null && ! array_key_exists('cc_department_ids', $item)) {
+            $item['cc_department_ids'] = $existing->cc_department_ids;
+        }
+
         $resolved = $this->resolver->resolve($item, $catalog, $category);
 
         if (! in_array($resolved['kind'], Observation::KINDS, true)) {
@@ -817,7 +823,7 @@ class ObservationService
             'extra_values' => $item['extra_values'] ?? null,
             'rating' => $item['rating'] ?? null,
             'event_date' => $v->visit_date,
-            'classification_status' => $catalog ? 'catalog' : (! empty($item['ai_classification_id']) ? 'ai_pending_review' : 'manual'),
+            'classification_status' => $this->classificationStatus($item, $catalog, $existing),
             'status' => match ($resolved['kind']) {
                 'positive' => 'positive',
                 'activity' => 'closed_no_action',
@@ -853,6 +859,26 @@ class ObservationService
         }
 
         return $observation;
+    }
+
+    /**
+     * catalog pick -> `catalog`; an AI suggestion id -> `ai_pending_review`. An update without the AI id keeps an
+     * AI status already on the row (a resumed draft never re-sends the id, and the row must stay in the review
+     * queue); anything else is `manual`.
+     */
+    private function classificationStatus(array $item, ?ObservationCatalogItem $catalog, ?Observation $existing): string
+    {
+        if ($catalog !== null) {
+            return 'catalog';
+        }
+        if (! empty($item['ai_classification_id'])) {
+            return 'ai_pending_review';
+        }
+        if ($existing !== null && in_array($existing->classification_status, ['ai_pending_review', 'ai_reviewed'], true)) {
+            return $existing->classification_status;
+        }
+
+        return 'manual';
     }
 
     /**
