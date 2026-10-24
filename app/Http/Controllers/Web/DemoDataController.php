@@ -12,8 +12,6 @@ use App\Models\Visit;
 use App\Models\VisitAnswer;
 use App\Models\VisitTemplate;
 use Database\Seeders\DemoObservationsSeeder;
-use Database\Seeders\DemoUsersSeeder;
-use Database\Seeders\ObservationSetupSeeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -194,11 +192,9 @@ class DemoDataController extends Controller
             }
         });
 
-        // Observations & Risk module: quick-login users, setup (so a wipe never leaves the catalog empty),
-        // then the demo visits/observations through the real services.
-        (new DemoUsersSeeder)->run();
-        DemoObservationsSeeder::prepare();
-        (new ObservationSetupSeeder)->run();
+        // Observations & Risk module through the real services. The seeder owns its preparation: demo
+        // users, and the module setup only when it is missing (so a wipe never leaves the catalog empty
+        // and the owner's catalog edits are never reset).
         $observations = new DemoObservationsSeeder;
         $observations->run();
         $o = $observations->summary;

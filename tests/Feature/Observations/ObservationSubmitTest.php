@@ -311,6 +311,37 @@ class ObservationSubmitTest extends TestCase
         $this->assertSame(1, Notification::where('type', 'observation_escalated')->count());
     }
 
+    public function test_demo_rows_do_not_count_as_repeats_for_real_observations(): void
+    {
+        $category = $this->category();
+        $item = $this->catalog($category, ['risk_level_id' => $this->risks['medium']->id]);
+
+        // Two demo rows of the same item at the same branch, inside the 30-day window.
+        $demoVisit = $this->visit(['status' => 'submitted']);
+        foreach ([3, 5] as $days) {
+            $prior = $this->observation($demoVisit, ['catalog_item_id' => $item->id, 'category_id' => $category->id, 'import_source' => 'demo']);
+            $prior->forceFill(['created_at' => now()->subDays($days)])->save();
+        }
+
+        // A real observation ignores them: no repeat, no escalation.
+        $realVisit = $this->visit();
+        $real = $this->observation($realVisit, ['catalog_item_id' => $item->id, 'category_id' => $category->id]);
+        $this->submit($realVisit);
+        $real->refresh();
+        $this->assertSame(0, $real->repeat_count);
+        $this->assertSame($this->risks['medium']->id, $real->risk_level_id);
+        $this->assertNull($real->escalated_from_risk_level_id);
+
+        // A demo observation still counts the demo rows (the real one too) and is escalated.
+        $nextDemoVisit = $this->visit();
+        $demo = $this->observation($nextDemoVisit, ['catalog_item_id' => $item->id, 'category_id' => $category->id, 'import_source' => 'demo']);
+        $this->submit($nextDemoVisit);
+        $demo->refresh();
+        $this->assertSame(3, $demo->repeat_count);
+        $this->assertSame($this->risks['high']->id, $demo->risk_level_id);
+        $this->assertSame($this->risks['medium']->id, $demo->escalated_from_risk_level_id);
+    }
+
     public function test_high_risk_notifies_area_manager(): void
     {
         $areaManager = Seeds::user('area_manager');

@@ -607,6 +607,10 @@ class ObservationService
             $query = Observation::where('branch_id', $o->branch_id)
                 ->whereKeyNot($o->id)
                 ->where('created_at', '>=', now()->subDays(30));
+            // Demo rows (DemoObservationsSeeder) never count as repeats of a real observation; demo-on-demo does.
+            if ($o->import_source !== 'demo') {
+                $query->where(fn ($q) => $q->whereNull('import_source')->orWhere('import_source', '!=', 'demo'));
+            }
             $o->catalog_item_id !== null
                 ? $query->where('catalog_item_id', $o->catalog_item_id)
                 : $query->whereNull('catalog_item_id')->where('category_id', $o->category_id);

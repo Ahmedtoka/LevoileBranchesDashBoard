@@ -8,6 +8,7 @@ use App\Models\Observation;
 use App\Models\ObservationCatalogItem;
 use App\Models\ObservationCategory;
 use App\Models\ObservationVisit;
+use App\Models\RiskLevel;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Services\Observations\Ai\ClassifierContract;
@@ -17,6 +18,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 /**
  * Demo data for the Observations & Risk module, built through ObservationService and TicketService so
@@ -32,12 +34,12 @@ class DemoObservationsSeeder extends Seeder
 
     public const MALL_OF_ARABIA = '6th of October - Mall of Arabia';
 
-    /** Departments the demo (and the catalog it uses) needs; created only when missing. */
+    /** Departments the demo (and the catalog it uses) needs; created only when missing (recorders as reporting). */
     private const DEPARTMENTS = [
-        'cctv' => ['name' => 'CCTV', 'ticket_prefix' => 'CCT', 'color' => '#64748b'],
-        'stock_control' => ['name' => 'Stock Control', 'ticket_prefix' => 'STK', 'color' => '#f59e0b'],
-        'hr' => ['name' => 'HR', 'ticket_prefix' => 'HRD', 'color' => '#14b8a6'],
-        'merchandise' => ['name' => 'Merchandise', 'ticket_prefix' => 'MRC', 'color' => '#ec4899'],
+        'cctv' => ['name' => 'CCTV', 'ticket_prefix' => 'CCT', 'color' => '#64748b', 'is_reporting' => true],
+        'stock_control' => ['name' => 'Stock Control', 'ticket_prefix' => 'STK', 'color' => '#f59e0b', 'is_reporting' => true],
+        'hr' => ['name' => 'HR', 'ticket_prefix' => 'HRD', 'color' => '#14b8a6', 'is_reporting' => true],
+        'merchandise' => ['name' => 'Merchandise', 'ticket_prefix' => 'MRC', 'color' => '#ec4899', 'is_reporting' => true],
         'operation' => ['name' => 'Operation', 'ticket_prefix' => 'OPR', 'color' => '#10b981'],
         'maintenance' => ['name' => 'Maintenance', 'ticket_prefix' => 'MTN', 'color' => '#ef4444'],
         'it' => ['name' => 'IT', 'ticket_prefix' => 'ITD', 'color' => '#0ea5e9'],
@@ -75,14 +77,19 @@ class DemoObservationsSeeder extends Seeder
     private int $photoSeq = 0;
 
     /**
-     * Create the departments and the Mall of Arabia branch the demo needs, without changing existing rows.
-     * Returns true when something was created (the setup seeder must then run again).
+     * The single owner of the demo's preparation: demo users, the departments and the Mall of Arabia branch
+     * (created only when missing, existing rows untouched), and the module setup only when it is missing
+     * (no active risk level or no catalog item), so the owner's catalog edits are never reset.
      */
-    public static function prepare(): bool
+    private function ensureSetup(): void
     {
-        $created = false;
+        $emails = array_column(DemoUsersSeeder::users(), 'email');
+        if (User::whereIn('email', $emails)->count() < count($emails)) {
+            (new DemoUsersSeeder)->run();
+        }
+
         foreach (self::DEPARTMENTS as $slug => $attrs) {
-            $created = Department::firstOrCreate(['slug' => $slug], $attrs)->wasRecentlyCreated || $created;
+            Department::firstOrCreate(['slug' => $slug], $attrs);
         }
 
         if (! Branch::where('branch_name', 'like', '%Mall of Arabia')->exists()) {
@@ -90,10 +97,16 @@ class DemoObservationsSeeder extends Seeder
                 'branch_name' => self::MALL_OF_ARABIA, 'area' => '6th of October', 'city' => 'Giza',
                 'active' => true, 'checkin_radius' => 150,
             ]);
-            $created = true;
         }
 
-        return $created;
+        if (! RiskLevel::where('active', true)->exists() || ! ObservationCatalogItem::exists()) {
+            (new ObservationSetupSeeder)->run();
+        }
+
+        $missing = array_diff(self::CODES, ObservationCatalogItem::whereIn('code', self::CODES)->pluck('code')->all());
+        if ($missing !== []) {
+            throw new RuntimeException('Demo observations need these catalog items: '.implode(', ', $missing));
+        }
     }
 
     /**
@@ -141,12 +154,7 @@ class DemoObservationsSeeder extends Seeder
 
     public function run(): void
     {
-        if (self::prepare() || ObservationCatalogItem::whereIn('code', self::CODES)->count() < count(self::CODES)) {
-            (new ObservationSetupSeeder)->run();
-        }
-        if (User::whereIn('email', self::USERS)->count() < count(self::USERS)) {
-            (new DemoUsersSeeder)->run();
-        }
+        $this->ensureSetup();
 
         self::purge();
 
@@ -384,14 +392,30 @@ class DemoObservationsSeeder extends Seeder
             return;
         }
 
+        // The reopen auto-assignment may have picked a real employee: hand the ticket to the demo employee
+        // through TicketService so the log, the event and the notification all name the right person.
+        $employee = $this->users['operation.emp@levoile.test'];
+        if ($new->assigned_to !== null && (int) $new->assigned_to !== (int) $employee->id) {
+            $this->tickets->assign($new, $employee, $this->users['operation.manager@levoile.test']);
+        }
+
+        // Backdate the new ticket's log one minute apart (in write order), then its milestones from it.
+        $assignedAt = null;
+        $step = $at->copy();
+        foreach (DB::table('ticket_updates')->where('ticket_id', $new->id)->orderBy('id')->get(['id', 'action']) as $row) {
+            DB::table('ticket_updates')->where('id', $row->id)->update(['created_at' => $step, 'updated_at' => $step]);
+            if ($row->action === 'assignment') {
+                $assignedAt = $step->copy();
+            }
+            $step = $step->copy()->addMinute();
+        }
+
+        $new->refresh();
         DB::table('tickets')->where('id', $new->id)->update([
-            'created_at' => $at, 'updated_at' => $at,
+            'created_at' => $at, 'updated_at' => $step,
             'due_at' => $new->sla_hours ? $at->copy()->addHours((int) $new->sla_hours) : null,
-            'assigned_at' => $new->assigned_to ? $at : null,
-            // An auto-assignment may have picked a real employee: keep the demo on demo users.
-            'assigned_to' => $new->assigned_to ? $this->users['operation.emp@levoile.test']->id : null,
+            'assigned_at' => $new->assigned_to ? ($assignedAt ?? $at) : null,
         ]);
-        DB::table('ticket_updates')->where('ticket_id', $new->id)->update(['created_at' => $at, 'updated_at' => $at]);
         DB::table('notifications')->where('ticket_id', $new->id)->update(['created_at' => $at, 'updated_at' => $at]);
     }
 

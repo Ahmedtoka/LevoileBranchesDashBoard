@@ -6,6 +6,7 @@ use App\Models\AiClassification;
 use App\Models\Area;
 use App\Models\Branch;
 use App\Models\Department;
+use App\Models\Notification;
 use App\Models\Observation;
 use App\Models\ObservationCatalogItem;
 use App\Models\ObservationCategory;
@@ -14,6 +15,7 @@ use App\Models\ObservationVerification;
 use App\Models\ObservationVisit;
 use App\Models\RiskLevel;
 use App\Models\Ticket;
+use App\Models\TicketUpdate;
 use App\Models\User;
 use App\Services\Observations\Ai\ClassifierContract;
 use App\Services\Observations\Ai\NullClassifier;
@@ -143,6 +145,36 @@ class DemoDataTest extends TestCase
         $this->assertSame(0, Ticket::where('source', 'observation')->count());
         $this->assertSame([], Storage::disk('public')->allFiles('evidence/observations'));
         $this->assertSame($before, $kept());
+
+        // Generate after a wipe works on the kept setup and never resets the owner's catalog edits.
+        $edited = ObservationCatalogItem::where('code', 'CCTV-FIT-OVER-5')->firstOrFail();
+        $edited->update(['label_ar' => 'نص عدّله المدير']);
+        $this->generate();
+        $this->assertSame('نص عدّله المدير', $edited->fresh()->label_ar);
+        $this->assertGreaterThan(0, Observation::count());
+        $this->assertSame($before['catalog'], ObservationCatalogItem::count());
+    }
+
+    public function test_reopen_ticket_reassigned_to_demo_employee_through_service(): void
+    {
+        // A real operation technician on Saraya, older than the demo users: autoAssign picks them first.
+        $operation = Seeds::department('operation');
+        $saraya = Seeds::branch('Sheikh Zayed - Saraya Mall', ['active' => true]);
+        $real = Seeds::user('department_employee', ['department_id' => $operation->id, 'name' => 'فني حقيقي']);
+        $real->branches()->attach($saraya->id);
+
+        $this->generate();
+
+        $reopened = Observation::where('status', 'reopened')->firstOrFail();
+        $ticket = Ticket::findOrFail($reopened->ticket_id);
+        $demoEmp = User::where('email', 'operation.emp@levoile.test')->firstOrFail();
+        $this->assertSame($demoEmp->id, (int) $ticket->assigned_to);
+        // The latest assignment log row names the demo employee (written by TicketService::assign) and is backdated.
+        $lastAssignment = TicketUpdate::where('ticket_id', $ticket->id)->where('action', 'assignment')->orderByDesc('id')->firstOrFail();
+        $this->assertStringContainsString($demoEmp->name, (string) $lastAssignment->note);
+        $this->assertTrue($lastAssignment->created_at->lt(now()->subDays(6)));
+        // No demo notification is left for the real technician.
+        $this->assertSame(0, Notification::where('user_id', $real->id)->count());
     }
 
     public function test_buttons_hidden_for_non_admin(): void
