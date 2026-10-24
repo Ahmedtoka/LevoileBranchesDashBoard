@@ -18,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureUserHasRole::class,
         ]);
         $middleware->web(append: [SetLocale::class]);
+        // Spec 9.3: the web page /observations/new calls the API with the session (stateful Sanctum).
+        $middleware->statefulApi();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

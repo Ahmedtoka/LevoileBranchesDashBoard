@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MaintenanceController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\ObservationController;
+use App\Http\Controllers\Api\ObservationVisitController;
 use App\Http\Controllers\Api\OpsController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\TicketController;
@@ -69,6 +71,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/ops/visits', [OpsController::class, 'visits']);
     Route::get('/ops/tickets', [OpsController::class, 'tickets']);
     Route::get('/ops/maintenance', [OpsController::class, 'maintenance']);
+
+    // ---- Observations & risk (spec section 11; the web page calls the same endpoints with the session) ----
+    // meta is registered before {observation}, and {observation} only matches numbers.
+    Route::get('/observations/meta', [ObservationController::class, 'meta']);
+    Route::get('/observation-visits', [ObservationVisitController::class, 'index']);
+    Route::post('/observation-visits', [ObservationVisitController::class, 'store']);
+    Route::get('/observation-visits/{visit}', [ObservationVisitController::class, 'show'])->whereNumber('visit');
+    Route::post('/observation-visits/{visit}/photos', [ObservationVisitController::class, 'uploadPhoto'])->whereNumber('visit');
+    Route::post('/observation-visits/{visit}/ai-check', [ObservationVisitController::class, 'aiCheck'])->whereNumber('visit');
+    Route::post('/observation-visits/{visit}/observations', [ObservationVisitController::class, 'upsert'])->whereNumber('visit');
+    Route::post('/observation-visits/{visit}/submit', [ObservationVisitController::class, 'submit'])->whereNumber('visit');
+    Route::get('/observations', [ObservationController::class, 'index']);
+    Route::get('/observations/{observation}', [ObservationController::class, 'show'])->whereNumber('observation');
+    Route::delete('/observations/{observation}', [ObservationController::class, 'destroyDraft'])->whereNumber('observation');
+    Route::post('/observations/{observation}/verify', [ObservationController::class, 'verify'])->whereNumber('observation');
+    Route::get('/branches/{branch}/observations/pending-verification', [ObservationController::class, 'pendingVerification'])->whereNumber('branch');
 
     // ---- Notifications ----
     Route::get('/notifications', [NotificationController::class, 'index']);
