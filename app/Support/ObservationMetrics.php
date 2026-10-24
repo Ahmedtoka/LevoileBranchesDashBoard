@@ -45,25 +45,30 @@ class ObservationMetrics
         $stats = $m->stats($r);
         $names = $m->departmentNames($stats);
         $weeks = self::weekWindows($r);
+        // "متأخر الآن" is a state now (Ticket::isOverdue), not bounded by the period: one value for every window.
+        $overdue = $m->overdueTicketsQuery()->count();
 
-        return $m->kpis($stats) + [
+        return $m->kpis($stats, $overdue) + [
             'risk_by_department' => $m->riskByDepartment($r),
             'repeated_branches' => $m->repeatedBranches($r),
             'responsible_performance' => $m->responsiblePerformance($stats['tickets'], $names),
             'outside_catalog_pct_by_department' => $m->outsideCatalog($stats['observations'], $names),
             'week_compare' => [
-                'current' => $m->kpis($m->stats($weeks['current'])),
-                'previous' => $m->kpis($m->stats($weeks['previous'])),
+                'current' => $m->kpis($m->stats($weeks['current']), $overdue),
+                'previous' => $m->kpis($m->stats($weeks['previous']), $overdue),
             ],
             // One row per reporting department for the "الإدارات" table (spec 12, العرض).
             'departments' => $m->departmentRows($stats, $names),
         ];
     }
 
-    /** "متأخر الآن" as a list: the overdue linked tickets, oldest due first, with their observation. */
-    public static function overdueTickets(User $u, DateRange $r, array $filters = [], int $limit = 20): Collection
+    /**
+     * "متأخر الآن" as a list: the overdue linked tickets, oldest due first, with their observation.
+     * Not bounded by the date range: the user scope and the non-range filters only.
+     */
+    public static function overdueTickets(User $u, array $filters = [], int $limit = 20): Collection
     {
-        return self::make($u, $filters)->tickets($r)->overdue()
+        return self::make($u, $filters)->overdueTicketsQuery()
             ->with(['observation.branch', 'department'])
             ->orderBy('tickets.due_at')->orderBy('tickets.id')
             ->limit($limit)->get();
@@ -95,11 +100,14 @@ class ObservationMetrics
 
     // ---- base queries: scope + range + filters -------------------------------------------------
 
-    /** Observations by event_date, through ObservationScope and the register's own filter code. */
-    private function observations(DateRange $r): Builder
+    /** Observations by event_date (or over all dates when $r is null), through ObservationScope and the register's own filter code. */
+    private function observations(?DateRange $r): Builder
     {
-        return (new ObservationFilters($r, $this->filters))
-            ->apply(ObservationScope::apply(Observation::query(), $this->user));
+        $query = ObservationScope::apply(Observation::query(), $this->user);
+
+        return $r === null
+            ? (new ObservationFilters(new DateRange, $this->filters))->applyWithoutRange($query)
+            : (new ObservationFilters($r, $this->filters))->apply($query);
     }
 
     /** Submitted visits (field and desk) by visit_date; the reporting department is visits.department_id. */
@@ -126,8 +134,8 @@ class ObservationMetrics
         return $q;
     }
 
-    /** The linked tickets (source=observation) of the in-range, scoped, filtered observations. */
-    private function tickets(DateRange $r): Builder
+    /** The linked tickets (source=observation) of the scoped, filtered observations (in-range unless $r is null). */
+    private function tickets(?DateRange $r): Builder
     {
         return Ticket::query()
             ->where('tickets.source', 'observation')
@@ -136,7 +144,13 @@ class ObservationMetrics
 
     // ---- aggregates -----------------------------------------------------------------------------
 
-    /** One query per metric family: visits (total + per department), observations, closed tickets, overdue. */
+    /** "متأخر الآن": linked tickets per Ticket::scopeOverdue() over the scope and the non-range filters (no period). */
+    private function overdueTicketsQuery(): Builder
+    {
+        return $this->tickets(null)->overdue();
+    }
+
+    /** One query per metric family for a range: visits (total + per department), observations, closed tickets. */
     private function stats(DateRange $r): array
     {
         $visitSelect = "COUNT(*) AS submitted,
@@ -163,12 +177,11 @@ class ObservationMetrics
                     SUM(CASE WHEN tickets.due_at IS NOT NULL AND tickets.closed_at <= tickets.due_at THEN 1 ELSE 0 END) AS on_time,
                     AVG(TIMESTAMPDIFF(SECOND, tickets.created_at, tickets.closed_at)) AS avg_seconds')
                 ->groupBy('tickets.department_id')->toBase()->get()->keyBy('department_id'),
-            'overdue' => $this->tickets($r)->overdue()->count(),
         ];
     }
 
-    /** The six KPI tiles (also the "مقارنة الأسابيع" set). */
-    private function kpis(array $stats): array
+    /** The six KPI tiles (also the "مقارنة الأسابيع" set); $overdue is the period-independent "متأخر الآن". */
+    private function kpis(array $stats, int $overdue): array
     {
         $observations = (int) $stats['observations']->sum('observations');
 
@@ -178,7 +191,7 @@ class ObservationMetrics
             'observations_per_visit' => self::ratio($observations, (int) $stats['visit_totals']->submitted),
             'open_issues' => (int) $stats['observations']->sum('open_issues'),
             'on_time_pct' => self::pct((int) $stats['tickets']->sum('on_time'), (int) $stats['tickets']->sum('closed')),
-            'overdue_now' => (int) $stats['overdue'],
+            'overdue_now' => $overdue,
         ];
     }
 

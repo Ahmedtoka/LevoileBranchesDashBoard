@@ -61,6 +61,12 @@ class ObservationFilters
     {
         $this->range->apply($query, $query->qualifyColumn('event_date'));
 
+        return $this->applyWithoutRange($query);
+    }
+
+    /** Every filter except the date range (for "now" states such as overdue that no period bounds). */
+    public function applyWithoutRange(Builder $query): Builder
+    {
         foreach (self::COLUMNS as $key => $column) {
             if (isset($this->values[$key])) {
                 $query->where($query->qualifyColumn($column), $this->values[$key]);

@@ -171,13 +171,27 @@ class ObservationMetricsTest extends TestCase
         $this->ticket($this->observation(), ['status' => 'closed', 'due_at' => $past, 'closed_at' => now()]);
         $this->ticket($this->observation(), ['status' => 'open', 'due_at' => now()->addHours(5)]);
         $this->ticket($this->observation(), ['status' => 'open', 'due_at' => null]);
-        // the ticket of an observation outside the range is not one of the dashboard's tickets
-        $this->ticket($this->observation(['event_date' => now()->subDays(40)->toDateString()]), ['status' => 'open', 'due_at' => $past]);
+        // "متأخر الآن" is a state now, not bounded by the period: an observation from 40 days ago still counts ...
+        $old = now()->subDays(40)->toDateString();
+        $oldOverdue = $this->ticket($this->observation(['event_date' => $old]), ['status' => 'in_progress', 'due_at' => now()->subDays(38)]);
+        // ... unless its ticket is closed or waiting approval
+        $this->ticket($this->observation(['event_date' => $old]), ['status' => 'closed', 'due_at' => now()->subDays(38), 'closed_at' => now()->subDays(37)]);
+        $this->ticket($this->observation(['event_date' => $old]), ['status' => 'waiting_approval', 'due_at' => now()->subDays(38)]);
 
         $this->assertTrue($counted->fresh()->isOverdue());
-        $this->assertSame(1, $this->metrics()['overdue_now']);
-        $list = ObservationMetrics::overdueTickets($this->admin, $this->range());
-        $this->assertSame([$counted->id], $list->pluck('id')->all());
+        $m = $this->metrics();
+        $this->assertSame(2, $m['overdue_now']);
+        $this->assertSame(2, $m['week_compare']['current']['overdue_now']);
+        $this->assertSame(2, $m['week_compare']['previous']['overdue_now']);
+        $this->assertSame(5, $m['open_issues']); // open_issues stays range-bound: 5 in range, the 3 from 40 days ago are not
+
+        $list = ObservationMetrics::overdueTickets($this->admin);
+        $this->assertSame([$oldOverdue->id, $counted->id], $list->pluck('id')->all()); // oldest due first
+
+        // the non-range filters still apply
+        $other = Seeds::branch('Maadi');
+        $this->assertSame(0, $this->metrics(['branch_id' => (string) $other->id])['overdue_now']);
+        $this->assertSame(2, $this->metrics(['branch_id' => (string) $this->branch->id])['overdue_now']);
     }
 
     public function test_repeated_branches_needs_two_of_the_same_item_and_branch(): void

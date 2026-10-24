@@ -8,15 +8,18 @@
     $register = fn (array $extra = []) => route('observations.index', $qs + $extra);
     $pct = fn ($v) => $v === null ? '—' : rtrim(rtrim(number_format($v, 1), '0'), '.').'%';
     $hours = fn ($v) => $v === null ? '—' : $v.' '.dt('س', 'h');
+    // "متأخر الآن" is not bounded by the period: its links carry the non-range filters only.
+    $overdueLink = route('observations.index', array_diff_key($qs, array_flip(['range', 'from', 'to'])) + ['kind' => 'issue']);
+    $notPeriod = dt('غير مرتبط بالفترة المختارة', 'Not limited to the selected period');
 
-    // The six KPI tiles (spec 12): key => [label, icon, colour, register link extras].
+    // The six KPI tiles (spec 12): key => [label, icon, colour, register link].
     $tiles = [
-        'visits' => [dt('زيارات الإدارة', 'Department visits'), 'bi-geo-alt', 'primary', []],
-        'branches_visited' => [dt('فروع تمت زيارتها', 'Branches visited'), 'bi-shop', 'info', []],
-        'observations_per_visit' => [dt('ملاحظات لكل زيارة', 'Observations per visit'), 'bi-journal-text', 'secondary', []],
-        'open_issues' => [dt('مشاكل مفتوحة', 'Open issues'), 'bi-exclamation-circle', 'warning', ['kind' => 'issue']],
-        'on_time_pct' => [dt('نسبة الحل في المهلة', 'Resolved on time'), 'bi-stopwatch', 'success', ['kind' => 'issue']],
-        'overdue_now' => [dt('متأخر الآن', 'Overdue now'), 'bi-alarm', 'danger', ['kind' => 'issue']],
+        'visits' => [dt('زيارات الإدارة', 'Department visits'), 'bi-geo-alt', 'primary', $register()],
+        'branches_visited' => [dt('فروع تمت زيارتها', 'Branches visited'), 'bi-shop', 'info', $register()],
+        'observations_per_visit' => [dt('ملاحظات لكل زيارة', 'Observations per visit'), 'bi-journal-text', 'secondary', $register()],
+        'open_issues' => [dt('مشاكل مفتوحة', 'Open issues'), 'bi-exclamation-circle', 'warning', $register(['kind' => 'issue'])],
+        'on_time_pct' => [dt('نسبة الحل في المهلة', 'Resolved on time'), 'bi-stopwatch', 'success', $register(['kind' => 'issue'])],
+        'overdue_now' => [dt('متأخر الآن', 'Overdue now'), 'bi-alarm', 'danger', $overdueLink],
     ];
     $show = fn (string $key, $value) => $key === 'on_time_pct' ? $pct($value) : $value;
 
@@ -99,11 +102,12 @@
 
 {{-- KPI tiles: each opens the register with the same range and filters. --}}
 <div class="row g-2 mb-3">
-    @foreach($tiles as $key => [$label, $icon, $colour, $extra])
+    @foreach($tiles as $key => [$label, $icon, $colour, $href])
         <div class="col-lg-2 col-md-4 col-6">
-            <a href="{{ $register($extra) }}" class="card stat-card p-2 text-center h-100 text-decoration-none">
+            <a href="{{ $href }}" class="card stat-card p-2 text-center h-100 text-decoration-none">
                 <div class="value text-{{ $colour }}" style="font-size:1.5rem">{{ $show($key, $metrics[$key]) }}</div>
                 <div class="text-muted" style="font-size:.75rem"><i class="bi {{ $icon }}"></i> {{ $label }}</div>
+                @if($key === 'overdue_now')<div class="text-muted" style="font-size:.65rem">{{ $notPeriod }}</div>@endif
             </a>
         </div>
     @endforeach
@@ -131,7 +135,9 @@
                 <div class="border rounded p-2 h-100">
                     <div class="text-muted" style="font-size:.72rem">{{ $label }}</div>
                     <div class="fw-bold">{{ $show($key, $cur) }} <span class="text-muted fw-normal small">/ {{ $show($key, $prev) }}</span></div>
-                    @if($delta !== null && $delta != 0)
+                    @if($key === 'overdue_now')
+                        <div class="text-muted" style="font-size:.65rem">{{ $notPeriod }}</div>
+                    @elseif($delta !== null && $delta != 0)
                         <div class="small text-muted">{{ $delta > 0 ? '+' : '' }}{{ $key === 'on_time_pct' ? $delta.'%' : $delta }}</div>
                     @endif
                 </div>
@@ -250,9 +256,10 @@
     <div class="col-lg-7">
         <div class="card p-3 h-100">
             <div class="d-flex align-items-center mb-2">
-                <h6 class="fw-bold mb-0">{{ dt('المتأخر الآن', 'Overdue now') }}</h6>
+                <h6 class="fw-bold mb-0">{{ dt('متأخر الآن', 'Overdue now') }}</h6>
+                <span class="text-muted small ms-2">{{ $notPeriod }}</span>
                 @if($metrics['overdue_now'] > $overdue->count())
-                    <a href="{{ $register(['kind' => 'issue']) }}" class="small ms-auto">{{ dt('عرض الكل', 'See all') }} ({{ $metrics['overdue_now'] }})</a>
+                    <a href="{{ $overdueLink }}" class="small ms-auto">{{ dt('عرض الكل', 'See all') }} ({{ $metrics['overdue_now'] }})</a>
                 @endif
             </div>
             <div class="table-responsive">

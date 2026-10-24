@@ -76,7 +76,7 @@ class ObservationController extends Controller
 
         return view('dashboard.observations.dashboard', [
             'metrics' => ObservationMetrics::for($user, $range, $qs),
-            'overdue' => ObservationMetrics::overdueTickets($user, $range, $qs),
+            'overdue' => ObservationMetrics::overdueTickets($user, $qs),
             'weeks' => ObservationMetrics::weekWindows($range),
             'qs' => $qs,
             'filters' => $filters,

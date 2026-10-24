@@ -73,11 +73,21 @@ class DashboardTest extends TestCase
             'status' => 'open', 'source' => 'observation', 'observation_id' => $late->id, 'due_at' => now()->subDay(),
         ]);
         $late->update(['ticket_id' => $ticket->id]);
+        // An old (out-of-range) overdue issue inside the area: counted by "متأخر الآن", not by the range-bound tiles.
+        $oldVisit = $this->visit($inside);
+        $oldVisit->update(['visit_date' => now()->subDays(40)->toDateString()]);
+        $old = $this->observation($inside, ['event_date' => now()->subDays(40)->toDateString(), 'title' => 'Old inside', 'observation_visit_id' => $oldVisit->id]);
+        $oldTicket = Ticket::create([
+            'reference' => 'TK-D0002', 'title' => 'Ticket', 'branch_id' => $inside->id, 'department_id' => $this->cctv->id,
+            'status' => 'open', 'source' => 'observation', 'observation_id' => $old->id, 'due_at' => now()->subDays(39),
+        ]);
+        $old->update(['ticket_id' => $oldTicket->id]);
 
         $res = $this->actingAs($am)->get(route('observations.dashboard'))
             ->assertOk()
             ->assertViewHas('metrics', fn (array $m) => $m['visits'] === 1 && $m['branches_visited'] === 1
-                && $m['open_issues'] === 1 && $m['overdue_now'] === 0)
+                && $m['open_issues'] === 1 && $m['overdue_now'] === 1)
+            ->assertSee('TK-D0002')->assertSee('غير مرتبط بالفترة المختارة')
             ->assertSee('زيارات الإدارة')->assertSee('فروع تمت زيارتها')->assertSee('ملاحظات لكل زيارة')
             ->assertSee('مشاكل مفتوحة')->assertSee('نسبة الحل في المهلة')->assertSee('متأخر الآن')
             ->assertSee('الفرق حجم توثيق مش بالضرورة أداء')
@@ -87,10 +97,12 @@ class DashboardTest extends TestCase
         // tiles link back to the register with the same filters
         $html = html_entity_decode($res->getContent());
         $this->assertStringContainsString(route('observations.index', ['range' => 'week', 'kind' => 'issue']), $html);
+        // the overdue tile is not period-bound, so its register link carries no range
+        $this->assertStringContainsString('href="'.route('observations.index', ['kind' => 'issue']).'"', $html);
 
         $this->actingAs(Seeds::user('super_admin'))->get(route('observations.dashboard'))
             ->assertOk()
-            ->assertViewHas('metrics', fn (array $m) => $m['visits'] === 2 && $m['open_issues'] === 2 && $m['overdue_now'] === 1)
+            ->assertViewHas('metrics', fn (array $m) => $m['visits'] === 2 && $m['open_issues'] === 2 && $m['overdue_now'] === 2)
             ->assertSee('TK-D0001')->assertSee($late->reference);
     }
 
@@ -126,6 +138,7 @@ class DashboardTest extends TestCase
 
         $html = html_entity_decode($res->getContent());
         $this->assertStringContainsString(route('observations.index', ['range' => 'month', 'branch_id' => $b->id, 'kind' => 'issue']), $html);
+        $this->assertStringContainsString('href="'.route('observations.index', ['branch_id' => $b->id, 'kind' => 'issue']).'"', $html);
     }
 
     public function test_super_admin_dashboard_renders_with_empty_db(): void
