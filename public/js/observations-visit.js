@@ -59,6 +59,7 @@
     /** All-branches mode only offers what is already an activity, so the server keeps kind=activity by precedence. */
     const catalogForMode = () => S.meta.catalog_items.filter((i) => !allMode() || i.kind === 'activity');
     const categoriesForMode = () => S.meta.categories.filter((c) => !allMode() || c.default_kind === 'activity');
+    const visitSubmitted = (visitId) => !!S.visits.find((v) => v.id === Number(visitId))?.submitted;
     const isTransient = (e) => e.status === 0 || e.status === 408 || e.status === 429 || e.status >= 500;
 
     function options(list, value, valueOf, textOf, withBlank) {
@@ -543,7 +544,9 @@
                 <span class="badge ${free ? 'text-bg-secondary' : 'text-bg-primary'}">${esc(free ? T.free : T.catalog)}</span>
                 <span class="fw-semibold small">${esc(title)}</span>
                 <span class="badge text-bg-light border">${esc(T.kinds[eff.kind] || eff.kind)}</span>
-                <button type="button" class="btn btn-sm btn-outline-danger ms-auto" data-action="delete" title="${esc(T.delete)}"><i class="bi bi-trash"></i></button>
+                ${Object.keys(row.ids).some(visitSubmitted)
+                    ? `<span class="badge text-bg-success ms-auto" title="${esc(T.row_submitted_hint)}"><i class="bi bi-lock"></i> ${esc(T.submitted_status)}</span>`
+                    : `<button type="button" class="btn btn-sm btn-outline-danger ms-auto" data-action="delete" title="${esc(T.delete)}"><i class="bi bi-trash"></i></button>`}
             </div>
             ${row.warning ? `<div class="alert alert-warning small py-1 px-2 mb-2">${esc(row.warning)}</div>` : ''}
             <div class="row g-2">
@@ -617,15 +620,23 @@
      */
     async function removeServerIds(row) {
         for (const [visitId, id] of Object.entries(row.ids)) {
+            // A submitted visit keeps its observation (the server refuses with 403): forget the id, never a ghost.
+            if (visitSubmitted(visitId)) { delete row.ids[visitId]; continue; }
             try {
                 await api('DELETE', `/observations/${id}`);
                 delete row.ids[visitId];
             } catch (e) {
-                if (e.status === 404) delete row.ids[visitId];
+                // 404 = already gone; 403 = that visit is no longer a draft (e.g. submitted elsewhere), the row stays there.
+                if (e.status === 404 || e.status === 403) delete row.ids[visitId];
                 else showAlert(`${T.delete_failed} ${e.message}`);
             }
         }
         if (Object.keys(row.ids).length) S.ghosts.add(row); else S.ghosts.delete(row);
+    }
+
+    /** Waits for every delete, including ones started while waiting (ghost retries, the pre-check save). */
+    async function drainDeletes() {
+        while (S.pendingDeletes.length) await Promise.all(S.pendingDeletes.splice(0));
     }
 
     async function uploadPhotos(row, files) {
@@ -829,12 +840,13 @@
         clearTimeout(S.saveTimer);
         S.saveTimer = null;
         // Every delete must have reached the server: a row still there would be submitted (and shift the error index).
-        await Promise.all(S.pendingDeletes);
-        S.pendingDeletes = [];
+        await drainDeletes();
         for (const ghost of Array.from(S.ghosts)) await removeServerIds(ghost);
         if (S.ghosts.size) { showAlert(T.delete_blocked); return; }
         // Pre-check: every visit must save cleanly before any is submitted.
         if (!(await saveAll())) { showAlert(T.fix_errors); return; }
+        await drainDeletes(); // a row deleted during the pre-check save
+        if (S.ghosts.size) { showAlert(T.delete_blocked); return; }
         if (!window.confirm(T.confirm_submit)) return;
 
         btn.disabled = true;
@@ -865,6 +877,7 @@
             }
         }
         renderVisitStatus();
+        renderRows();
         btn.disabled = false;
         btn.innerHTML = label;
 

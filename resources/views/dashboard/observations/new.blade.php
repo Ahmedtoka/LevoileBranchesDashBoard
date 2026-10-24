@@ -116,6 +116,7 @@
     'draft' => dt('مسودة', 'Draft'),
     'submitted_status' => dt('تم الإرسال', 'Submitted'),
     'partial_submit' => dt('بعض الزيارات أُرسلت وبعضها لا يزال مسودة — التعديلات تُحفظ على المسودات فقط. صحّح ثم أعد الإرسال لإكمالها.', 'Some visits were submitted, others are still drafts — edits only reach the drafts. Fix and submit again to finish them.'),
+    'row_submitted_hint' => dt('هذه الملاحظة أُرسلت مع زيارة مُرسلة فلا يمكن حذفها؛ التعديلات تصل للمسودات فقط.', 'This observation was sent with a submitted visit, so it cannot be deleted; edits only reach the drafts.'),
     'delete_failed' => dt('تعذر حذف ملاحظة من الخادم:', 'Could not delete an observation on the server:'),
     'delete_blocked' => dt('ملاحظة محذوفة لم تُحذف من الخادم بعد — لا يمكن الإرسال قبل حذفها. أعد المحاولة.', 'A deleted observation is still on the server — the visit cannot be submitted until it is removed. Try again.'),
     'link_removed' => dt('أُزيل ربط البند/الفئة لأنه ليس نشاطاً — بدون فرع تُسجَّل الملاحظة كنشاط.', 'The item/category link was removed because it is not an activity — without a branch the row is recorded as an activity.'),
