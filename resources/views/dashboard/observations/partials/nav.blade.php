@@ -7,7 +7,7 @@
     $obsNavUser = auth()->user();
     $obsNavShow = $obsNavUser->can('viewAny', \App\Models\Observation::class);
     $obsNavCreate = $obsNavShow && $obsNavUser->can('create', \App\Models\ObservationVisit::class);
-    $obsNavDashboard = $obsNavShow && ! $obsNavUser->hasRole(\App\Support\ObservationScope::BRANCH_ROLES);
+    $obsNavDashboard = $obsNavShow && ! $obsNavUser->hasRole(array_merge(\App\Support\ObservationScope::BRANCH_ROLES, ['department_employee']));
 @endphp
 @if($obsNavShow)
     <div class="nav-label" data-obs-nav>{{ t('obs.nav.section','الملاحظات') }}</div>

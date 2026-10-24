@@ -41,7 +41,7 @@ class NavTest extends TestCase
     public function test_reporting_department_employee_sees_register_and_new_visit(): void
     {
         $cctv = Seeds::department('cctv', ['is_reporting' => true]);
-        $this->assertLinks(Seeds::user('department_employee', ['department_id' => $cctv->id]), ['index', 'create', 'beforeAfter', 'dashboard'], []);
+        $this->assertLinks(Seeds::user('department_employee', ['department_id' => $cctv->id]), ['index', 'create', 'beforeAfter'], ['dashboard']);
     }
 
     public function test_non_reporting_department_staff_see_no_observation_links(): void
