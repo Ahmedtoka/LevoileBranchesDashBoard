@@ -126,4 +126,5 @@ Route::middleware('auth')->group(function () {
     Route::delete('/questions/{question}', [TemplateController::class, 'destroyQuestion'])->name('questions.destroy');
 
     require __DIR__.'/observations-admin.php';
+    require __DIR__.'/observations-approval.php';
 });

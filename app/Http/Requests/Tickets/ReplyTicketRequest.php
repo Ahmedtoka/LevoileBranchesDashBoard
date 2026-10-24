@@ -24,6 +24,7 @@ class ReplyTicketRequest extends FormRequest
             'state' => ['required', Rule::in(TicketService::REPLY_STATES)],
             'note' => ['required', 'string', 'min:3', 'max:2000'],
             'photo_path' => ['nullable', 'string', 'max:255'],
+            'photo' => ['nullable', 'image', 'max:8192'],
         ];
     }
 
