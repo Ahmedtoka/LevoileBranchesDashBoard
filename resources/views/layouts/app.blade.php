@@ -82,6 +82,8 @@
         @endif
     @endif
 
+    @include('dashboard.observations.partials.admin-nav')
+
     <div class="nav-label">{{ dt('المشتريات','Purchasing') }}</div>
     <a href="{{ route('purchasing.index') }}" class="{{ request()->routeIs('purchasing.index') || request()->routeIs('purchasing.show') ? 'active' : '' }}"><i class="bi bi-cart3 me-2"></i>{{ dt('طلبات الشراء','Purchase requests') }}</a>
     @if($purcAdmin)
