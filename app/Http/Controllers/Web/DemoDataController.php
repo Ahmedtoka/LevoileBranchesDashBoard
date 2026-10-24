@@ -209,8 +209,8 @@ class DemoDataController extends Controller
         $o = $observations->summary;
 
         return back()->with('status', dt(
-            "تم توليد ديمو حقيقي — {$visits} شيك ليست و{$created} تذكرة موزّعة على الإدارات، و{$o['observations']} ملاحظة في {$o['visits']} زيارات ملاحظات و{$o['tickets']} تذكرة ملاحظات.",
-            "Demo generated: {$visits} checklists and {$created} tickets across departments, plus {$o['observations']} observations in {$o['visits']} observation visits with {$o['tickets']} observation tickets."
+            "تم توليد ديمو حقيقي — {$visits} شيك ليست و{$created} تذكرة موزّعة على الإدارات، و{$o['observations']} ملاحظة في {$o['visits']} زيارات ملاحظات و{$o['tickets']} تذكرة ملاحظات، منها {$o['pending']} زيارة بانتظار اعتماد المدير.",
+            "Demo generated: {$visits} checklists and {$created} tickets across departments, plus {$o['observations']} observations in {$o['visits']} observation visits with {$o['tickets']} observation tickets ({$o['pending']} visit awaiting manager approval)."
         ));
     }
 

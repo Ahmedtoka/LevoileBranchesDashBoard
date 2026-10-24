@@ -61,8 +61,22 @@ class DemoDataTest extends TestCase
 
         // Everything is marked demo, every visit is submitted and spread over the last 10 days.
         $this->assertSame(0, Observation::where(fn ($q) => $q->whereNull('import_source')->orWhere('import_source', '!=', 'demo'))->count());
-        $this->assertSame(6, ObservationVisit::count());
-        $this->assertSame(0, ObservationVisit::where('status', '!=', 'submitted')->count());
+        $this->assertSame(7, ObservationVisit::count());
+        // Plan H: every historical visit is approved (tickets exist), ONE recent CCTV visit waits for its manager.
+        $this->assertSame(6, ObservationVisit::where('status', 'approved')->whereNotNull('approved_by')->whereNotNull('approved_at')->count());
+        $pending = ObservationVisit::where('status', 'submitted')->get();
+        $this->assertCount(1, $pending);
+        $pending = $pending->first();
+        $cctvManager = User::where('email', 'cctv.manager@levoile.test')->firstOrFail();
+        $this->assertSame(User::where('email', 'cctv.emp@levoile.test')->value('id'), (int) $pending->user_id);
+        $this->assertSame(3, $pending->observations()->whereNull('catalog_item_id')->whereNull('responsible_department_id')->whereNull('ticket_id')->count());
+        $this->assertNull($pending->approved_by);
+        $this->assertSame(1, Notification::where('user_id', $cctvManager->id)->where('type', 'observation_visit_submitted')->count());
+        $this->assertTrue($pending->created_at->lt(now()));
+        // Approved by the demo manager of the reporting department when there is one (CCTV), else the super admin.
+        $cctvVisit = ObservationVisit::where('status', 'approved')->whereHas('observations', fn ($q) => $q->where('description', 'like', '%35 دقيقة%'))->firstOrFail();
+        $this->assertSame($cctvManager->id, (int) $cctvVisit->approved_by);
+        $this->assertTrue($cctvVisit->approved_at->gt($cctvVisit->submitted_at));
         $this->assertTrue(ObservationVisit::where('visit_date', '<=', now()->subDays(7)->toDateString())->exists());
         $this->assertTrue(ObservationVisit::where('visit_date', '>=', now()->subDays(3)->toDateString())->exists());
         $this->assertSame(0, ObservationVisit::where('visit_date', '<', now()->subDays(10)->toDateString())->count());

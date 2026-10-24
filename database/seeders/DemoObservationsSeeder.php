@@ -27,6 +27,11 @@ use RuntimeException;
  * Idempotent: it first deletes only its own previous rows (observations.import_source = 'demo' and what
  * hangs off them). Never touches setup data (users, branches, areas, departments, risk levels, catalog).
  * The service methods own their transactions, so none is opened around them here.
+ *
+ * Plan H: a submitted visit waits for the reporting department's manager and has no tickets until
+ * approveVisit(). Every historical demo visit is therefore submitted AND approved (by the demo manager of
+ * its department, or the super admin), while ONE recent CCTV visit with three free-text points is left
+ * `submitted` so the owner can walk the approval flow ("فحص" then "اعتماد الزيارة") right after generating.
  */
 class DemoObservationsSeeder extends Seeder
 {
@@ -54,12 +59,12 @@ class DemoObservationsSeeder extends Seeder
     ];
 
     private const USERS = [
-        'admin@levoile.test', 'ops@levoile.test', 'cctv.emp@levoile.test', 'stock.emp@levoile.test',
+        'admin@levoile.test', 'ops@levoile.test', 'cctv.manager@levoile.test', 'cctv.emp@levoile.test', 'stock.emp@levoile.test',
         'operation.manager@levoile.test', 'operation.emp@levoile.test',
     ];
 
-    /** What the last run created: observations, visits, tickets. */
-    public array $summary = ['observations' => 0, 'visits' => 0, 'tickets' => 0];
+    /** What the last run created: observations, visits, tickets, and visits still awaiting the manager. */
+    public array $summary = ['observations' => 0, 'visits' => 0, 'tickets' => 0, 'pending' => 0];
 
     private ObservationService $service;
 
@@ -128,6 +133,10 @@ class DemoObservationsSeeder extends Seeder
         DB::transaction(function () use ($obsIds, $visitIds, $ticketIds) {
             DB::table('observations')->whereIn('id', $obsIds)->update(['ticket_id' => null]);
             DB::table('notifications')->whereIn('ticket_id', $ticketIds)->delete();
+            // The "awaiting your approval" rows of a demo visit left submitted (ticket_id is null on them).
+            DB::table('notifications')->where('type', 'observation_visit_submitted')
+                ->whereIn('link', array_map(fn ($id) => '/observations/visits/to-approve/'.$id, $visitIds))
+                ->delete();
             DB::table('ticket_updates')->whereIn('ticket_id', $ticketIds)->delete();
             DB::table('tickets')->whereIn('id', $ticketIds)->delete();
 
@@ -256,6 +265,19 @@ class DemoObservationsSeeder extends Seeder
         ]);
         $this->submit($visitC, $cctv, $atC);
 
+        // ---- Visit P: CCTV, City Stars, yesterday: three free-text points, submitted and NOT approved ----
+        // Left for the CCTV manager (cctv.manager@levoile.test) to classify ("فحص") and approve from
+        // /observations/visits/to-approve; the tickets appear only then.
+        $atP = $this->day(1, 9, 30);
+        $visitP = $this->visit($cctv, 'cctv', $stars, 'field', $atP);
+        $this->record($visitP, $cctv, $atP, [
+            ['kind' => 'issue', 'description' => 'باب المخزن الخلفي مفتوح من غير موظف طول فترة الذروة',
+                'photos' => [$this->photo($visitP, 'before')]],
+            ['kind' => 'issue', 'description' => 'الكاشير بيستلم مرتجع من غير فاتورة ومن غير مراجعة المدير'],
+            ['kind' => 'issue', 'description' => 'شنطة عميل متروكة جنب الفيتنج روم أكثر من نص ساعة'],
+        ]);
+        $this->submit($visitP, $cctv, $atP, approve: false);
+
         $this->cleanNotifications();
 
         $obsIds = DB::table('observations')->where('import_source', self::SOURCE)->pluck('id');
@@ -263,6 +285,8 @@ class DemoObservationsSeeder extends Seeder
             'observations' => $obsIds->count(),
             'visits' => DB::table('observations')->whereIn('id', $obsIds)->distinct()->count('observation_visit_id'),
             'tickets' => DB::table('tickets')->whereIn('observation_id', $obsIds)->count(),
+            'pending' => DB::table('observation_visits')->where('status', 'submitted')
+                ->whereIn('id', DB::table('observations')->whereIn('id', $obsIds)->select('observation_visit_id'))->count(),
         ];
     }
 
@@ -307,18 +331,61 @@ class DemoObservationsSeeder extends Seeder
         return $saved->all();
     }
 
-    private function submit(ObservationVisit $v, User $u, Carbon $at): void
+    /**
+     * Submit the draft (silent: no notification to real staff) and, unless $approve is false, approve it 30
+     * minutes later as the demo manager of its reporting department (super admin when there is none), which
+     * creates the tickets (Plan H). Every row written is backdated. A visit left submitted gets the
+     * "awaiting your approval" notification for the demo manager only.
+     */
+    private function submit(ObservationVisit $v, User $u, Carbon $at, bool $approve = true): void
     {
         $submittedAt = $at->copy()->addMinutes(45);
         // Silent: no notifications or auto-assignment to real staff; the demo assigns explicitly below.
-        $result = $this->service->submitVisit($v->refresh(), $u, ['silent' => true, 'due_from' => $submittedAt]);
+        $this->service->submitVisit($v->refresh(), $u, ['silent' => true, 'due_from' => $submittedAt]);
 
         DB::table('observation_visits')->where('id', $v->id)->update(['submitted_at' => $submittedAt, 'updated_at' => $submittedAt]);
         DB::table('observations')->where('observation_visit_id', $v->id)->update(['updated_at' => $submittedAt]);
 
+        $manager = $this->approverFor($v);
+
+        if (! $approve) {
+            if ($manager->is_department_manager && (int) $manager->department_id === (int) $v->department_id && $manager->id !== $u->id) {
+                DB::table('notifications')->insert([
+                    'user_id' => $manager->id,
+                    'type' => 'observation_visit_submitted',
+                    'title' => dt('زيارة ملاحظات بانتظار اعتمادك', 'Observation visit awaiting your approval'),
+                    'body' => $v->fresh()->code.($v->branch_id ? ' — '.Branch::whereKey($v->branch_id)->value('branch_name') : '').' — '.$u->name,
+                    'link' => '/observations/visits/to-approve/'.$v->id,
+                    'created_at' => $submittedAt, 'updated_at' => $submittedAt,
+                ]);
+            }
+
+            return;
+        }
+
+        $approvedAt = $submittedAt->copy()->addMinutes(30);
+        // With observations.manager_approval off, submitVisit already approved the visit and this is a no-op.
+        $result = $this->service->approveVisit($v->fresh(), $manager, ['silent' => true, 'due_from' => $approvedAt]);
+
+        DB::table('observation_visits')->where('id', $v->id)->where('status', 'approved')
+            ->update(['approved_at' => $approvedAt, 'updated_at' => $approvedAt]);
+        DB::table('observations')->where('observation_visit_id', $v->id)->update(['updated_at' => $approvedAt]);
+
         $ticketIds = array_column($result['created_tickets'], 'ticket_id');
-        DB::table('tickets')->whereIn('id', $ticketIds)->update(['created_at' => $submittedAt, 'updated_at' => $submittedAt]);
-        DB::table('ticket_updates')->whereIn('ticket_id', $ticketIds)->update(['created_at' => $submittedAt, 'updated_at' => $submittedAt]);
+        DB::table('tickets')->whereIn('id', $ticketIds)->update(['created_at' => $approvedAt, 'updated_at' => $approvedAt]);
+        DB::table('ticket_updates')->whereIn('ticket_id', $ticketIds)->update(['created_at' => $approvedAt, 'updated_at' => $approvedAt]);
+    }
+
+    /** The demo manager of the visit's reporting department (e.g. cctv.manager@levoile.test), else the super admin. */
+    private function approverFor(ObservationVisit $v): User
+    {
+        foreach ($this->users as $user) {
+            if ($user->is_department_manager && (int) $user->department_id === (int) $v->department_id) {
+                return $user;
+            }
+        }
+
+        return $this->users['admin@levoile.test'];
     }
 
     /**
