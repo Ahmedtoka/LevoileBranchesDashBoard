@@ -11,8 +11,12 @@ use App\Models\User;
 use App\Models\Visit;
 use App\Models\VisitAnswer;
 use App\Models\VisitTemplate;
+use Database\Seeders\DemoObservationsSeeder;
+use Database\Seeders\DemoUsersSeeder;
+use Database\Seeders\ObservationSetupSeeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -44,32 +48,53 @@ class DemoDataController extends Controller
 
     public function wipe()
     {
+        abort_unless(auth()->user()->hasRole('super_admin'), 403);
+
         // Clears ALL operational/transactional data for a clean production test.
-        // Keeps: users, roles, departments, branches, checklist templates, vendors, coverage.
+        // Keeps: users, roles, departments, branches, areas, checklist templates, vendors, coverage,
+        // risk levels, observation categories and catalog items.
         $tables = [
+            // notifications (point at tickets)
+            'notifications',
+            // observations module, children first (observations <-> tickets are unlinked below)
+            'ai_classifications', 'observation_verifications', 'observation_photos',
             // checklists & tickets
             'ticket_updates', 'ticket_evidence', 'visit_answer_evidence',
-            'visit_answer_selected_employees', 'visit_answers', 'tickets', 'visits',
+            'visit_answer_selected_employees', 'visit_answers', 'tickets',
+            'observations', 'observation_visits', 'visits',
             // purchasing (transactional only — vendors kept as reference data)
             'purchase_order_request', 'purchase_request_updates', 'purchase_quotations',
             'purchase_orders', 'purchase_requests',
-            // notifications
-            'notifications',
         ];
 
+        $schema = DB::getSchemaBuilder();
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        foreach ($tables as $table) {
-            if (DB::getSchemaBuilder()->hasTable($table)) {
-                DB::table($table)->delete();
+        try {
+            // Break the observations <-> tickets cycle so the order above is FK-safe on its own.
+            if ($schema->hasTable('observations')) {
+                DB::table('observations')->whereNotNull('ticket_id')->update(['ticket_id' => null]);
             }
+            foreach ($tables as $table) {
+                if ($schema->hasTable($table)) {
+                    DB::table($table)->delete();
+                }
+            }
+        } finally {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
         }
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
-        return back()->with('status', 'تم مسح كل بيانات النظام (تذاكر، زيارات، شيك ليستات، مشتريات) — مع الإبقاء على المستخدمين والإدارات والفروع.');
+        Storage::disk('public')->deleteDirectory('evidence/observations');
+
+        return back()->with('status', dt(
+            'تم مسح كل بيانات النظام (تذاكر، زيارات، شيك ليستات، ملاحظات ومخاطر، مشتريات) — مع الإبقاء على المستخدمين والإدارات والفروع وإعدادات الملاحظات.',
+            'All system data was wiped (tickets, visits, checklists, observations and risk, purchasing). Users, departments, branches and the observation setup were kept.'
+        ));
     }
 
     public function generate()
     {
+        abort_unless(auth()->user()->hasRole('super_admin'), 403);
+
         @set_time_limit(600);
 
         $this->buildStatusPool();
@@ -118,7 +143,7 @@ class DemoDataController extends Controller
             $deptList, $maintId, $empByDept, $branchEmps, $branches, $maintTitles, &$created, &$visits
         ) {
             // 1) STORE MANAGERS — one daily checklist per day (some days missed).
-            foreach ($storeManagers as $sm) {
+            foreach ($storeTpl ? $storeManagers : [] as $sm) {
                 $branchId = $sm->branch_id;
                 $emps = $branchEmps[$branchId] ?? [];
                 // Each manager has a "discipline" — how often they actually do the daily list.
@@ -147,7 +172,7 @@ class DemoDataController extends Controller
             }
 
             // 2) AREA MANAGERS — visit a covered branch per day, close with pass/fail.
-            foreach ($areaManagers as $am) {
+            foreach ($areaTpl ? $areaManagers : [] as $am) {
                 $cov = $am->branches()->pluck('branches.id')->all();
                 if (empty($cov)) {
                     $cov = $branches->random(min(5, $branches->count()))->pluck('id')->all();
@@ -169,7 +194,19 @@ class DemoDataController extends Controller
             }
         });
 
-        return back()->with('status', "تم توليد ديمو حقيقي — {$visits} شيك ليست و{$created} تذكرة موزّعة على الإدارات.");
+        // Observations & Risk module: quick-login users, setup (so a wipe never leaves the catalog empty),
+        // then the demo visits/observations through the real services.
+        (new DemoUsersSeeder)->run();
+        DemoObservationsSeeder::prepare();
+        (new ObservationSetupSeeder)->run();
+        $observations = new DemoObservationsSeeder;
+        $observations->run();
+        $o = $observations->summary;
+
+        return back()->with('status', dt(
+            "تم توليد ديمو حقيقي — {$visits} شيك ليست و{$created} تذكرة موزّعة على الإدارات، و{$o['observations']} ملاحظة في {$o['visits']} زيارات ملاحظات و{$o['tickets']} تذكرة ملاحظات.",
+            "Demo generated: {$visits} checklists and {$created} tickets across departments, plus {$o['observations']} observations in {$o['visits']} observation visits with {$o['tickets']} observation tickets."
+        ));
     }
 
     // ---------- core ----------
