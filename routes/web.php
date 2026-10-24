@@ -104,6 +104,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/purchasing/{pr}/receive', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'receive'])->name('purchasing.receive');
     Route::post('/purchasing/{pr}/status', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'status'])->name('purchasing.status');
 
+    // ---- Observations & risk (operations web) ----
+    // export.csv MUST stay above any future /observations/{observation} route, or "export.csv" is read as an id.
+    Route::get('/observations', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'index'])->name('observations.index');
+    Route::get('/observations/export.csv', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'export'])->name('observations.export');
+
     // ---- KPIs & deep reports ----
     Route::get('/kpis', [\App\Http\Controllers\Web\KpiController::class, 'index'])->name('kpis.index');
     Route::get('/kpis/tickets', [\App\Http\Controllers\Web\KpiController::class, 'tickets'])->name('kpis.tickets');

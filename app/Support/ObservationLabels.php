@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Support;
+
+/** Display labels / colours for observation statuses, shared by the pages and the CSV export. */
+class ObservationLabels
+{
+    /** status => [Arabic, English, bootstrap colour] */
+    private const STATUSES = [
+        'open' => ['مفتوحة', 'Open', 'secondary'],
+        'in_progress' => ['جاري التنفيذ', 'In progress', 'warning'],
+        'waiting_verification' => ['بانتظار التحقق', 'Waiting verification', 'info'],
+        'verified_closed' => ['مغلقة بعد التحقق', 'Verified & closed', 'success'],
+        'reopened' => ['أُعيد فتحها', 'Reopened', 'danger'],
+        'closed_no_action' => ['مغلقة بدون إجراء', 'Closed, no action', 'dark'],
+        'positive' => ['إيجابية', 'Positive', 'success'],
+    ];
+
+    public static function status(string $status): string
+    {
+        $row = self::STATUSES[$status] ?? null;
+
+        return $row ? dt($row[0], $row[1]) : $status;
+    }
+
+    public static function statusColor(string $status): string
+    {
+        return self::STATUSES[$status][2] ?? 'secondary';
+    }
+
+    public static function kind(string $kind): string
+    {
+        return match ($kind) {
+            'issue' => dt('مشكلة', 'Issue'),
+            'activity' => dt('نشاط', 'Activity'),
+            'assessment' => dt('تقييم', 'Assessment'),
+            'positive' => dt('إيجابية', 'Positive'),
+            default => $kind,
+        };
+    }
+}
