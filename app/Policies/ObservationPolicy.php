@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Observation;
+use App\Models\ObservationVisit;
 use App\Models\User;
 use App\Support\ObservationScope;
 
@@ -31,6 +32,21 @@ class ObservationPolicy
         return $user->hasRole('area_manager')
             && $observation->branch_id
             && in_array((int) $observation->branch_id, $user->scopedBranchIds() ?? [], true);
+    }
+
+    /**
+     * Plan H: the reporting department's manager (or ops / super) corrects a point's responsible department,
+     * risk, category, text or kind while the visit is not yet approved (no ticket exists before approval).
+     */
+    public function updateClassification(User $user, Observation $observation): bool
+    {
+        $visitStatus = $observation->relationLoaded('visit')
+            ? $observation->visit?->status
+            : ObservationVisit::whereKey($observation->observation_visit_id)->value('status');
+
+        return $visitStatus !== null
+            && $visitStatus !== 'approved'
+            && ObservationScope::approvesDepartment($user, $observation->reporting_department_id);
     }
 
     public function reroute(User $user, Observation $observation): bool

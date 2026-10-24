@@ -27,22 +27,27 @@ use Illuminate\Pagination\LengthAwarePaginator;
  */
 class ObservationVisitController extends Controller
 {
-    /** Spec section 8: shown when the classifier is unavailable (failed / skipped). */
-    private const AI_UNAVAILABLE = 'الفحص غير متاح، اختر الفئة يدوياً';
-
     public function __construct(private ObservationService $service) {}
 
-    /** GET /api/observation-visits?status=&mine=1&branch_id=&department_id= */
+    /** GET /api/observation-visits?status=&mine=1&branch_id=&department_id=&scope=to_approve */
     public function index(Request $request): JsonResponse
     {
         $u = $request->user();
-        $this->allow($u->can('create', ObservationVisit::class));
+        $this->allow($u->can('create', ObservationVisit::class) || ObservationScope::approvableDepartmentIds($u) !== []);
 
-        // Own visits OR the scope. A subquery, because for global roles the scope adds no condition and an
-        // empty nested orWhere would be dropped, leaving only "own visits".
-        $visible = ObservationScope::apply(ObservationVisit::query()->select('observation_visits.id'), $u, 'branch_id', 'department_id');
-        $query = ObservationVisit::query()
-            ->where(fn ($q) => $q->where('user_id', $u->id)->orWhereIn('id', $visible))
+        if ($request->query('scope') === 'to_approve') {
+            // Plan H: submitted visits of the reporting department(s) the user approves for (null = all).
+            $departmentIds = ObservationScope::approvableDepartmentIds($u);
+            $query = ObservationVisit::query()->where('status', 'submitted')
+                ->when($departmentIds !== null, fn ($q) => $q->whereIn('department_id', $departmentIds));
+        } else {
+            // Own visits OR the scope. A subquery, because for global roles the scope adds no condition and an
+            // empty nested orWhere would be dropped, leaving only "own visits".
+            $visible = ObservationScope::apply(ObservationVisit::query()->select('observation_visits.id'), $u, 'branch_id', 'department_id');
+            $query = ObservationVisit::query()->where(fn ($q) => $q->where('user_id', $u->id)->orWhereIn('id', $visible));
+        }
+
+        $query
             ->when(in_array($request->query('status'), ObservationVisit::STATUSES, true), fn ($q) => $q->where('status', $request->query('status')))
             ->when($request->boolean('mine'), fn ($q) => $q->where('user_id', $u->id))
             ->when($request->filled('branch_id'), fn ($q) => $q->where('branch_id', (int) $request->query('branch_id')))
@@ -137,7 +142,7 @@ class ObservationVisitController extends Controller
 
         return response()->json([
             'status' => $batch->status,
-            'message' => $batch->status === 'ok' ? null : self::AI_UNAVAILABLE,
+            'message' => $batch->status === 'ok' ? null : ObservationService::AI_UNAVAILABLE,
             'results' => $results,
             'classification_ids' => array_map(fn (AiClassification $c) => $c->id, $created),
         ]);
@@ -162,7 +167,10 @@ class ObservationVisitController extends Controller
         ]);
     }
 
-    /** POST /api/observation-visits/{visit}/submit */
+    /**
+     * POST /api/observation-visits/{visit}/submit. With observations.manager_approval (default) the visit
+     * only becomes `submitted` (no tickets; `created_tickets` is []): a manager approves it later.
+     */
     public function submit(SubmitObservationVisitRequest $request, ObservationVisit $visit): JsonResponse
     {
         $u = $request->user();
@@ -170,27 +178,67 @@ class ObservationVisitController extends Controller
 
         $result = $this->service->submitVisit($visit, $u);
 
-        $tickets = Ticket::with('department:id,name')
-            ->whereIn('id', array_column($result['created_tickets'], 'ticket_id'))
-            ->get()->keyBy('id');
+        return response()->json([
+            'message' => config('observations.manager_approval', true) ? 'تم إرسال الزيارة وهي بانتظار اعتماد المدير.' : 'تم إرسال الزيارة.',
+            'visit' => $this->visitItem($result['visit']),
+            'created_tickets' => $this->createdTickets($result['created_tickets']),
+        ]);
+    }
+
+    /**
+     * POST /api/observation-visits/{visit}/classify (Plan H): the manager runs the classifier on the visit's
+     * free points; suggestions are written on the rows. HTTP 200 in every case (status ok / failed / skipped).
+     */
+    public function classify(Request $request, ObservationVisit $visit): JsonResponse
+    {
+        $u = $request->user();
+        $this->allow($u->can('classify', $visit));
+
+        $result = $this->service->classifyVisit($visit, $u);
 
         return response()->json([
-            'message' => 'تم إرسال الزيارة.',
-            'visit' => $this->visitItem($result['visit']),
-            'created_tickets' => array_map(function (array $row) use ($tickets) {
-                $ticket = $tickets[$row['ticket_id']] ?? null;
-
-                return [
-                    'id' => $row['ticket_id'],
-                    'observation_id' => $row['observation_id'],
-                    'ticket_id' => $row['ticket_id'],
-                    'reference' => $row['reference'],
-                    'title' => $ticket?->title,
-                    'priority' => $ticket?->priority,
-                    'department' => $ticket?->department ? ['id' => $ticket->department->id, 'name' => $ticket->department->name] : null,
-                ];
-            }, $result['created_tickets']),
+            'status' => $result['status'],
+            'message' => $result['message'],
+            'visit' => $this->visitItem($visit->fresh()),
+            'observations' => ObservationItem::many($result['observations']),
         ]);
+    }
+
+    /** POST /api/observation-visits/{visit}/approve (Plan H): the manager creates the tickets. */
+    public function approve(Request $request, ObservationVisit $visit): JsonResponse
+    {
+        $u = $request->user();
+        $this->allow($u->can('approve', $visit) || ($visit->status === 'approved' && $u->can('supervise', $visit)));
+
+        $result = $this->service->approveVisit($visit, $u);
+
+        return response()->json([
+            'message' => 'تم اعتماد الزيارة.',
+            'visit' => $this->visitItem($result['visit']),
+            'created_tickets' => $this->createdTickets($result['created_tickets']),
+        ]);
+    }
+
+    /** @param  list<array{observation_id:int, ticket_id:int, reference:string}>  $rows */
+    private function createdTickets(array $rows): array
+    {
+        $tickets = Ticket::with('department:id,name')
+            ->whereIn('id', array_column($rows, 'ticket_id'))
+            ->get()->keyBy('id');
+
+        return array_map(function (array $row) use ($tickets) {
+            $ticket = $tickets[$row['ticket_id']] ?? null;
+
+            return [
+                'id' => $row['ticket_id'],
+                'observation_id' => $row['observation_id'],
+                'ticket_id' => $row['ticket_id'],
+                'reference' => $row['reference'],
+                'title' => $ticket?->title,
+                'priority' => $ticket?->priority,
+                'department' => $ticket?->department ? ['id' => $ticket->department->id, 'name' => $ticket->department->name] : null,
+            ];
+        }, $rows);
     }
 
     private function visitItem(ObservationVisit $visit): array

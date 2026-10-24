@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Exceptions\TicketTransitionDenied;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Tickets\ReplyTicketRequest;
 use App\Models\Department;
 use App\Models\Ticket;
 use App\Models\User;
@@ -111,7 +112,32 @@ class TicketController extends Controller
             ? User::where('department_id', $ticket->department_id)->where('is_department_manager', false)->get()
             : collect();
 
-        return view('dashboard.tickets.show', compact('ticket', 'employees'));
+        // Plan H: the responsible department answers with working / solved while the ticket is still open work.
+        $canReply = ! in_array($ticket->status, ['waiting_approval', 'closed'], true)
+            && $this->service->canReply($ticket, request()->user());
+
+        return view('dashboard.tickets.show', compact('ticket', 'employees', 'canReply'));
+    }
+
+    /** POST /tickets/{ticket}/reply (Plan H): working | solved with a mandatory note and an optional after photo. */
+    public function reply(ReplyTicketRequest $request, Ticket $ticket)
+    {
+        $user = $request->user();
+        abort_unless($this->service->canReply($ticket, $user), 403);
+
+        $photoPath = $request->hasFile('photo')
+            ? $request->file('photo')->store('evidence/tickets/'.$ticket->id, 'public')
+            : $request->input('photo_path');
+
+        try {
+            $this->service->reply($ticket, $user, (string) $request->input('state'), (string) $request->input('note'), $photoPath);
+        } catch (TicketTransitionDenied $e) {
+            return back()->withErrors(['status' => $e->getMessage()])->with('status', $e->getMessage());
+        }
+
+        return back()->with('status', $request->input('state') === 'solved'
+            ? dt('تم إرسال الحل للاعتماد.', 'Solution sent for approval.')
+            : dt('تم تسجيل الرد وبدء العمل.', 'Reply recorded, work started.'));
     }
 
     public function assign(Request $request, Ticket $ticket)

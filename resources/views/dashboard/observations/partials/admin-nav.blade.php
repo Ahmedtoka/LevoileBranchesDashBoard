@@ -7,7 +7,12 @@
     $obsUser = auth()->user();
     $obsAdmin = $obsUser->hasRole('super_admin');
     $obsDeptManager = ! $obsAdmin && \App\Support\ObservationScope::managedReportingDepartmentId($obsUser) !== null;
+    $obsApprover = \App\Support\ObservationScope::approvableDepartmentIds($obsUser) !== [];
 @endphp
+@if($obsApprover)
+    <div class="nav-label">{{ dt('اعتماد الزيارات', 'Visit approval') }}</div>
+    <a href="{{ route('obs.approval.index') }}" class="{{ request()->routeIs('obs.approval.*') ? 'active' : '' }}"><i class="bi bi-clipboard-check me-2"></i>{{ dt('زيارات بانتظار الاعتماد', 'Visits awaiting approval') }}</a>
+@endif
 @if($obsAdmin || $obsDeptManager)
     <div class="nav-label">{{ t('obs.nav.settings','إعدادات الملاحظات') }}</div>
     <a href="{{ route('obs.review.index') }}" class="{{ request()->routeIs('obs.review.*') ? 'active' : '' }}"><i class="bi bi-patch-check me-2"></i>{{ t('obs.nav.review','اعتماد التصنيفات') }}</a>

@@ -13,6 +13,7 @@ Flow simulator: `docs/superpowers/specs/observations-flow-simulator.html`
 | F Import | `2026-10-22-obs-F-import.md` | A, B | `feat/observations-import` |
 
 | G Integration & handover | `2026-10-22-obs-G-handover.md` | all of the above | run on `master` |
+| H Manager approval gate + department reply | `2026-10-25-obs-H-manager-approval.md` | B, C (D for the demo seeder) | `feat/observations-approval` (web) + `feat/observations` (mobile) |
 
 Order: A first and merge to `master`. Then B, C, D, E in parallel (each rebases on master). F after B. G last.
 
@@ -617,3 +618,93 @@ Sidebar: `@include('dashboard.observations.partials.nav')` directly above Plan C
 - Dev DB contains browser smoke-run visits OV-00114..OV-00124 (+ tickets); the wipe button removes them (and the import).
 - A web draft can be resumed only by its owner; mobile drafts appear in "مسوداتي" too (same table).
 - Register tile links from the dashboard (`kind=issue`) count more rows than the tile for open/on-time; only `overdue` matches exactly (`range=all`).
+## Manager approval as built (filled in by the Plan H backend session at hand-off)
+
+> Branch `feat/observations-approval` (worktree `wt-approval`, cut from master c2959b7), tasks 1–6. Tests: `php artisan test` → 181 passed (2122 assertions). If code and this page disagree, the code wins.
+
+### Deploy checklist (Plan H)
+
+- `php artisan migrate`: `2026_10_25_000001_add_approval_to_observation_visits` adds `observation_visits.approved_by` (FK users, nullOnDelete) and `approved_at`, then **backfills**: every visit that is `submitted` with a `submitted_at` becomes `approved` (`approved_by = user_id`, `approved_at = submitted_at`). Rationale: before this migration tickets were created at submit, so every submitted visit (imported, demo, activity-only) is finished work; otherwise the imported October visits would flood the managers' approval queue. Deviation from the plan text ("at least one ticket"): the ticket condition was dropped on purpose.
+- Config `config/observations.php` → `manager_approval` (env `OBS_MANAGER_APPROVAL`, default `true`). `false` = pre-Plan-H behaviour (tickets at submit, visit approved by the submitter).
+- `php artisan optimize` after deploy (routes / config cache).
+
+### Status lifecycle
+
+`observation_visits.status`: `draft` → `submitted` (awaiting the reporting department's manager, **no tickets**) → `approved` (tickets created, `approved_by/at` set). `ObservationVisit::STATUSES = ['draft','submitted','approved']`; relation `approver()`. `status == 'approved'` ⇔ the tickets exist. There is no `rejected`.
+
+**Callers that used `submitVisit()` to get tickets (Plan D demo seeder, any command) must now call both:**
+
+```php
+$svc->submitVisit($visit, $recorder, ['silent' => true]);                           // marks submitted, no tickets
+$svc->approveVisit($visit->fresh(), $manager, ['silent' => true, 'due_from' => $d]); // creates the tickets -> approved
+```
+
+`approveVisit` refuses a `draft` (422 `visit` "الزيارة لم تُرسل بعد.") and is idempotent on an approved visit. `ImportWriter` already does this (imported visits end `approved`). With the flag off, `submitVisit` alone still creates the tickets and `approveVisit` afterwards is a no-op, so seeders written this way work under both settings. Policies are not checked inside the service.
+
+### Service surface (`App\Services\Observations\ObservationService`, additive)
+
+| Method | Behaviour |
+|---|---|
+| `submitVisit(ObservationVisit, User, array $options = []): array{visit, created_tickets}` | Flag on: locks, `status=submitted`, `submitted_at=now`, notifies every active `is_department_manager` of `visit.department_id` except the submitter (`notifications.type = observation_visit_submitted`, `link = /observations/visits/to-approve/{id}`, no ticket), returns `created_tickets: []`. Flag off: the old behaviour in one transaction (422 per item before any write, tickets, `approved` by the submitter). Idempotent for `submitted` / `approved` (returns the linked tickets). Options `silent`, `due_from`. |
+| `approveVisit(ObservationVisit, User, array $options = []): array{visit, created_tickets}` | Locks, requires `submitted`, `assertTicketable` (422 `items.{i}.responsible_department_id` / `items.{i}.branch_id`, `i` = position in the visit's observations by id), then per row: catalog `usage_count`+1, good/average assessment → `closed_no_action`, each issue / poor assessment → ticket via `ticketAttributesFor` (same as before; `created_by` = the observation's author, the log row's actor = the approver), before photos copied, `observation_new` / `observation_escalated` / `observation_cc` notifications + `ticket_new` from `createManual`. Sets `approved`, `approved_by`, `approved_at`. Idempotent. Options `silent`, `due_from`. |
+| `classifyVisit(ObservationVisit, User, ?ClassifierContract = null): array{status, message, observations}` | Visit not approved (else 422). Points = the visit's observations with `catalog_item_id IS NULL`, text = `description`, index = position. Calls the bound classifier once; one `ai_classifications` row per point **with `observation_id`** (batch status / model / error / latency on every row, token totals on the first). Batch `ok`: each answered row gets `responsible_department_id` (when given), `risk_level_id` (by slug), `category_id` (only a category of the visit's department) and `classification_status = ai_pending_review`; `catalog_item_id` and `kind` are never written. `failed` / `skipped`: observations untouched, `message = ObservationService::AI_UNAVAILABLE` ("الفحص غير متاح، اختر الفئة يدوياً"). No free points → `ok` without a classifier call. `observations` = the visit's rows (models, `ObservationItem::WITH` loaded). |
+| `updateClassification(Observation, array $data, User): Observation` | Visit must not be `approved` (422 `visit`). Keys, each optional, `null` clears: `responsible_department_id`, `risk_level_slug` (unknown slug → 422), `category_id` (another department's → 422 `category_id`; moving away from the row's catalog item unlinks it and sets `manual`), `description` (a title derived from the old text follows it), `kind` (re-applies the draft status rules: positive → `positive`, activity → `closed_no_action`, else `open`). `classification_status` is otherwise left as is (the review queue of Plan C still learns from the manager's edits). |
+| `ObservationService::AI_UNAVAILABLE` | public const, also used by `ai-check`. |
+
+`App\Support\ObservationScope::approvableDepartmentIds(User): ?array` (null = every reporting department for super_admin / ops_manager, `[id]` for the manager of a reporting department, `[]` otherwise) and `approvesDepartment(User, ?int): bool`.
+
+`App\Services\TicketService` (additive): `REPLY_STATES = ['working','solved']`; `canReply(Ticket, User): bool` (users whose `department_id` = the ticket's, plus super_admin / ops_manager); `reply(Ticket, User $actor, string $state, string $note, ?string $photoPath = null): Ticket`. `working`: if the ticket is `open` or unassigned → `assign()` (to the actor when nobody holds it), then `assigned → on_the_way → in_progress` through `changeStatus` (a log row per step; intermediate rows carry "رد الإدارة: جاري العمل عليها", the last one the note); already `in_progress` → one `comment` log row with the note. `solved`: same chain, then `photo_path` recorded as `after` evidence (skipped when that path is already on the ticket), then `waiting_approval` with the note (`resolved_at`, `ticket_approval` notification to the creator). Throws `AuthorizationException` (other department), `ValidationException` (`state`, `note` < 3 chars), `TicketTransitionDenied` 422 when the ticket is `waiting_approval` or `closed`. Transaction + row lock. `TicketStatusChanged` fires per step, so the observation follows (`in_progress`).
+
+### Policies (additive)
+
+`ObservationVisitPolicy`: `supervise(User, ObservationVisit)` = `ObservationScope::approvesDepartment($u, $visit->department_id)` (no status check); `approve` and `classify` = `supervise` AND `status === 'submitted'`. `ObservationPolicy@updateClassification(User, Observation)` = visit status not `approved` AND `approvesDepartment($u, $o->reporting_department_id)`. Call forms: `can('approve'|'classify'|'supervise', $visit)`, `can('updateClassification', $observation)`.
+
+### API contract (additive to Plan B; all under `auth:sanctum`)
+
+- **Visit item** gains `pending_points` (int: `issue` rows without `responsible_department_id`), `approved_at` (ISO-8601 or null), `approved_by` (`{id, name}` or null). `status` may be `approved`.
+- **Observation item** gains `visit_status` (`draft` | `submitted` | `approved`) and `can_edit_classification` (bool for the current user = `can('updateClassification')`).
+- `POST /api/observation-visits/{id}/submit` → unchanged auth (owner + draft). Response `{message, visit (status submitted), created_tickets: []}` with the flag on; message "تم إرسال الزيارة وهي بانتظار اعتماد المدير.". Flag off: as before, `visit.status` is `approved`.
+- `GET /api/observation-visits?scope=to_approve` → submitted visits of the departments the user approves for (`approvableDepartmentIds`; ops / super see all). `status=` is ignored for this scope (always `submitted`), the other filters (`branch_id`, `department_id`, `page`) still apply. Auth: a reporting user OR an approver; a non-reporting department's manager gets 403; a department employee gets an empty list. Same `{data, meta}` shape.
+- `POST /api/observation-visits/{id}/classify` (no body) → `can('classify')` (403 for non-managers and for drafts). Always HTTP 200: `{status: ok|failed|skipped, message: null|"الفحص غير متاح، اختر الفئة يدوياً", visit: <visit item>, observations: [<observation item>...]}` (every observation of the visit, ordered by id; `visit` is additive to the plan contract so the client can refresh `pending_points`).
+- `PUT /api/observations/{id}` body `{responsible_department_id?, risk_level_slug?, category_id?, description?, kind?}` (`UpdateObservationRequest`: each nullable; `risk_level_slug` in `RiskLevel::SLUGS`, `kind` in `Observation::KINDS`, ids must exist) → `can('updateClassification')` (403 after approval). Response `{message, observation: <observation item>}`; 422 `category_id` for another department's category.
+- `POST /api/observation-visits/{id}/approve` (no body) → `can('approve')`; an already approved visit answers 200 for a supervising manager (idempotent, same tickets), 403 for others; a draft → 403. Response `{message: "تم اعتماد الزيارة.", visit (status approved), created_tickets: [{id, observation_id, ticket_id, reference, title, priority, department{id,name}}]}` (same row shape the old submit returned). 422 `items.{i}.responsible_department_id` / `items.{i}.branch_id` and nothing written.
+- `POST /api/tickets/{id}/reply` body `{state: working|solved, note (required, min 3, max 2000), photo_path? (max 255), photo? (image, web form only)}` (`ReplyTicketRequest`) → 403 `{"message":"غير مصرح."}` unless `canReply`; 422 from the FormRequest or `{"message": "انتقال غير مسموح في دورة الحالة."}` when the ticket is already `waiting_approval` / `closed`. Response `{message, ticket: <TicketController::item(full)>}` (`ticket.status` = `in_progress` or `waiting_approval`, `assigned_to` set). The mobile uploads the after photo first with `POST /api/tickets/{id}/evidence` (`kind=after`) — then `photo_path` may be omitted or repeated (deduplicated) — or passes any `path` returned by an upload endpoint.
+- The fine-grained ticket endpoints (`status`, `send-for-approval`, `approve`, `reject`, `assign`, `departments/ticket/{id}/status`) are unchanged.
+
+### Admin web (`routes/observations-approval.php`, required once from the `auth` group of `routes/web.php`)
+
+| Method | Path | Name | Policy |
+|---|---|---|---|
+| GET | `/observations/visits/to-approve` (`?department_id=` for ops / super) | `obs.approval.index` | `approvableDepartmentIds !== []` else 403 |
+| GET | `/observations/visits/to-approve/{visit}` | `obs.approval.show` | `supervise` (approved visits stay readable, read-only, tickets linked) |
+| POST | `/observations/visits/to-approve/{visit}/classify` | `obs.approval.classify` | `classify` |
+| PUT | `/observations/visits/to-approve/{visit}/observations/{observation}` (`UpdateObservationRequest`) | `obs.approval.observation` | `updateClassification` (+ 404 when the point is not the visit's) |
+| POST | `/observations/visits/to-approve/{visit}/approve` | `obs.approval.approve` | `approve`; a 422 from the service is flashed as `$errors` + `status` |
+| POST | `/tickets/{ticket}/reply` (`ReplyTicketRequest`, multipart `photo` stored under `evidence/tickets/{id}/`) | `tickets.reply` | `TicketService::canReply` (403) |
+
+Controllers: `App\Http\Controllers\Web\Observations\ApprovalController`, `Web\TicketController@reply`. Views: `resources/views/dashboard/observations/approval/{index,show}.blade.php`, strings with `dt()` (no `TranslationSeeder` rows, so no conflict with Plan D). Sidebar: the `admin-nav` partial shows a "اعتماد الزيارات" label + link to managers of reporting departments, ops_manager and super_admin (`approvableDepartmentIds !== []`), independently of the settings block. Ticket show page (`dashboard/tickets/show.blade.php`): a "رد الإدارة المسؤولة" card with a mandatory note, optional photo and the two buttons "جاري العمل عليها" / "تم الحل" for `canReply` users while the ticket is not `waiting_approval` / `closed` (`$canReply` is passed by `Web\TicketController@show`).
+
+### Notification types added by Plan H
+
+`observation_visit_submitted` (managers of the reporting department, `ticket_id` null, `link` to the web approval page). Approval reuses Plan B's `ticket_new` / `observation_new` / `observation_escalated` / `observation_cc`; the reply reuses `ticket_assigned` and `ticket_approval`.
+
+### Tests (Plan H)
+
+`tests/Feature/Observations/{ApprovalSchemaTest,ApprovalServiceTest,ApprovalApiTest}.php`, `tests/Feature/Observations/Web/ApprovalTest.php`, `tests/Feature/Tickets/ReplyTest.php`. The pre-Plan-H tests that expect tickets at submit (`ObservationSubmitTest`, `ApiTest::test_full_mobile_flow`, `ApiTest::test_submit_returns_422_per_item_without_responsible`) set `config(['observations.manager_approval' => false])` and now expect `visit.status === 'approved'`; `ImportWriterTest` expects `approved`; the `VerificationTest` / `ApiTest` helpers call `approveVisit` after `submitVisit`.
+
+### Deviations from the plan text (Plan H)
+
+- Backfill marks every old `submitted` visit with a `submitted_at` as `approved`, with or without tickets (see deploy checklist).
+- Flag off: the visit ends `approved` (by the submitter), not `submitted`, so `approved` always means "tickets exist".
+- `classify` response carries an additive `visit` key; `to_approve` ignores `status=`.
+- `PUT /observations/{id}` never changes `catalog_item_id` except to unlink it when the category moves; `classify` never writes `catalog_item_id` or `kind` (the manager uses PUT, or the Plan C review queue merges into a catalog item).
+- `canReply` also admits super_admin / ops_manager.
+- `approve` answers 200 (idempotent) to a supervising manager on an already approved visit instead of 403.
+
+### Hazards for the mobile / Plan D / G
+
+- A department manager who submits their own visit must still approve it (no self-approval shortcut); they are not notified about their own submission.
+- The Plan D demo seeder must call `approveVisit` after `submitVisit` to get tickets (see "Status lifecycle"); with the flag off `submitVisit` alone is enough.
+- `ObservationItem::make` calls `auth()->user()->can('updateClassification')` per row (no extra query: the policy reads the eager-loaded `visit:id,status` and the user's cached department); when the item is serialized outside a request (`auth()->user()` null) the key is `false`.
+- The mobile hides the old fine-grained buttons for observation tickets, but the API still accepts them; `reply` on a `rejected` ticket assigns the actor and walks to `in_progress`.
+- `GET /observation-visits?status=submitted` (without `scope`) still means "my visits / my scope with status submitted", i.e. the recorder's own pending visits.

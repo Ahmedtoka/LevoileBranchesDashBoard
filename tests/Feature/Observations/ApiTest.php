@@ -140,6 +140,7 @@ class ApiTest extends TestCase
         $observation = $this->observation($visit);
         ObservationPhoto::create(['observation_id' => $observation->id, 'path' => 'obs/before.jpg', 'kind' => 'before', 'source' => 'camera', 'uploaded_by' => $this->recorder->id]);
         app(ObservationService::class)->submitVisit($visit, $this->recorder, ['silent' => true]);
+        app(ObservationService::class)->approveVisit($visit->fresh(), $this->operationManager, ['silent' => true]);
 
         $ticket = $observation->fresh()->ticket;
         $tickets = app(TicketService::class);
@@ -203,6 +204,8 @@ class ApiTest extends TestCase
 
     public function test_full_mobile_flow(): void
     {
+        // Pre-Plan-H flow: tickets at submit. The approval gate is covered by ApprovalApiTest.
+        config(['observations.manager_approval' => false]);
         Storage::fake('public');
         Sanctum::actingAs($this->recorder);
 
@@ -268,7 +271,7 @@ class ApiTest extends TestCase
 
         $submit = $this->postJson("/api/observation-visits/{$visitId}/submit")->assertOk()
             ->assertJsonStructure(['message', 'visit' => self::VISIT_ITEM, 'created_tickets' => [['id', 'observation_id', 'ticket_id', 'reference', 'title', 'priority', 'department' => ['id', 'name']]]]);
-        $this->assertSame('submitted', $submit->json('visit.status'));
+        $this->assertSame('approved', $submit->json('visit.status'));
         $this->assertCount(1, $submit->json('created_tickets'));
         $this->assertSame($observationId, $submit->json('created_tickets.0.observation_id'));
         $this->assertSame('high', $submit->json('created_tickets.0.priority'));
@@ -527,6 +530,7 @@ class ApiTest extends TestCase
 
     public function test_submit_returns_422_per_item_without_responsible(): void
     {
+        config(['observations.manager_approval' => false]);
         $visit = $this->visit();
         Sanctum::actingAs($this->recorder);
 

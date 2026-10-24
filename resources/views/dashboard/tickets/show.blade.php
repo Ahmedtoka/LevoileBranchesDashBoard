@@ -43,6 +43,23 @@
     </div>
 
     <div class="col-lg-5">
+        @if($canReply)
+        <div class="card p-3 mb-3 border-primary">
+            <h6 class="fw-bold">{{ dt('رد الإدارة المسؤولة', 'Department reply') }}</h6>
+            <p class="small text-muted mb-2">{{ dt('اكتب ملاحظة ثم اختر: جاري العمل عليها (يُعيّن الطلب لك ويبدأ التنفيذ) أو تم الحل (يُرسل للاعتماد؛ الصورة اختيارية).', 'Write a note then choose: working on it (assigns the ticket to you and starts work) or solved (sent for approval; the photo is optional).') }}</p>
+            @error('note')<div class="text-danger small mb-1">{{ $message }}</div>@enderror
+            <form method="POST" action="{{ route('tickets.reply', $ticket) }}" enctype="multipart/form-data" id="replyForm">
+                @csrf
+                <input type="hidden" name="state" id="replyState" value="working">
+                <textarea name="note" class="form-control form-control-sm mb-2 @error('note') is-invalid @enderror" rows="2" required minlength="3" placeholder="{{ dt('ملاحظة إجبارية…', 'Mandatory note…') }}">{{ old('note') }}</textarea>
+                <input type="file" name="photo" accept="image/*" class="form-control form-control-sm mb-2" title="{{ dt('صورة بعد الحل (اختيارية)', 'After photo (optional)') }}">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-warning flex-fill" onclick="document.getElementById('replyState').value='working'"><i class="bi bi-tools me-1"></i>{{ dt('جاري العمل عليها', 'Working on it') }}</button>
+                    <button class="btn btn-sm btn-success flex-fill" onclick="document.getElementById('replyState').value='solved'"><i class="bi bi-check2-circle me-1"></i>{{ dt('تم الحل', 'Solved') }}</button>
+                </div>
+            </form>
+        </div>
+        @endif
         <div class="card p-3 mb-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h6 class="fw-bold mb-0">دورة الحالة</h6>

@@ -5,6 +5,7 @@ namespace App\Services\Observations;
 use App\Models\AiClassification;
 use App\Models\Branch;
 use App\Models\Department;
+use App\Models\Notification;
 use App\Models\Observation;
 use App\Models\ObservationCatalogItem;
 use App\Models\ObservationCategory;
@@ -16,6 +17,7 @@ use App\Models\Ticket;
 use App\Models\TicketUpdate;
 use App\Models\User;
 use App\Services\Observations\Ai\ClassificationBatch;
+use App\Services\Observations\Ai\ClassifierContract;
 use App\Services\TicketService;
 use App\Support\ObservationScope;
 use Carbon\Carbon;
@@ -29,6 +31,9 @@ class ObservationService
 {
     /** Ticket statuses meaning someone is working on it: the observation shows `in_progress`. */
     private const TICKET_WORKING = ['assigned', 'on_the_way', 'in_progress'];
+
+    /** Spec section 8: shown when the classifier is unavailable (failed / skipped). */
+    public const AI_UNAVAILABLE = 'الفحص غير متاح، اختر الفئة يدوياً';
 
     /** Management roles that may record for any reporting department (others: their own one only). */
     public const ALL_DEPARTMENTS_ROLES = ['super_admin', 'ops_manager', 'area_manager', 'branch_director', 'vm_manager'];
@@ -176,63 +181,291 @@ class ObservationService
     }
 
     /**
-     * Submit a draft visit (spec section 9.2 step 4): repeat escalation, one ticket per issue (and per
-     * `poor` assessment, converted to an issue), before photos, notifications, counters. All or nothing.
-     * A second call on a submitted visit creates nothing and returns the tickets already linked.
+     * Submit a draft visit. With `observations.manager_approval` (default) the visit becomes `submitted`:
+     * it waits for a manager of the reporting department (notified with `observation_visit_submitted`) and
+     * NO ticket is created until approveVisit(). With the flag off, submit also approves at once (tickets
+     * created, visit `approved` by the submitter), as before Plan H. Idempotent: a visit already submitted
+     * or approved is returned unchanged with the tickets already linked.
      *
-     * Options: `silent` (bool) passes through to createManual and suppresses this method's notifications;
-     * `due_from` (?Carbon, default now) is the start of each ticket's SLA.
+     * Options: `silent` (bool) suppresses every notification (and createManual's auto-assign);
+     * `due_from` (?Carbon, default now) is the start of each ticket's SLA (flag off only).
      *
      * @return array{visit: ObservationVisit, created_tickets: list<array{observation_id:int, ticket_id:int, reference:string}>}
      */
     public function submitVisit(ObservationVisit $v, User $u, array $options = []): array
     {
-        if ($v->status === 'submitted') {
+        if ($v->status !== 'draft') {
             return ['visit' => $v, 'created_tickets' => $this->linkedTickets($v)];
         }
-        $this->assertDraft($v);
 
         $silent = (bool) ($options['silent'] ?? false);
         $dueFrom = $options['due_from'] ?? null;
+        $approveNow = ! config('observations.manager_approval', true);
 
         // One transaction is the unit retried on a duplicate ticket reference (see retryOnDuplicate).
-        $created = $this->retryOnDuplicate(fn () => DB::transaction(function () use ($v, $u, $silent, $dueFrom) {
+        $created = $this->retryOnDuplicate(fn () => DB::transaction(function () use ($v, $u, $silent, $dueFrom, $approveNow) {
             // The draft check above is in memory: the lock closes the race with a concurrent upsert/submit.
             $visit = ObservationVisit::whereKey($v->id)->lockForUpdate()->firstOrFail();
-            if ($visit->status === 'submitted') {
+            if ($visit->status !== 'draft') {
                 return null;
-            }
-            $this->assertDraft($visit);
-
-            $observations = $visit->observations()->with(['catalogItem', 'category'])->orderBy('id')->get();
-            $this->assertTicketable($observations);
-
-            $created = [];
-            foreach ($observations as $o) {
-                if ($o->catalog_item_id !== null) {
-                    ObservationCatalogItem::whereKey($o->catalog_item_id)->increment('usage_count');
-                }
-
-                if (! $this->needsTicket($o)) {
-                    // Nothing follows a good/average assessment.
-                    if ($o->kind === 'assessment') {
-                        $o->update(['status' => 'closed_no_action']);
-                    }
-
-                    continue;
-                }
-
-                $created[] = $this->openTicket($o, $u, $silent, $dueFrom);
             }
 
             $visit->update(['status' => 'submitted', 'submitted_at' => now()]);
 
-            return $created;
+            if ($approveNow) {
+                return $this->finalizeApproval($visit, $u, $silent, $dueFrom);
+            }
+
+            if (! $silent) {
+                $this->notifySubmitted($visit, $u);
+            }
+
+            return [];
         }));
 
         $v->refresh();
 
         return ['visit' => $v, 'created_tickets' => $created ?? $this->linkedTickets($v)];
+    }
+
+    /**
+     * Approve a submitted visit (Plan H): repeat escalation, one ticket per issue (and per `poor`
+     * assessment, converted to an issue), before photos, notifications, counters: exactly what submit did
+     * before the approval gate. Every issue needs a responsible department and a branch (one 422 lists
+     * them all, keys `items.{i}.responsible_department_id` / `items.{i}.branch_id`, `i` = position in the
+     * visit's observations ordered by id) and nothing is written otherwise. All or nothing; idempotent.
+     * The caller authorizes (`approve` policy). Options as submitVisit (`silent`, `due_from`).
+     *
+     * @return array{visit: ObservationVisit, created_tickets: list<array{observation_id:int, ticket_id:int, reference:string}>}
+     */
+    public function approveVisit(ObservationVisit $v, User $u, array $options = []): array
+    {
+        if ($v->status === 'approved') {
+            return ['visit' => $v, 'created_tickets' => $this->linkedTickets($v)];
+        }
+        $this->assertSubmitted($v);
+
+        $silent = (bool) ($options['silent'] ?? false);
+        $dueFrom = $options['due_from'] ?? null;
+
+        $created = $this->retryOnDuplicate(fn () => DB::transaction(function () use ($v, $u, $silent, $dueFrom) {
+            $visit = ObservationVisit::whereKey($v->id)->lockForUpdate()->firstOrFail();
+            if ($visit->status === 'approved') {
+                return null;
+            }
+            $this->assertSubmitted($visit);
+
+            return $this->finalizeApproval($visit, $u, $silent, $dueFrom);
+        }));
+
+        $v->refresh();
+
+        return ['visit' => $v, 'created_tickets' => $created ?? $this->linkedTickets($v)];
+    }
+
+    /**
+     * The ticket-creating half of the old submit, run on a locked `submitted` visit inside the caller's
+     * transaction: validates, opens the tickets, closes good/average assessments, counts catalog usage and
+     * marks the visit `approved` by `$u`.
+     *
+     * @return list<array{observation_id:int, ticket_id:int, reference:string}>
+     */
+    private function finalizeApproval(ObservationVisit $visit, User $u, bool $silent, ?Carbon $dueFrom): array
+    {
+        $observations = $visit->observations()->with(['catalogItem', 'category'])->orderBy('id')->get();
+        $this->assertTicketable($observations);
+
+        $created = [];
+        foreach ($observations as $o) {
+            if ($o->catalog_item_id !== null) {
+                ObservationCatalogItem::whereKey($o->catalog_item_id)->increment('usage_count');
+            }
+
+            if (! $this->needsTicket($o)) {
+                // Nothing follows a good/average assessment.
+                if ($o->kind === 'assessment') {
+                    $o->update(['status' => 'closed_no_action']);
+                }
+
+                continue;
+            }
+
+            $created[] = $this->openTicket($o, $u, $silent, $dueFrom);
+        }
+
+        $visit->update(['status' => 'approved', 'approved_by' => $u->id, 'approved_at' => now()]);
+
+        return $created;
+    }
+
+    /** `observation_visit_submitted` to every active manager of the reporting department except the submitter. */
+    private function notifySubmitted(ObservationVisit $visit, User $submitter): void
+    {
+        $managerIds = User::where('department_id', $visit->department_id)
+            ->where('is_department_manager', true)
+            ->where('active', true)
+            ->whereKeyNot($submitter->id)
+            ->orderBy('id')
+            ->pluck('id');
+
+        $branchName = $visit->branch_id ? Branch::whereKey($visit->branch_id)->value('branch_name') : null;
+        $body = $visit->code.($branchName ? ' — '.$branchName : '').' — '.$submitter->name;
+
+        foreach ($managerIds as $managerId) {
+            Notification::create([
+                'user_id' => $managerId,
+                'type' => 'observation_visit_submitted',
+                'title' => dt('زيارة ملاحظات بانتظار اعتمادك', 'Observation visit awaiting your approval'),
+                'body' => $body,
+                'link' => '/observations/visits/to-approve/'.$visit->id,
+            ]);
+        }
+    }
+
+    /**
+     * Manager-side "فحص" (Plan H): classify every observation of a not-yet-approved visit that has no
+     * catalog item, from the saved descriptions, and write the suggestions (responsible department, risk,
+     * category) straight onto those rows as `ai_pending_review`. One ai_classifications row per point,
+     * linked by `observation_id`. A classifier failure changes no observation (the rows still record the
+     * failed/skipped batch). Catalog rows are never touched. The caller authorizes (`classify` policy).
+     *
+     * @return array{status: string, message: ?string, observations: Collection<int, Observation>}
+     */
+    public function classifyVisit(ObservationVisit $v, User $u, ?ClassifierContract $classifier = null): array
+    {
+        if ($v->status === 'approved') {
+            throw ValidationException::withMessages(['visit' => dt('الزيارة معتمدة بالفعل.', 'The visit is already approved.')]);
+        }
+
+        $targets = $v->observations()->whereNull('catalog_item_id')->orderBy('id')->get()->values();
+        if ($targets->isEmpty()) {
+            return ['status' => 'ok', 'message' => null, 'observations' => $this->visitObservations($v)];
+        }
+
+        $points = $targets->map(fn (Observation $o, int $i) => [$i, (string) $o->description])->all();
+        $batch = ($classifier ?? app(ClassifierContract::class))->classify((int) $v->department_id, $v->branch_id, $points);
+        $byIndex = [];
+        foreach ($batch->results as $result) {
+            $byIndex[$result->index] = $result;
+        }
+        $categoryIds = ObservationCategory::where('department_id', $v->department_id)->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        DB::transaction(function () use ($v, $targets, $batch, $byIndex, $categoryIds) {
+            foreach ($targets as $i => $o) {
+                $result = $byIndex[$i] ?? null;
+
+                AiClassification::create([
+                    'observation_visit_id' => $v->id,
+                    'observation_id' => $o->id,
+                    'request_hash' => sha1($v->department_id.'|'.$o->description),
+                    'input_text' => $o->description,
+                    'suggested' => $result?->toArray(),
+                    'model' => $batch->model,
+                    'status' => $batch->status,
+                    'error' => $batch->error,
+                    'latency_ms' => $batch->latencyMs,
+                    'input_tokens' => $i === 0 ? $batch->inputTokens : null,
+                    'output_tokens' => $i === 0 ? $batch->outputTokens : null,
+                ]);
+
+                if ($batch->status !== 'ok' || $result === null) {
+                    continue;
+                }
+
+                $attributes = ['classification_status' => 'ai_pending_review'];
+                if ($result->responsibleDepartmentId !== null) {
+                    $attributes['responsible_department_id'] = $result->responsibleDepartmentId;
+                }
+                if ($result->categoryId !== null && in_array($result->categoryId, $categoryIds, true)) {
+                    $attributes['category_id'] = $result->categoryId;
+                }
+                if ($risk = RiskLevel::bySlug($result->riskLevelSlug)) {
+                    $attributes['risk_level_id'] = $risk->id;
+                }
+                $o->update($attributes);
+            }
+        });
+
+        return [
+            'status' => $batch->status,
+            'message' => $batch->status === 'ok' ? null : self::AI_UNAVAILABLE,
+            'observations' => $this->visitObservations($v),
+        ];
+    }
+
+    /**
+     * Manager correction of one point before approval (Plan H). Keys (each optional, null clears):
+     * responsible_department_id, risk_level_slug, category_id (must belong to the visit's reporting
+     * department), description, kind. A category change away from the row's catalog item unlinks the item
+     * (`manual`); a kind change re-applies the draft status rules (positive / closed_no_action / open).
+     * The caller authorizes (`updateClassification` policy); the visit must not be approved.
+     */
+    public function updateClassification(Observation $o, array $data, User $u): Observation
+    {
+        $visitStatus = $o->visit?->status;
+        if ($visitStatus === 'approved') {
+            throw ValidationException::withMessages(['visit' => dt('الزيارة معتمدة ولا يمكن تعديل نقاطها.', 'The visit is approved; its points can no longer be edited.')]);
+        }
+
+        $attributes = [];
+
+        if (array_key_exists('responsible_department_id', $data)) {
+            $attributes['responsible_department_id'] = $data['responsible_department_id'] !== null ? (int) $data['responsible_department_id'] : null;
+        }
+
+        if (array_key_exists('risk_level_slug', $data)) {
+            if ($data['risk_level_slug'] === null || $data['risk_level_slug'] === '') {
+                $attributes['risk_level_id'] = null;
+            } else {
+                $risk = RiskLevel::bySlug((string) $data['risk_level_slug']);
+                if ($risk === null) {
+                    throw ValidationException::withMessages(['risk_level_slug' => dt('درجة الخطورة غير صحيحة.', 'Invalid risk level.')]);
+                }
+                $attributes['risk_level_id'] = $risk->id;
+            }
+        }
+
+        if (! empty($data['category_id'])) {
+            $category = ObservationCategory::find($data['category_id']);
+            if ($category === null || (int) $category->department_id !== (int) $o->reporting_department_id) {
+                throw ValidationException::withMessages(['category_id' => dt('الفئة من إدارة أخرى.', 'The category belongs to another department.')]);
+            }
+            $attributes['category_id'] = $category->id;
+            if ($o->catalog_item_id !== null && (int) ObservationCatalogItem::whereKey($o->catalog_item_id)->value('category_id') !== (int) $category->id) {
+                $attributes['catalog_item_id'] = null;
+                $attributes['classification_status'] = 'manual';
+            }
+        }
+
+        $description = trim((string) ($data['description'] ?? ''));
+        if ($description !== '' && $description !== (string) $o->description) {
+            $attributes['description'] = $description;
+            if ((string) $o->title === '' || (string) $o->title === mb_substr((string) $o->description, 0, 120)) {
+                $attributes['title'] = mb_substr($description, 0, 120);
+            }
+        }
+
+        if (! empty($data['kind']) && in_array($data['kind'], Observation::KINDS, true) && $data['kind'] !== $o->kind) {
+            $attributes['kind'] = $data['kind'];
+            // No ticket exists before approval, so the draft status rules apply.
+            $attributes['status'] = match ($data['kind']) {
+                'positive' => 'positive',
+                'activity' => 'closed_no_action',
+                default => 'open',
+            };
+        }
+
+        if ($attributes !== []) {
+            $o->update($attributes);
+        }
+
+        return $o->fresh();
+    }
+
+    /** @return Collection<int, Observation> the visit's rows with the item relations, ordered by id */
+    private function visitObservations(ObservationVisit $v): Collection
+    {
+        return $v->observations()->with(\App\Http\Resources\Observations\ObservationItem::WITH)->orderBy('id')->get();
     }
 
     /**
@@ -626,7 +859,9 @@ class ObservationService
         $escalated = $this->applyRepeatEscalation($o);
         $o->save();
 
-        $ticket = $this->tickets->createManual($this->ticketAttributesFor($o, $u, $dueFrom), $u->id, ['silent' => $silent]);
+        // The ticket is raised in the recorder's name (the row's author), whoever approves the visit.
+        $author = (int) $o->created_by === (int) $u->id ? $u : (User::find($o->created_by) ?? $u);
+        $ticket = $this->tickets->createManual($this->ticketAttributesFor($o, $author, $dueFrom), $u->id, ['silent' => $silent]);
         // createManual may have auto-assigned a fresh copy of the ticket; its assignment event ran before
         // ticket_id was linked, so the status is derived here from the saved ticket.
         $ticket->refresh();
@@ -935,6 +1170,15 @@ class ObservationService
                 'source' => $source,
                 'uploaded_by' => $u->id,
             ]);
+        }
+    }
+
+    private function assertSubmitted(ObservationVisit $v): void
+    {
+        if ($v->status !== 'submitted') {
+            throw ValidationException::withMessages(['visit' => $v->status === 'draft'
+                ? dt('الزيارة لم تُرسل بعد.', 'The visit has not been submitted yet.')
+                : dt('الزيارة معتمدة بالفعل.', 'The visit is already approved.')]);
         }
     }
 

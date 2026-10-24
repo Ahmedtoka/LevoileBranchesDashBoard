@@ -10,12 +10,17 @@ use Illuminate\Database\Eloquent\Model;
 class ObservationVisitItem
 {
     /** Relations to eager-load before serializing a list. */
-    public const WITH = ['department:id,name', 'branch:id,branch_name'];
+    public const WITH = ['department:id,name', 'branch:id,branch_name', 'approver:id,name'];
 
     /** Counts to load with `withCount()` / `loadCount()` before serializing. */
     public static function counts(): array
     {
-        return ['observations', 'observations as issues_count' => fn (Builder $q) => $q->where('kind', 'issue')];
+        return [
+            'observations',
+            'observations as issues_count' => fn (Builder $q) => $q->where('kind', 'issue'),
+            // Issues the manager still has to route before the visit can be approved.
+            'observations as pending_points' => fn (Builder $q) => $q->where('kind', 'issue')->whereNull('responsible_department_id'),
+        ];
     }
 
     /** @param  ObservationVisit  $m */
@@ -36,7 +41,10 @@ class ObservationVisitItem
             'checkin_simulated' => (bool) $m->checkin_simulated,
             'observations_count' => (int) ($m->observations_count ?? $m->observations()->count()),
             'issues_count' => (int) ($m->issues_count ?? $m->observations()->where('kind', 'issue')->count()),
+            'pending_points' => (int) ($m->pending_points ?? $m->observations()->where('kind', 'issue')->whereNull('responsible_department_id')->count()),
             'submitted_at' => $m->submitted_at?->toIso8601String(),
+            'approved_at' => $m->approved_at?->toIso8601String(),
+            'approved_by' => $m->approver ? ['id' => $m->approver->id, 'name' => $m->approver->name] : null,
         ];
     }
 }

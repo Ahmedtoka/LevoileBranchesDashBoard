@@ -12,7 +12,10 @@ use App\Models\TicketUpdate;
 use App\Models\User;
 use App\Models\Visit;
 use App\Models\VisitAnswer;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class TicketService
 {
@@ -296,6 +299,89 @@ class TicketService
         $this->log($ticket, $actor->id, 'cancelled', $from, 'closed', $note);
 
         return $ticket;
+    }
+
+    /** Plan H reply states: `working` -> in_progress, `solved` -> waiting_approval. */
+    public const REPLY_STATES = ['working', 'solved'];
+
+    /** Users of the ticket's department (manager or employee), plus super_admin / ops_manager, may reply. */
+    public function canReply(Ticket $ticket, User $user): bool
+    {
+        if ($user->hasRole(['super_admin', 'ops_manager'])) {
+            return true;
+        }
+
+        return $ticket->department_id !== null
+            && $user->department_id !== null
+            && (int) $user->department_id === (int) $ticket->department_id;
+    }
+
+    /**
+     * The responsible department's one-tap answer (Plan H): `working` assigns the ticket to the actor when
+     * nobody holds it and walks the cycle to `in_progress` in one call (assigned -> on_the_way ->
+     * in_progress, a log row per step; the note goes on the last one, or on a plain `comment` row when the
+     * ticket is already in progress). `solved` does the same chain, records `$photoPath` as `after`
+     * evidence (skipped when that path is already on the ticket) and moves to `waiting_approval`, so the
+     * approver can close. The note is mandatory (min 3 chars). Throws AuthorizationException for other
+     * departments, ValidationException for a bad state / note, TicketTransitionDenied (422) when the
+     * ticket is already waiting approval or closed.
+     */
+    public function reply(Ticket $ticket, User $actor, string $state, string $note, ?string $photoPath = null): Ticket
+    {
+        if (! $this->canReply($ticket, $actor)) {
+            throw new AuthorizationException(dt('هذا الطلب ليس من اختصاص إدارتك.', 'This ticket is not routed to your department.'));
+        }
+        if (! in_array($state, self::REPLY_STATES, true)) {
+            throw ValidationException::withMessages(['state' => dt('نوع الرد غير صحيح.', 'Invalid reply state.')]);
+        }
+        $note = trim($note);
+        if (mb_strlen($note) < 3) {
+            throw ValidationException::withMessages(['note' => dt('اكتب ملاحظة مع الرد.', 'A note is required with the reply.')]);
+        }
+        if (in_array($ticket->status, ['waiting_approval', 'closed'], true)) {
+            throw TicketTransitionDenied::invalidTransition();
+        }
+
+        return DB::transaction(function () use ($ticket, $actor, $state, $note, $photoPath) {
+            $ticket = Ticket::whereKey($ticket->id)->lockForUpdate()->firstOrFail();
+            if (in_array($ticket->status, ['waiting_approval', 'closed'], true)) {
+                throw TicketTransitionDenied::invalidTransition();
+            }
+
+            $marker = $state === 'working'
+                ? dt('رد الإدارة: جاري العمل عليها', 'Department reply: working on it')
+                : dt('رد الإدارة: تم الحل', 'Department reply: solved');
+
+            if ($ticket->status === 'open' || $ticket->assigned_to === null) {
+                $ticket = $this->assign($ticket, $ticket->assigned_to ? User::findOrFail($ticket->assigned_to) : $actor, $actor)->fresh();
+            }
+
+            // Walk forward to in_progress; the last step of the chain carries the note for `working`.
+            $path = match ($ticket->status) {
+                'assigned' => ['on_the_way', 'in_progress'],
+                'on_the_way', 'postponed', 'not_fixed', 'rejected' => ['in_progress'],
+                default => [],
+            };
+            foreach ($path as $i => $to) {
+                $last = $i === array_key_last($path);
+                $ticket = $this->changeStatus($ticket, $to, $actor, $last && $state === 'working' ? $note : $marker)->fresh();
+            }
+
+            if ($state === 'working') {
+                if ($path === []) {
+                    $this->log($ticket, $actor->id, 'comment', null, null, $note);
+                }
+
+                return $ticket->fresh();
+            }
+
+            if ($photoPath !== null && trim($photoPath) !== ''
+                && ! TicketUpdate::where('ticket_id', $ticket->id)->where('evidence_path', $photoPath)->exists()) {
+                $this->addEvidence($ticket, trim($photoPath), 'after', $actor);
+            }
+
+            return $this->changeStatus($ticket, 'waiting_approval', $actor, $note)->fresh();
+        });
     }
 
     public function addEvidence(Ticket $ticket, string $path, string $kind = 'after', ?User $actor = null): TicketUpdate

@@ -107,6 +107,9 @@ class WebVisitTest extends TestCase
 
     public function test_desk_all_branches_forces_activity(): void
     {
+        // The ticketability check (branch required for an issue) runs where tickets are created: at submit with
+        // the manager-approval gate off (Plan H), otherwise at approveVisit. This test keeps the pre-Plan-H path.
+        config(['observations.manager_approval' => false]);
         $this->actingAs($this->recorder);
 
         $visitId = $this->postJson('/web-api/observation-visits', [
@@ -133,7 +136,7 @@ class WebVisitTest extends TestCase
 
         $this->postJson("/web-api/observation-visits/{$visitId}/submit")
             ->assertOk()
-            ->assertJsonPath('visit.status', 'submitted')
+            ->assertJsonPath('visit.status', 'approved')
             ->assertJsonPath('created_tickets', []);
 
         $this->assertSame('closed_no_action', Observation::findOrFail($rowId)->status);

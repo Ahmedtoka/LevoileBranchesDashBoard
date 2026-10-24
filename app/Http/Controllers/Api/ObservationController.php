@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Observations\UpdateObservationRequest;
 use App\Http\Requests\Observations\VerifyObservationRequest;
 use App\Http\Resources\Observations\ObservationItem;
 use App\Models\Area;
@@ -146,6 +147,20 @@ class ObservationController extends Controller
                 'employee_final' => $classification->employee_final,
                 'admin_final' => $classification->admin_final,
             ] : null,
+        ]);
+    }
+
+    /** PUT /api/observations/{observation} (Plan H): the reporting department's manager corrects a point before approval. */
+    public function update(UpdateObservationRequest $request, Observation $observation): JsonResponse
+    {
+        $u = $request->user();
+        $this->allow($u->can('updateClassification', $observation));
+
+        $updated = $this->service->updateClassification($observation, $request->validated(), $u);
+
+        return response()->json([
+            'message' => 'تم تحديث الملاحظة.',
+            'observation' => ObservationItem::make($updated->load(ObservationItem::WITH)),
         ]);
     }
 

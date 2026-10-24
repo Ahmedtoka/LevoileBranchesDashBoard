@@ -13,7 +13,7 @@ class ObservationItem
     /** Relations to eager-load before serializing a list. */
     public const WITH = [
         'riskLevel', 'responsibleDepartment:id,name', 'reportingDepartment:id,name', 'branch:id,branch_name',
-        'ticket', 'photos', 'creator:id,name',
+        'ticket', 'photos', 'creator:id,name', 'visit:id,status',
     ];
 
     /**
@@ -63,6 +63,9 @@ class ObservationItem
             ] : null,
             'photos' => $m->photos->sortBy('id')->values()->map(fn (ObservationPhoto $p) => self::photo($p))->all(),
             'repeat_count' => (int) $m->repeat_count,
+            // Plan H: the approval gate state and whether the current user may edit the point.
+            'visit_status' => $m->visit?->status,
+            'can_edit_classification' => (bool) (auth()->user()?->can('updateClassification', $m) ?? false),
             'created_by' => self::ref($m->creator),
             'created_at' => $m->created_at?->toIso8601String(),
         ];

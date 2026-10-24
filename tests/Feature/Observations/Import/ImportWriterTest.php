@@ -104,7 +104,7 @@ class ImportWriterTest extends TestCase
         $visit = ObservationVisit::sole();
         $this->assertSame('import', $visit->source);
         $this->assertSame('field', $visit->type);
-        $this->assertSame('submitted', $visit->status);
+        $this->assertSame('approved', $visit->status);
         $this->assertSame($this->cityStars->id, $visit->branch_id);
         $this->assertSame($this->importUser->id, $visit->user_id);
         $this->assertSame('2026-10-13', $visit->visit_date->toDateString());
@@ -213,7 +213,7 @@ class ImportWriterTest extends TestCase
         $this->assertSame('desk', $visit->type);
         $this->assertNull($visit->branch_id);
         $this->assertSame('2026-10-11', $visit->visit_date->toDateString());
-        $this->assertSame('submitted', $visit->status);
+        $this->assertSame('approved', $visit->status);
 
         foreach (Observation::all() as $o) {
             $this->assertSame('activity', $o->kind);
