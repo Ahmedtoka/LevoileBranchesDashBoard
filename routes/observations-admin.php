@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\Observations\AreaController;
+use App\Http\Controllers\Web\Observations\CategoryController;
 use App\Http\Controllers\Web\Observations\RiskLevelController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,3 +17,10 @@ Route::post('/admin/areas/{area}/branches', [AreaController::class, 'assignBranc
 // ---- Risk levels (edit only; the 5 levels are fixed) ----
 Route::get('/admin/risk-levels', [RiskLevelController::class, 'index'])->name('obs.risk.index');
 Route::put('/admin/risk-levels/{riskLevel}', [RiskLevelController::class, 'update'])->name('obs.risk.update');
+
+// ---- Observation categories ----
+Route::get('/admin/observation-categories', [CategoryController::class, 'index'])->name('obs.categories.index');
+Route::post('/admin/observation-categories', [CategoryController::class, 'store'])->name('obs.categories.store');
+Route::post('/admin/observation-categories/reorder', [CategoryController::class, 'reorder'])->name('obs.categories.reorder');
+Route::put('/admin/observation-categories/{category}', [CategoryController::class, 'update'])->name('obs.categories.update');
+Route::delete('/admin/observation-categories/{category}', [CategoryController::class, 'destroy'])->name('obs.categories.destroy');
