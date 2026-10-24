@@ -28,6 +28,17 @@ class ObservationLabels
         return self::STATUSES[$status][2] ?? 'secondary';
     }
 
+    public static function classification(string $status): string
+    {
+        return match ($status) {
+            'catalog' => dt('من الكتالوج', 'From catalog'),
+            'manual' => dt('يدوي', 'Manual'),
+            'ai_pending_review' => dt('بانتظار اعتماد الفحص', 'Awaiting review'),
+            'ai_reviewed' => dt('مُعتمد', 'Reviewed'),
+            default => $status,
+        };
+    }
+
     public static function kind(string $kind): string
     {
         return match ($kind) {

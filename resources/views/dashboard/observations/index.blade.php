@@ -102,7 +102,7 @@
             <label class="form-label small mb-1">{{ dt('حالة التصنيف', 'Classification') }}</label>
             <select name="classification_status" class="form-select form-select-sm">
                 <option value="">{{ t('common.all', 'الكل') }}</option>
-                @foreach(\App\Models\Observation::CLASSIFICATION as $c)<option value="{{ $c }}" @selected($selected('classification_status', $c))>{{ $c }}</option>@endforeach
+                @foreach(\App\Models\Observation::CLASSIFICATION as $c)<option value="{{ $c }}" @selected($selected('classification_status', $c))>{{ \App\Support\ObservationLabels::classification($c) }}</option>@endforeach
             </select>
         </div>
         <div class="col-md-2 col-6">

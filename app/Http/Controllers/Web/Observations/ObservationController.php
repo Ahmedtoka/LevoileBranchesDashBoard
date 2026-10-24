@@ -35,15 +35,21 @@ class ObservationController extends Controller
         Gate::authorize('viewAny', Observation::class);
 
         $filters = ObservationFilters::fromRequest($request);
+        $user = $request->user();
+
+        // Area / store managers only get their own branches (and those branches' areas) in the dropdowns.
+        $branchIds = $user->scopedBranchIds();
+        $branches = Branch::where('active', true)->when($branchIds !== null, fn ($q) => $q->whereIn('id', $branchIds));
+        $areas = Area::where('active', true)->when($branchIds !== null, fn ($q) => $q->whereIn('id', Branch::whereIn('id', $branchIds)->whereNotNull('area_id')->select('area_id')));
 
         return view('dashboard.observations.index', [
-            'observations' => $this->query($filters, $request->user())->paginate(30)->withQueryString(),
+            'observations' => $this->query($filters, $user)->paginate(30)->withQueryString(),
             'filters' => $filters,
             'range' => $filters->range,
             'reportingDepartments' => Department::where('is_reporting', true)->orderBy('name')->get(),
             'departments' => Department::orderBy('name')->get(),
-            'areas' => Area::where('active', true)->orderBy('sort_order')->orderBy('name')->get(),
-            'branches' => Branch::where('active', true)->orderBy('branch_name')->get(),
+            'areas' => $areas->orderBy('sort_order')->orderBy('name')->get(),
+            'branches' => $branches->orderBy('branch_name')->get(),
             'categories' => ObservationCategory::where('active', true)
                 ->when($filters->get('reporting_department_id'), fn ($q, $id) => $q->where('department_id', $id))
                 ->orderBy('sort_order')->orderBy('id')->get(),
@@ -69,12 +75,12 @@ class ObservationController extends Controller
                 fputcsv($out, [
                     $o->reference,
                     $o->event_date?->toDateString(),
-                    $o->branch?->branch_name,
-                    $o->reportingDepartment?->name,
-                    $o->catalogItem ? dt($o->catalogItem->label_ar, $o->catalogItem->label_en) : ($o->category ? dt($o->category->name_ar, $o->category->name_en) : ''),
-                    $o->title,
+                    self::cell($o->branch?->branch_name),
+                    self::cell($o->reportingDepartment?->name),
+                    self::cell($o->catalogItem ? dt($o->catalogItem->label_ar, $o->catalogItem->label_en) : ($o->category ? dt($o->category->name_ar, $o->category->name_en) : '')),
+                    self::cell($o->title),
                     $o->riskLevel ? dt($o->riskLevel->name_ar, $o->riskLevel->name_en) : '',
-                    $o->responsibleDepartment?->name,
+                    self::cell($o->responsibleDepartment?->name),
                     ObservationLabels::status($o->status),
                     $o->ticket?->reference,
                     $o->ticket?->isOverdue() ? 'متأخر' : '',
@@ -83,5 +89,11 @@ class ObservationController extends Controller
 
             fclose($out);
         }, 'observations-'.now()->format('Ymd-His').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /** Neutralise spreadsheet formulas in free-text CSV cells (=, +, -, @ at the start). */
+    private static function cell(?string $value): ?string
+    {
+        return $value !== null && $value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true) ? "'".$value : $value;
     }
 }
