@@ -45,7 +45,7 @@
     </div>
     <div class="col-md-3"><label class="form-label small">{{ t('obs.sla_hours','المهلة (ساعات)') }}</label><input name="sla_hours" id="itSla" type="number" min="1" class="form-control" placeholder="{{ t('obs.from_category','من الفئة') }}"></div>
     <div class="col-md-3">
-        <label class="form-label small">{{ t('obs.cc','CC') }}</label>
+        <label class="form-label small">{{ t('obs.cc','إدارات تُبلَّغ بدون تيكت (CC)') }}</label>
         <select name="cc_department_ids[]" id="itCc" class="form-select" multiple size="3">
             @foreach($allDepartments as $d)<option value="{{ $d->id }}">{{ $d->name }}</option>@endforeach
         </select>
