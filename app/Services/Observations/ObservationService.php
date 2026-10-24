@@ -527,6 +527,12 @@ class ObservationService
 
     private function needsTicket(Observation $o): bool
     {
+        // A row already closed without action (an imported "Done" finding) is not open work. Live drafts
+        // never carry this status on an issue, so nothing changes for them.
+        if ($o->status === 'closed_no_action') {
+            return false;
+        }
+
         return $o->kind === 'issue' || ($o->kind === 'assessment' && $o->rating === 'poor');
     }
 
