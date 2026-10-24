@@ -108,10 +108,30 @@ Route::middleware('auth')->group(function () {
     // export.csv MUST stay above /observations/{observation} (also constrained to digits), or "export.csv" is read as an id.
     Route::get('/observations', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'index'])->name('observations.index');
     Route::get('/observations/export.csv', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'export'])->name('observations.export');
+    Route::get('/observations/new', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'create'])->name('observations.create');
     Route::get('/observations/{observation}', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'show'])->whereNumber('observation')->name('observations.show');
     Route::post('/observations/{observation}/reroute', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'reroute'])->whereNumber('observation')->name('observations.reroute');
     Route::post('/observations/{observation}/raise-risk', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'raiseRisk'])->whereNumber('observation')->name('observations.raiseRisk');
     Route::post('/observations/{observation}/close-no-action', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'closeNoAction'])->whereNumber('observation')->name('observations.closeNoAction');
+
+    // ---- Plan B's observations API mounted a second time under the web session (spec 9.3) ----
+    // Used by /observations/new (public/js/observations-visit.js): session cookie + X-CSRF-TOKEN, no Sanctum.
+    // Same relative paths, constraints and controller methods as routes/api.php; meta stays above {observation}.
+    Route::prefix('web-api')->name('web-api.')->group(function () {
+        Route::get('/observations/meta', [\App\Http\Controllers\Api\ObservationController::class, 'meta']);
+        Route::get('/observation-visits', [\App\Http\Controllers\Api\ObservationVisitController::class, 'index']);
+        Route::post('/observation-visits', [\App\Http\Controllers\Api\ObservationVisitController::class, 'store']);
+        Route::get('/observation-visits/{visit}', [\App\Http\Controllers\Api\ObservationVisitController::class, 'show'])->whereNumber('visit');
+        Route::post('/observation-visits/{visit}/photos', [\App\Http\Controllers\Api\ObservationVisitController::class, 'uploadPhoto'])->whereNumber('visit');
+        Route::post('/observation-visits/{visit}/ai-check', [\App\Http\Controllers\Api\ObservationVisitController::class, 'aiCheck'])->whereNumber('visit');
+        Route::post('/observation-visits/{visit}/observations', [\App\Http\Controllers\Api\ObservationVisitController::class, 'upsert'])->whereNumber('visit');
+        Route::post('/observation-visits/{visit}/submit', [\App\Http\Controllers\Api\ObservationVisitController::class, 'submit'])->whereNumber('visit');
+        Route::get('/observations', [\App\Http\Controllers\Api\ObservationController::class, 'index']);
+        Route::get('/observations/{observation}', [\App\Http\Controllers\Api\ObservationController::class, 'show'])->whereNumber('observation');
+        Route::delete('/observations/{observation}', [\App\Http\Controllers\Api\ObservationController::class, 'destroyDraft'])->whereNumber('observation');
+        Route::post('/observations/{observation}/verify', [\App\Http\Controllers\Api\ObservationController::class, 'verify'])->whereNumber('observation');
+        Route::get('/branches/{branch}/observations/pending-verification', [\App\Http\Controllers\Api\ObservationController::class, 'pendingVerification'])->whereNumber('branch');
+    });
 
     // ---- KPIs & deep reports ----
     Route::get('/kpis', [\App\Http\Controllers\Web\KpiController::class, 'index'])->name('kpis.index');

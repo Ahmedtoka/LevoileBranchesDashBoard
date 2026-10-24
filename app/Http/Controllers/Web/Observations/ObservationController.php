@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web\Observations;
 
 use App\Exceptions\TicketTransitionDenied;
+use App\Http\Controllers\Api\ObservationController as ApiObservationController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Observations\Web\CloseNoActionRequest;
 use App\Http\Requests\Observations\Web\RaiseRiskRequest;
@@ -12,6 +13,7 @@ use App\Models\Branch;
 use App\Models\Department;
 use App\Models\Observation;
 use App\Models\ObservationCategory;
+use App\Models\ObservationVisit;
 use App\Models\RiskLevel;
 use App\Models\User;
 use App\Services\Observations\ObservationService;
@@ -97,6 +99,31 @@ class ObservationController extends Controller
 
             fclose($out);
         }, 'observations-'.now()->format('Ymd-His').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * GET /observations/new: the laptop visit page (spec 9.3). A vanilla-JS app (public/js/observations-visit.js)
+     * that calls Plan B's API mounted under /web-api with the session. The first meta is inlined, read from the
+     * API controller itself so there is one meta.
+     */
+    public function create(Request $request)
+    {
+        Gate::authorize('create', ObservationVisit::class);
+
+        return view('dashboard.observations.new', [
+            'meta' => app(ApiObservationController::class)->meta($request)->getData(true),
+            'config' => [
+                'urls' => [
+                    'api' => url('/web-api'),
+                    'register' => route('observations.index'),
+                    'observations' => url('/observations'),
+                    'tickets' => url('/tickets'),
+                ],
+                'csrf' => csrf_token(),
+                'today' => now()->toDateString(),
+                'locale' => app()->getLocale(),
+            ],
+        ]);
     }
 
     public function show(Observation $observation)
