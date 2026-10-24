@@ -194,4 +194,343 @@ Idempotency: `updateOrCreate`, so re-running re-applies seeded labels/risk/SLA/r
 
 ## API contract as built (filled in by the Plan B session at hand-off)
 
-_Plan B appends the JSON shapes from its Task 4 here._
+> Written by the Plan B session at hand-off (branch `feat/observations-api`, tasks 1–7). Tests: `php artisan test` → 103 tests, 1154 assertions, all green. Listener registration, auto-discovery and deploy notes below. If code and this page disagree, the code wins.
+
+### Deploy checklist (Plan B)
+
+- Run `php artisan migrate` (adds `observations.last_overdue_notified_at`, guarded).
+- Set `ANTHROPIC_API_KEY` (optional — without it the Null classifier answers `skipped`).
+- Run `php artisan optimize` (or `event:clear` + `event:cache`) so the auto-discovered listener is registered.
+- Make sure the scheduler cron runs (`php artisan schedule:run` every minute) for `observations:escalate` at 08:00.
+- Add the web host to `SANCTUM_STATEFUL_DOMAINS` for the laptop page.
+
+### API contract
+
+All routes are under `/api`, inside `auth:sanctum`. The Flutter app sends `Authorization: Bearer <token>`. The web page uses stateful Sanctum: the session cookie plus the CSRF header. Clients must send `Accept: application/json`.
+
+Common errors on every route:
+
+| Code | Body | When |
+|---|---|---|
+| 401 | `{"message": "Unauthenticated."}` | no auth |
+| 403 | `{"message": "غير مصرح."}` | policy denied (the service's own AuthorizationException on verify carries its message) |
+| 404 | `{"message": "..."}` | unknown id (route-model binding) |
+| 422 | `{"message": "...", "errors": {"field": ["..."]}}` | Laravel's default validation error. The service's `ValidationException`s use the same shape (e.g. `items.0.responsible_department_id`) |
+
+Dates: `visit_date` and `event_date` are `YYYY-MM-DD`. Every other timestamp is ISO-8601 (`2026-10-22T10:00:00+02:00`). `url` is always `asset('storage/'.path)`.
+
+#### Shared shapes
+
+**Visit item**
+```json
+{
+  "id": 1, "code": "OV-00001", "type": "field", "status": "draft", "source": "mobile",
+  "department": {"id": 3, "name": "CCTV"},
+  "branch": {"id": 7, "name": "Saraya Mall"},
+  "visit_date": "2026-10-22",
+  "started_at": "2026-10-22T10:00:00+02:00",
+  "checkin_latitude": 30.05, "checkin_longitude": 31.2, "checkin_simulated": false,
+  "observations_count": 2, "issues_count": 1,
+  "submitted_at": null
+}
+```
+- `type` is `field` or `desk`.
+- `status` is `draft` or `submitted`.
+- `source` is `mobile`, `web` or `import`.
+- `branch` is `null` for a desk visit covering all branches.
+- `issues_count` counts the observations with `kind = issue`.
+
+**Observation item**
+```json
+{
+  "id": 10, "reference": "OB-00010", "observation_visit_id": 1,
+  "kind": "issue", "status": "open", "classification_status": "ai_pending_review",
+  "category_id": 4, "catalog_item_id": null,
+  "title": "باب الطوارئ مقفول", "description": "باب الطوارئ مقفول بجنزير",
+  "product_or_area": null, "extra_values": null, "rating": null,
+  "risk": {"slug": "high", "name_ar": "عالية", "color": "#f97316"},
+  "risk_level": {"slug": "high", "name_ar": "عالية", "color": "#f97316"},
+  "risk_override_reason": null,
+  "responsible_department": {"id": 5, "name": "Operation"},
+  "cc_departments": [{"id": 6, "name": "Stock Control"}],
+  "branch": {"id": 7, "name": "Saraya Mall"},
+  "reporting_department": {"id": 3, "name": "CCTV"},
+  "event_date": "2026-10-22",
+  "ticket": {"id": 55, "reference": "OPE-0012", "title": "باب الطوارئ مقفول", "status": "open",
+             "priority": "high", "due_at": "2026-10-24T10:00:00+02:00", "is_overdue": false},
+  "photos": [{"id": 3, "kind": "before", "path": "evidence/observations/1/x.jpg", "url": "http://host/storage/evidence/observations/1/x.jpg"}],
+  "repeat_count": 0,
+  "created_by": {"id": 9, "name": "موظف كاميرات"},
+  "created_at": "2026-10-22T10:05:00+02:00"
+}
+```
+- `risk` and `risk_level` are the same object. Both are `null` when the observation has no risk level.
+- `ticket` is `null` until the visit is submitted, and stays `null` for rows that need no ticket. `ticket.is_overdue` is `Ticket::isOverdue()`.
+- `photos[].kind` is `before`, `after` or `other`.
+- `kind` is `issue`, `activity`, `assessment` or `positive`.
+- `status` is one of `Observation::STATUSES`.
+- `classification_status` is `catalog`, `manual`, `ai_pending_review` or `ai_reviewed`.
+- `rating` is `good`, `average`, `poor` or `null`.
+
+**Pagination meta**
+```json
+{"current_page": 1, "last_page": 3, "per_page": 30, "total": 75}
+```
+
+**Verification item**
+```json
+{"id": 4, "result": "resolved", "notes": "تمام", "verified_by": {"id": 9, "name": "موظف كاميرات"}, "verified_at": "2026-10-23T09:00:00+02:00"}
+```
+
+#### `GET /api/observations/meta?department_id=`
+- **Auth:** `can('create', ObservationVisit::class)`, i.e. `isReportingUser()`. Otherwise 403.
+- **Query:** `department_id` (optional). It is used only when it is in `reporting_departments`. Otherwise `department_id` falls back to `default_department_id` (`User::defaultReportingDepartmentId()`).
+- **`reporting_departments`:** for super_admin, ops_manager, area_manager, branch_director and vm_manager this is every `is_reporting` department, ordered by name. Otherwise it is the user's own department if it is reporting.
+- **Response 200** (flat, not wrapped in `data`):
+```json
+{
+  "reporting_departments": [{"id": 3, "slug": "cctv", "name": "CCTV"}],
+  "default_department_id": 3,
+  "department_id": 3,
+  "risk_levels": [{"id": 1, "slug": "critical", "name_ar": "حرجة", "name_en": "Critical", "color": "#dc2626", "requires_field_verification": true}],
+  "categories": [{"id": 4, "slug": "emergency", "name_ar": "طوارئ", "name_en": "Emergency", "default_kind": "issue",
+                  "risk_level_id": 2, "responsible_department_id": 5,
+                  "default_risk_level_id": 2, "default_responsible_department_id": 5}],
+  "catalog_items": [{"id": 12, "category_id": 4, "code": "CCTV-EXIT-LOCKED", "label_ar": "باب طوارئ مقفول", "label_en": "Emergency exit locked",
+                     "keywords": ["باب", "طوارئ"], "kind": "issue", "risk_level_id": 2, "responsible_department_id": 5,
+                     "extra_fields": [{"key": "count", "label_ar": "العدد", "label_en": "Count", "type": "number", "options": null, "required": false}]}],
+  "responsible_departments": [{"id": 5, "slug": "operation", "name": "Operation"}],
+  "areas": [{"id": 1, "name": "Cairo", "branch_ids": [7, 8]}],
+  "branches": [{"id": 7, "name": "Saraya Mall", "area_id": 1, "latitude": 30.0, "longitude": 31.0}]
+}
+```
+- `risk_levels` are the active ones, ordered by `sort_order`.
+- `categories` are the active categories of `department_id`, ordered by `sort_order`. `risk_level_id` and `responsible_department_id` are aliases of the two `default_*` keys.
+- `catalog_items` are the active items in active categories of `department_id`, ordered by category `sort_order` then item `sort_order`. `keywords` and `extra_fields` are returned as stored (`[]` when null). An item's own `risk_level_id` and `responsible_department_id` can be `null`; the category default then applies.
+- `responsible_departments` is every department, ordered by name.
+- `areas` are the active areas. `branch_ids` are the branches whose `area_id` points to the area.
+- `branches` are the active branches, ordered by name. `name` is `branch_name`.
+
+#### `GET /api/observation-visits`
+- **Auth:** `can('create', ObservationVisit::class)`.
+- **Rows returned:** the caller's own visits (`user_id`) OR the visits that pass `ObservationScope::apply(…, 'branch_id', 'department_id')`.
+- **Query:**
+  - `status`: `draft` or `submitted`. Any other value is ignored.
+  - `mine=1`: own visits only.
+  - `branch_id`, `department_id`.
+  - `page`.
+- **Order and paging:** `id` descending, 30 per page.
+- **Response 200:** `{"data": [<visit item>], "meta": <pagination meta>}`
+
+#### `POST /api/observation-visits`
+- **Auth:** `can('create', ObservationVisit::class)`.
+- **Body:**
+  - `department_id`: nullable | integer | exists:departments,id. It must be one of the user's `reporting_departments` (the same list as `meta`), else 422 `department_id` "لا يمكنك التسجيل باسم هذه الإدارة.". When it is omitted the default is `User::defaultReportingDepartmentId()`.
+  - `branch_id`: nullable | integer | exists:branches,id | required_if:type,field
+  - `type`: required | in:field,desk
+  - `visit_date`: required | date
+  - `latitude`, `longitude`: nullable | numeric (stored as `checkin_latitude` / `checkin_longitude`)
+  - `simulated`: nullable | boolean (stored as `checkin_simulated`)
+  - `source`: nullable | in:mobile,web. Default: `mobile` with a bearer token, else `web`.
+  - `general_notes`: nullable | string
+- **Response 201:** `{"message": "تم بدء الزيارة.", "visit": <visit item>}`
+- **422:** for example a field visit without `branch_id` gives `errors.branch_id` = "الفرع مطلوب للزيارة الميدانية.". A `department_id` the user may not report for gives `errors.department_id`.
+
+#### `GET /api/observation-visits/{visit}`
+- **Auth:** `can('view', $visit)`: owner, or the visit passes the scope.
+- **Response 200:** `{"visit": <visit item>, "observations": [<observation item>, ...]}`. Observations are ordered by id.
+
+#### `POST /api/observation-visits/{visit}/photos` (multipart)
+- **Auth:** `can('update', $visit)`: owner and visit still `draft`.
+- **Body:**
+  - `photo`: required | image | max:8192 KB (8 MB)
+  - `kind`: nullable | in:before,after,other. Default `before`. It is only echoed back (see "Hazards for Plans C–G").
+- **Storage:** disk `public`, path `evidence/observations/{visitId}/<hash>.<ext>`.
+- **Response 200:** `{"path": "evidence/observations/1/abc.jpg", "url": "http://host/storage/evidence/observations/1/abc.jpg", "kind": "before"}`
+- **What to do with `path`:** send it back in `items[].photos[]` of the upsert, or in `photo_path` of verify.
+
+#### `POST /api/observation-visits/{visit}/ai-check`
+- **Auth:** `can('update', $visit)`.
+- **Body:**
+  - `points`: required | array | min:1 | max:50
+  - `points.*.index`: required | integer | min:0 | distinct
+  - `points.*.text`: required | string | max:2000
+- **What it does:**
+  - Calls `ClassifierContract::classify($visit->department_id, $visit->branch_id, [[index, text], ...])`.
+  - `ObservationService::recordClassifications()` saves ONE `ai_classifications` row per point:
+    - `observation_visit_id`, `input_text`.
+    - `request_hash = sha1(department_id.'|'.text)`.
+    - `suggested`: the matching result, or null.
+    - `model`, `status` (the batch status) and `error`.
+    - `latency_ms` on every row.
+    - `input_tokens` / `output_tokens`: the batch totals on the first row only, null on the others.
+- **Response 200 in all three cases** (a classifier failure never fails the request):
+```json
+{
+  "status": "ok",
+  "message": null,
+  "results": [{"index": 0, "catalog_item_id": 12, "category_id": 4, "kind": "issue", "risk_level": "high",
+               "responsible_department_id": 5, "confidence": 0.86, "reason": "سطر واحد", "ai_classification_id": 31}],
+  "classification_ids": [31, 32]
+}
+```
+- `status` is `ok`, `failed` or `skipped`. With `failed` or `skipped`, `message` is `"الفحص غير متاح، اختر الفئة يدوياً"` and `results` is `[]`. The client treats any status other than `ok` as "classify manually".
+- `classification_ids` has one id per point, in input order. `results` only contains the points the classifier answered.
+- Display rule (spec §8): when `confidence ≥ 0.75` and `catalog_item_id` is set, show "قصدك: {item}". Otherwise mark it "مقترح".
+
+#### `POST /api/observation-visits/{visit}/observations` (upsert a draft's observations)
+- **Auth:** `can('update', $visit)`.
+- **Body:** `{"items": [ {...}, ... ]}`
+  - `items`: required | array | min:1
+  - `items.*.id`: nullable | integer. Set it to update that row of this visit. A row of another visit gives 422 `items.{i}.id`.
+  - `items.*.catalog_item_id`: nullable | integer | exists:observation_catalog_items,id
+  - `items.*.category_id`: nullable | integer | exists:observation_categories,id. When both this and `catalog_item_id` are sent and they disagree: 422 `items.{i}.category_id` "الفئة لا تطابق بند الكتالوج".
+  - `items.*.kind`: required | in:issue,activity,assessment,positive. Ignored when the catalog item or category sets a kind (precedence: catalog item → category → item).
+  - `items.*.risk_level_slug`: nullable | in:critical,high,medium,low,none
+  - `items.*.risk_override_reason`: nullable | string | max:1000. The service requires it when the chosen risk differs from the policy risk.
+  - `items.*.responsible_department_id`: nullable | integer | exists:departments,id. Ignored when the catalog item or category sets one (precedence: catalog item → category → item). It only matters for free-text rows.
+  - `items.*.title`: nullable | string | max:191
+  - `items.*.description`: required_without:items.*.catalog_item_id | nullable | string | max:5000. A catalog quick-pick needs no text: the description defaults to the catalog item's `label_ar`.
+  - `items.*.product_or_area`: nullable | string | max:191
+  - `items.*.extra_values`: nullable | array (object keyed by the item's `extra_fields[].key`)
+  - `items.*.rating`: nullable | in:good,average,poor
+  - `items.*.photos`: nullable | array of string (max 255 each), the paths returned by the photos endpoint. Paths the row already has are skipped. New ones are stored as `before`.
+  - `items.*.photo_source`: nullable | in:camera,gallery. Default `gallery`. Saved as `observation_photos.source` for the new photos of that item.
+  - `items.*.cc_department_ids`: nullable | array of integer | each exists:departments,id. Ignored when the catalog item or category has CC departments (precedence: catalog item → category → item). Empty is stored as NULL. Returned as `cc_departments: [{id, name}]`.
+  - `items.*.ai_classification_id`: nullable | integer | exists:ai_classifications,id. It must belong to this visit, else 422 `items.{i}.ai_classification_id`. In the same transaction as the upsert, the service links the row (`observation_id`), sets `classification_status = ai_pending_review` (unless a catalog item is chosen), and stores `employee_final = {catalog_item_id, category_id, kind, risk_level (slug), responsible_department_id}` read from the SAVED observation.
+- **All or nothing.** Any failing item rejects the whole batch.
+- **Response 200:** `{"data": [<observation item>, ...]}`, in input order.
+
+#### `POST /api/observation-visits/{visit}/submit`
+- **Auth:** `can('submit', $visit)`: owner and `draft`. A visit that was already submitted gives 403.
+- **Body:** none. `SubmitObservationVisitRequest` has no rules; it exists so every POST has a FormRequest.
+- **What it does:**
+  - Repeat escalation.
+  - One ticket for each `issue` and for each `poor` assessment.
+  - Copies the before photos to the ticket.
+  - Sends the notifications.
+- **Response 200:**
+```json
+{
+  "message": "تم إرسال الزيارة.",
+  "visit": {"...": "<visit item, status submitted>"},
+  "created_tickets": [{"id": 55, "observation_id": 10, "ticket_id": 55, "reference": "OPE-0012",
+                       "title": "باب الطوارئ مقفول", "priority": "high", "department": {"id": 5, "name": "Operation"}}]
+}
+```
+- `created_tickets[].id` equals `ticket_id`.
+- **422:** one error per ticket-bound item, for example `{"errors": {"items.0.responsible_department_id": ["الإدارة المسؤولة مطلوبة لفتح طلب."], "items.1.branch_id": ["الفرع مطلوب لفتح طلب."]}}`. Here `i` is the row's position in the visit's observations ordered by id.
+
+#### `GET /api/observations`
+- **Auth:** `can('viewAny', Observation::class)`: a reporting user or a store/branch manager.
+- **Rows returned:** `ObservationScope::apply(Observation::query(), $u)`.
+- **Query** (all optional):
+  - `branch_id`
+  - `status`
+  - `risk` (risk slug)
+  - `department_id` (= the reporting department)
+  - `responsible_department_id`
+  - `from` / `to` (on `event_date`, inclusive)
+  - `kind`
+  - `classification_status`
+  - `catalog_item_id`
+  - `q` (LIKE on `reference`, `title`, `description`)
+  - `page`
+- **Order and paging:** `id` descending, 30 per page.
+- **Response 200:** `{"data": [<observation item>], "meta": <pagination meta>}`
+
+#### `GET /api/observations/{observation}`
+- **Auth:** `can('view', $observation)`.
+- **Response 200:**
+```json
+{
+  "observation": {"...": "<observation item>"},
+  "photos": [{"id": 3, "kind": "before", "path": "...", "url": "..."}],
+  "ticket": {"id": 55, "reference": "OPE-0012", "title": "...", "status": "closed", "priority": "high", "due_at": "...", "is_overdue": false},
+  "verifications": [{"id": 4, "result": "resolved", "notes": "تمام", "verified_by": {"id": 9, "name": "..."}, "verified_at": "..."}],
+  "classification": {"id": 31, "status": "ok", "suggested": {"...": "§8 shape"}, "employee_final": {"...": "..."}, "admin_final": null}
+}
+```
+- `photos` and `ticket` are repeated from the observation item on purpose.
+- `ticket` and `classification` can be `null`.
+- `classification` is the LATEST `ai_classifications` row linked to the observation (`hasOne(...)->latestOfMany()`).
+
+#### `DELETE /api/observations/{observation}`
+- **Auth:** `can('update', $observation->visit)`: owner and the visit still a draft. Otherwise 403.
+- **What it does:** deletes the observation and its photo rows.
+- **Response 200:** `{"message": "تم حذف الملاحظة."}`
+
+#### `POST /api/observations/{observation}/verify`
+- **Auth:** `can('verify', $observation)`. That is super_admin or ops_manager; or a user whose `department_id` is the observation's reporting department; or an area_manager of the observation's branch.
+- **Body:**
+  - `result`: required | in:resolved,not_resolved,partially
+  - `notes`: nullable | string | max:2000. The service makes it required for `not_resolved` (422 `notes` "اكتب سبب عدم الحل.").
+  - `photo_path`: nullable | string | max:255. Stored as an `after` photo.
+  - `observation_visit_id`: nullable | integer | exists:observation_visits,id
+- **Status changes** (the observation must be `waiting_verification`, else 422 `status`):
+  - `resolved` → `verified_closed`
+  - `partially` → stays `waiting_verification`
+  - `not_resolved` → `reopened`, with a new ticket
+- **Response 200:**
+```json
+{"message": "تم تسجيل التحقق.", "verification": {"...": "<verification item>"}, "observation": {"...": "<observation item, after the change>"}}
+```
+
+#### `GET /api/branches/{branch}/observations/pending-verification`
+- **Auth:** `can('viewAny', Observation::class)`.
+- **Rows returned:** the service applies the scope. The rows are `waiting_verification` at this branch, ordered by id.
+- **Response 200:** `{"data": [<observation item>]}`. The list is empty when the caller's scope does not include the branch.
+
+#### `POST /api/login` and `GET /api/me` (additive keys in `user`)
+```json
+{"user": {"...": "existing keys", "is_reporting_user": true, "reporting_departments": [{"id": 3, "slug": "cctv", "name": "CCTV"}]}}
+```
+- `reporting_departments` is the same list as in `meta`. It is `[]` when `is_reporting_user` is false.
+- The Flutter app shows the Observations tab when `is_reporting_user` is true.
+
+### Names fixed by Plan B (services, classifier, listener, command)
+
+| Class | Public surface | Notes |
+|---|---|---|
+| `App\Services\Observations\ObservationService` | `createVisit(User, array $data): ObservationVisit`; `upsertObservations(ObservationVisit, array $items, User): Collection`; `deleteDraftObservation(Observation): void`; `submitVisit(ObservationVisit, User, array $options = []): array{visit, created_tickets}` (options `silent`, `due_from` Carbon); `ticketAttributesFor(Observation, User, ?Carbon $dueFrom = null): array`; `syncFromTicket(Ticket, ?string $from, string $to): void`; `verify(Observation, User, string $result, ?string $notes = null, ?string $photoPath = null, ?int $visitId = null): ObservationVerification`; `pendingVerification(Branch, User): Collection`; `reroute(Observation, int $responsibleDepartmentId, User, ?string $reason = null): Observation`; `raiseRisk(Observation, RiskLevel $to, User, string $reason): Observation`; `reportingDepartmentsFor(User): Collection`; `recordClassifications(ObservationVisit, array $points, ClassificationBatch): array` | Constructor `(?RiskResolver, ?TicketService)` — `app(ObservationService::class)` works. Throws `Illuminate\Validation\ValidationException` (422) for rule violations, `AuthorizationException` from `verify`. `reroute`/`raiseRisk` do NOT self-authorize: callers must check `can('reroute', $o)` (Plan C/D). NEVER call `createVisit`/`upsertObservations`/`submitVisit`/`verify` inside a caller `DB::transaction`: they own their transaction and retry once on a duplicate reference (MySQL 1062), which only works outside a caller transaction. |
+| `App\Services\Observations\RiskResolver` | `resolve(array $item, ?ObservationCatalogItem, ?ObservationCategory): array{risk_level_id, responsible_department_id, cc_department_ids, sla_hours, kind}` | Pure (no writes). Precedence for risk, responsible, cc and kind: catalog item → category default → item value. Catalog `escalation_rules` (`{field, gte|lte|eq, risk}`) evaluated against numeric `extra_values`. |
+| `App\Services\Observations\Ai\ClassifierContract` | `classify(int $departmentId, ?int $branchId, array $points /* [[index,text],...] */): ClassificationBatch` | Bound in `AppServiceProvider::register()`: `AnthropicClassifier` when `config('services.anthropic.key')` is filled, else `NullClassifier` (`status=skipped`). Never throws. |
+| `ClassificationBatch` / `ClassificationResult` | readonly DTOs; `ClassificationResult::toArray()` → `{index, catalog_item_id, category_id, kind, risk_level, responsible_department_id, confidence, reason}` | `inputTokens` is the total incl. cache read/creation tokens. |
+| `App\Services\Observations\Ai\PromptBuilder` | `system(int $departmentId): string` (cached block, byte-stable), `schema(): array` (object root `{results: [...]}`), `sanitise(array $raw, int $departmentId): ClassificationResult[]` | Confidence min/max are NOT in the JSON schema (structured outputs rejects them); range is in the description and `sanitise` clamps 0..1. |
+| `App\Listeners\SyncObservationFromTicket` | `handle(TicketStatusChanged)` | Registered by Laravel 12 **auto-discovery** (NOT `Event::listen`, deviation from the plan text). Deploy: run `php artisan optimize` / `event:cache` rebuild after deploy, or a stale event cache leaves the listener unregistered. Swallows exceptions (`Log::error`) so ticket flows never break. |
+| `App\Console\Commands\ObservationsEscalate` | `observations:escalate {--dry-run}`; scheduled `dailyAt('08:00')` in `routes/console.php` | Notifies area manager + active ops managers `observation_overdue` once per 24 h via `observations.last_overdue_notified_at` (migration `2026_10_22_000005_add_overdue_flag_to_observations`). `Observation::overdueOpen()` scope reusable for "متأخر" lists. |
+| Config | `config/services.php` → `anthropic.key|model|timeout`; env `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-opus-5-5`, `ANTHROPIC_TIMEOUT=30` | Empty env strings are not defaulted (`ANTHROPIC_TIMEOUT=` → 0 = no timeout): leave the lines out rather than empty. |
+| `bootstrap/app.php` | `$middleware->statefulApi()` added | Spec §9.3: the web page calls the API with the session. The web page MUST send the XSRF token (`X-XSRF-TOKEN` header from the `XSRF-TOKEN` cookie) and the host must be in `SANCTUM_STATEFUL_DOMAINS`. Bearer clients unaffected. |
+| `App\Models\Observation` | `classification()` is now `hasOne(...)->latestOfMany()`; `scopeOverdueOpen()`; `last_overdue_notified_at` fillable/cast | Deviations from Plan A text. |
+
+### Notification types added by Plan B
+`observation_new` (branch manager; area manager for high/critical), `observation_cc` (cc departments' managers), `observation_escalated` (area manager, repeat escalation at submit), `observation_reopened` (previous assignee on reopen), `observation_overdue` (daily command). The responsible department manager still gets the existing `ticket_new` from `createManual`.
+
+### Business rules as built (spec §7/§9 interpretations)
+- Draft observations: `status` = `open` (issue/assessment), `closed_no_action` (activity), `positive` (positive). At submit: good/average assessments → `closed_no_action`; `poor` assessment → `issue`.
+- Submit: one ticket per `issue` via `createManual` (`source=observation`, `observation_id`, priority = risk `ticket_priority` or `medium`, `sla_hours` = catalog ?? category ?? risk SLA, `due_at = now()+sla`, `category` = catalog code or category slug). Before photos copied as ticket evidence `before`. `usage_count` +1 per catalog observation. Per-item 422 (`items.{i}.responsible_department_id` / `items.{i}.branch_id`) before any write; `{i}` = position in the visit's observations ordered by id.
+- Repeat escalation: `repeat_count` = other observations in the same branch with the same catalog item (or same category when free) in the last 30 days (same-visit rows included); `>= 2` → one level up (`escalated_from_risk_level_id`), at most ONCE per observation. SLA after escalation keeps an explicit item/category SLA (owner decision pending).
+- Ticket → observation: `assigned|on_the_way|in_progress` → `in_progress`; `closed` → `waiting_verification` when the risk `requires_field_verification`, else `verified_closed` + automatic verification (`verified_by` = closing actor). Only the CURRENT ticket (`observation.ticket_id`) moves the observation.
+- Verify: only from `waiting_verification`; `resolved` → `verified_closed`; `partially` → unchanged; `not_resolved` (notes required) → `reopened`, `repeat_count+1`, new ticket titled `إعادة فتح: …` with `reopen_count+1`, previous assignee notified. Observation stays `reopened` until the new ticket closes.
+- Visit `department_id` must be one of `reportingDepartmentsFor(user)`: global roles (super_admin, ops_manager, area_manager, branch_director, vm_manager) → any `is_reporting` department; department users → their own reporting department only.
+
+### Hazards for Plans C–G (found by Plan B)
+- `orWhere(fn ($q) => ObservationScope::apply($q, ...))` collapses for global roles (the scope adds no clause and Laravel drops the empty group → only the other branch of the OR applies). Use `orWhereIn('id', ObservationScope::apply(Model::query()->select('id'), ...))` instead (see `ObservationVisitController@index`).
+- `Observation::classification()` returns the latest `ai_classifications` row; several rows can share an `observation_id` after repeated ai-checks.
+- Photo upload `kind` is only echoed; the upsert stores item photos as `before`. Verification photos: upload through the observation's own visit (`POST /observation-visits/{visit}/photos` with `kind=after`) then pass `photo_path` to `verify` — the visit policy `update` requires the uploader to be the visit owner AND the visit to be a draft, so a verifier who did not record the visit currently has NO upload route (Plan D/E must add one, e.g. `POST /observations/{id}/photos`).
+- `meta.responsible_departments` lists inactive departments too; `meta.areas[].branch_ids` includes inactive branches while `meta.branches` lists active only.
+- `upsertObservations`/`deleteDraftObservation` do not lock the visit; a concurrent submit can race with an upsert (submit itself locks).
+- `AnthropicClassifier` has never been called against the live API in this environment (no key). SDK 1.x sends the key as `Authorization: Bearer`. Run the tinker smoke test from the plan once `ANTHROPIC_API_KEY` is set.
+- Empty drafts (zero observations) submit successfully with no tickets.
+- `due_from` option of `submitVisit` must be `\Carbon\Carbon` (not `CarbonImmutable`).
+- Repeat escalation at reopen sends no `observation_escalated` notification (only at submit).
+- `reroute` writes the ticket status directly (no `TicketStatusChanged`) and treats any non-closed ticket as reroutable.
+
+### Deviations from the plan text (Plan B)
+- Listener registered by auto-discovery, not `Event::listen`.
+- `PromptBuilder::schema()` root is an object `{results: [...]}`; no `minimum`/`maximum` on `confidence`.
+- `meta` has additive keys `branches[{id,name,area_id,latitude,longitude}]`, `department_id`, `default_department_id`; observation item carries `risk` AND `risk_level` (same object), `observation_visit_id`, `category_id`, `catalog_item_id`, `rating`, `risk_override_reason`; visit item carries `started_at`, `checkin_*`, `source`, `issues_count`; `created_tickets[]` enriched to `{id, observation_id, ticket_id, reference, title, priority, department{id,name}}`.
+- `createVisit` data keys are `checkin_latitude`/`checkin_longitude`/`simulated` (the API maps `latitude`/`longitude`/`simulated`).
+- `items.*.description` is `required_without:items.*.catalog_item_id`.
+- `submit` has a (rule-less) `SubmitObservationVisitRequest`; `DELETE` has no FormRequest.
+- `ai-check` always returns HTTP 200 with `status` ok|failed|skipped and `message` (Arabic) for non-ok; `ai_classifications` token counts are stored on the first row of the batch only.
