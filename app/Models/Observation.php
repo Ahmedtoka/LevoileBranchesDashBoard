@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -26,6 +27,7 @@ class Observation extends Model
         'product_or_area', 'extra_values', 'rating', 'event_date', 'ticket_id', 'status',
         'classification_status', 'classification_reviewed_by', 'classification_reviewed_at',
         'repeat_count', 'escalated_from_risk_level_id', 'created_by', 'import_source', 'import_row',
+        'last_overdue_notified_at',
     ];
 
     protected $casts = [
@@ -34,6 +36,7 @@ class Observation extends Model
         'event_date' => 'date',
         'classification_reviewed_at' => 'datetime',
         'repeat_count' => 'integer',
+        'last_overdue_notified_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -51,6 +54,21 @@ class Observation extends Model
             ->max(DB::raw('CAST(SUBSTRING(reference, 4) AS UNSIGNED)'));
 
         return 'OB-'.str_pad($max + 1, 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Open issues whose current ticket is past due and not closed / waiting approval.
+     * Mirrors Ticket::isOverdue(); the single definition of "متأخر الآن" for lists and escalation.
+     */
+    public function scopeOverdueOpen(Builder $q): Builder
+    {
+        return $q->where('kind', 'issue')
+            ->whereIn('status', ['open', 'in_progress', 'reopened'])
+            ->whereHas('ticket', function ($t) {
+                $t->whereNotNull('due_at')
+                    ->where('due_at', '<', now())
+                    ->whereNotIn('status', ['closed', 'waiting_approval']);
+            });
     }
 
     public function visit(): BelongsTo
