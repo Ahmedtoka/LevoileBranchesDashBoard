@@ -33,6 +33,9 @@ class ObservationService
     /** Management roles that may record for any reporting department (others: their own one only). */
     public const ALL_DEPARTMENTS_ROLES = ['super_admin', 'ops_manager', 'area_manager', 'branch_director', 'vm_manager'];
 
+    /** Statuses after which an observation can no longer be closed without action. */
+    public const FINAL_STATUSES = ['closed_no_action', 'verified_closed', 'positive'];
+
     public function __construct(private ?RiskResolver $resolver = null, private ?TicketService $tickets = null)
     {
         $this->resolver ??= new RiskResolver;
@@ -449,6 +452,40 @@ class ObservationService
                 'due_at' => $sla ? $ticket->created_at->copy()->addHours($sla) : null,
             ]);
             $this->tickets->log($ticket, $u->id, 'priority', $oldPriority, $newPriority, 'رفع درجة الريسك: '.$reason);
+        });
+
+        return $o->fresh();
+    }
+
+    /**
+     * Close without action (duplicate, recording error). A ticket that is not closed is cancelled
+     * (TicketService::cancel: no after photo needed, no TicketStatusChanged), then the observation is
+     * marked `closed_no_action` with the reason. Does NOT self-authorize: callers check `can('closeNoAction')`.
+     */
+    public function closeNoAction(Observation $o, User $u, string $reason): Observation
+    {
+        $reason = trim($reason);
+        if ($reason === '') {
+            throw ValidationException::withMessages(['reason' => dt('سبب الإغلاق مطلوب.', 'A closing reason is required.')]);
+        }
+
+        DB::transaction(function () use ($o, $u, $reason) {
+            $locked = Observation::whereKey($o->id)->lockForUpdate()->firstOrFail();
+            if (in_array($locked->status, self::FINAL_STATUSES, true)) {
+                throw ValidationException::withMessages(['status' => dt('الملاحظة مغلقة بالفعل.', 'The observation is already closed.')]);
+            }
+
+            $ticket = $locked->ticket_id ? Ticket::whereKey($locked->ticket_id)->lockForUpdate()->first() : null;
+            if ($ticket !== null && $ticket->status !== 'closed') {
+                $this->tickets->cancel($ticket, $u, 'أُغلقت بدون إجراء: '.$reason);
+            }
+
+            $locked->update([
+                'status' => 'closed_no_action',
+                'close_reason' => $reason,
+                'closed_by' => $u->id,
+                'closed_at' => now(),
+            ]);
         });
 
         return $o->fresh();

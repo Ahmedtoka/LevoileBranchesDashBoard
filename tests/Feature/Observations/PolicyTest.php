@@ -244,6 +244,23 @@ class PolicyTest extends TestCase
         }
     }
 
+    public function test_raise_risk_only_ops_and_super(): void
+    {
+        $cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $am = Seeds::user('area_manager');
+        $area = Area::create(['name' => 'East', 'slug' => 'east', 'manager_id' => $am->id]);
+        $branch = Seeds::branch('Branch A', ['area_id' => $area->id]);
+        $deptManager = Seeds::user('department_manager', ['department_id' => $cctv->id, 'is_department_manager' => true]);
+        $recorder = Seeds::user('department_employee', ['department_id' => $cctv->id]);
+        $observation = $this->observation($branch, $cctv, $recorder);
+
+        $this->assertTrue(Seeds::user('ops_manager')->can('raiseRisk', $observation));
+        $this->assertTrue(Seeds::user('super_admin')->can('raiseRisk', $observation));
+        $this->assertFalse($am->can('raiseRisk', $observation));
+        $this->assertFalse($deptManager->can('raiseRisk', $observation));
+        $this->assertFalse($recorder->can('raiseRisk', $observation));
+    }
+
     public function test_review_policy(): void
     {
         $cctv = Seeds::department('cctv', ['is_reporting' => true]);

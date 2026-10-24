@@ -136,8 +136,8 @@
         </tr></thead>
         <tbody>
         @forelse($observations as $o)
-            <tr style="cursor:pointer" onclick="if (!event.target.closest('a')) location.href='{{ url('/observations/'.$o->id) }}'">
-                <td class="fw-semibold text-nowrap"><a href="{{ url('/observations/'.$o->id) }}" class="text-decoration-none">{{ $o->reference }}</a></td>
+            <tr style="cursor:pointer" onclick="if (!event.target.closest('a')) location.href='{{ route('observations.show', $o) }}'">
+                <td class="fw-semibold text-nowrap"><a href="{{ route('observations.show', $o) }}" class="text-decoration-none">{{ $o->reference }}</a></td>
                 <td class="text-nowrap">{{ $o->event_date?->format('Y-m-d') }}</td>
                 <td>{{ $o->branch?->branch_name ?? '—' }}</td>
                 <td>{{ $o->reportingDepartment?->name ?? '—' }}</td>

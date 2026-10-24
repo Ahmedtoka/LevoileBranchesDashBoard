@@ -105,9 +105,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/purchasing/{pr}/status', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'status'])->name('purchasing.status');
 
     // ---- Observations & risk (operations web) ----
-    // export.csv MUST stay above any future /observations/{observation} route, or "export.csv" is read as an id.
+    // export.csv MUST stay above /observations/{observation} (also constrained to digits), or "export.csv" is read as an id.
     Route::get('/observations', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'index'])->name('observations.index');
     Route::get('/observations/export.csv', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'export'])->name('observations.export');
+    Route::get('/observations/{observation}', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'show'])->whereNumber('observation')->name('observations.show');
+    Route::post('/observations/{observation}/reroute', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'reroute'])->whereNumber('observation')->name('observations.reroute');
+    Route::post('/observations/{observation}/raise-risk', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'raiseRisk'])->whereNumber('observation')->name('observations.raiseRisk');
+    Route::post('/observations/{observation}/close-no-action', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'closeNoAction'])->whereNumber('observation')->name('observations.closeNoAction');
 
     // ---- KPIs & deep reports ----
     Route::get('/kpis', [\App\Http\Controllers\Web\KpiController::class, 'index'])->name('kpis.index');

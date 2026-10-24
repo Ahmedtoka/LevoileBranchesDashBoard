@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Web\Observations;
 
+use App\Exceptions\TicketTransitionDenied;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Observations\Web\CloseNoActionRequest;
+use App\Http\Requests\Observations\Web\RaiseRiskRequest;
+use App\Http\Requests\Observations\Web\RerouteRequest;
 use App\Models\Area;
 use App\Models\Branch;
 use App\Models\Department;
@@ -10,12 +14,16 @@ use App\Models\Observation;
 use App\Models\ObservationCategory;
 use App\Models\RiskLevel;
 use App\Models\User;
+use App\Services\Observations\ObservationService;
+use App\Support\ClassificationPresenter;
 use App\Support\ObservationFilters;
 use App\Support\ObservationLabels;
 use App\Support\ObservationScope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ObservationController extends Controller
@@ -89,6 +97,105 @@ class ObservationController extends Controller
 
             fclose($out);
         }, 'observations-'.now()->format('Ymd-His').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    public function show(Observation $observation)
+    {
+        Gate::authorize('view', $observation);
+
+        $observation->load([
+            'visit', 'branch', 'reportingDepartment', 'responsibleDepartment', 'category', 'catalogItem',
+            'riskLevel', 'escalatedFrom', 'creator', 'closer', 'classification',
+            'photos' => fn ($q) => $q->orderBy('id'),
+            'verifications' => fn ($q) => $q->with('verifier')->orderByDesc('verified_at')->orderByDesc('id'),
+            'ticket' => fn ($q) => $q->with(['department', 'assignee']),
+            'tickets' => fn ($q) => $q->with(['department', 'assignee', 'updates.user'])->orderByDesc('id'),
+        ]);
+
+        // Every ticket of the observation, newest first (a reopen creates a new one); the current one even if unlinked.
+        $tickets = $observation->tickets;
+        if ($observation->ticket && ! $tickets->contains('id', $observation->ticket->id)) {
+            $tickets = $tickets->prepend($observation->ticket->load('updates.user'))->sortByDesc('id')->values();
+        }
+
+        $risk = $observation->riskLevel;
+        $canRaise = $risk !== null && $risk->slug !== 'critical';
+
+        return view('dashboard.observations.show', [
+            'observation' => $observation,
+            'ticket' => $observation->ticket,
+            'tickets' => $tickets,
+            'ccDepartments' => Department::whereIn('id', array_filter((array) $observation->cc_department_ids))->orderBy('name')->get(),
+            'extraValues' => $this->extraValues($observation),
+            'photoGroups' => $observation->photos->groupBy('kind'),
+            'classificationColumns' => ClassificationPresenter::columns($observation->classification),
+            'rerouteDepartments' => Department::query()
+                ->when($observation->responsible_department_id, fn ($q, $id) => $q->whereKeyNot($id))
+                ->orderBy('name')->get(),
+            'raiseLevels' => $canRaise
+                ? RiskLevel::where('active', true)->where('sort_order', '<', $risk->sort_order)->orderBy('sort_order')->get()
+                : collect(),
+            'canClose' => ! in_array($observation->status, ObservationService::FINAL_STATUSES, true),
+        ]);
+    }
+
+    public function reroute(RerouteRequest $request, Observation $observation, ObservationService $service): RedirectResponse
+    {
+        $service->reroute($observation, (int) $request->validated('responsible_department_id'), $request->user(), $request->validated('reason'));
+
+        return redirect()->route('observations.show', $observation)
+            ->with('status', dt('تمت إعادة توجيه الملاحظة.', 'The observation was rerouted.'));
+    }
+
+    public function raiseRisk(RaiseRiskRequest $request, Observation $observation, ObservationService $service): RedirectResponse
+    {
+        $to = RiskLevel::bySlug($request->validated('risk_level_slug'));
+        if ($to === null) {
+            throw ValidationException::withMessages(['risk_level_slug' => dt('درجة الخطورة غير موجودة.', 'The risk level does not exist.')]);
+        }
+
+        $service->raiseRisk($observation, $to, $request->user(), $request->validated('reason'));
+
+        return redirect()->route('observations.show', $observation)
+            ->with('status', dt('تم رفع درجة الخطورة.', 'The risk level was raised.'));
+    }
+
+    public function closeNoAction(CloseNoActionRequest $request, Observation $observation, ObservationService $service): RedirectResponse
+    {
+        try {
+            $service->closeNoAction($observation, $request->user(), $request->validated('reason'));
+        } catch (TicketTransitionDenied $e) {
+            return back()->withErrors(['status' => $e->getMessage()]);
+        }
+
+        return redirect()->route('observations.show', $observation)
+            ->with('status', dt('تم إغلاق الملاحظة بدون إجراء.', 'The observation was closed without action.'));
+    }
+
+    /**
+     * extra_values as label => text, labels taken from the catalog item's extra_fields when available.
+     *
+     * @return array<string, string>
+     */
+    private function extraValues(Observation $observation): array
+    {
+        $labels = [];
+        foreach ((array) ($observation->catalogItem?->extra_fields ?? []) as $field) {
+            if (is_array($field) && isset($field['key'])) {
+                $ar = (string) ($field['label_ar'] ?? $field['key']);
+                $labels[$field['key']] = dt($ar, (string) ($field['label_en'] ?? $ar));
+            }
+        }
+
+        $rows = [];
+        foreach ((array) ($observation->extra_values ?? []) as $key => $value) {
+            $text = is_scalar($value) || $value === null
+                ? (is_bool($value) ? ($value ? dt('نعم', 'Yes') : dt('لا', 'No')) : (string) $value)
+                : json_encode($value, JSON_UNESCAPED_UNICODE);
+            $rows[$labels[$key] ?? (string) $key] = $text;
+        }
+
+        return $rows;
     }
 
     /** Neutralise spreadsheet formulas in free-text CSV cells (=, +, -, @ at the start). */

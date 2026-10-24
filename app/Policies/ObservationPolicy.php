@@ -38,6 +38,11 @@ class ObservationPolicy
         return $user->hasRole(['super_admin', 'ops_manager']);
     }
 
+    public function raiseRisk(User $user, Observation $observation): bool
+    {
+        return $user->hasRole(['super_admin', 'ops_manager']);
+    }
+
     public function closeNoAction(User $user, Observation $observation): bool
     {
         return $user->hasRole(['super_admin', 'ops_manager']);

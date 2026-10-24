@@ -39,6 +39,35 @@ class ObservationLabels
         };
     }
 
+    public static function verificationResult(string $result): string
+    {
+        return match ($result) {
+            'resolved' => dt('تم الحل', 'Resolved'),
+            'not_resolved' => dt('لم يتم الحل', 'Not resolved'),
+            'partially' => dt('حل جزئي', 'Partially resolved'),
+            default => $result,
+        };
+    }
+
+    public static function verificationColor(string $result): string
+    {
+        return match ($result) {
+            'resolved' => 'success',
+            'not_resolved' => 'danger',
+            'partially' => 'warning',
+            default => 'secondary',
+        };
+    }
+
+    public static function visitType(string $type): string
+    {
+        return match ($type) {
+            'field' => dt('ميدانية', 'Field'),
+            'desk' => dt('مكتبية', 'Desk'),
+            default => $type,
+        };
+    }
+
     public static function kind(string $kind): string
     {
         return match ($kind) {
