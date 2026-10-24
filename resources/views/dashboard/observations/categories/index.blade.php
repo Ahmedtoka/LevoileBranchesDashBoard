@@ -5,7 +5,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="fw-bold mb-0">{{ t('obs.cat.title','فئات الملاحظات') }} <span class="text-muted fs-6">({{ $categories->count() }})</span></h4>
     <div class="d-flex gap-2">
-        @if(Route::has("obs.catalog.index"))<a href="{{ route("obs.catalog.index", $departmentId ? ["department_id" => $departmentId] : []) }}" class="btn btn-outline-secondary"><i class="bi bi-journal-text me-1"></i>{{ t("obs.catalog.title","كتالوج الملاحظات") }}</a>@endif
+        <a href="{{ route("obs.catalog.index", $departmentId ? ["department_id" => $departmentId] : []) }}" class="btn btn-outline-secondary"><i class="bi bi-journal-text me-1"></i>{{ t("obs.catalog.title","كتالوج الملاحظات") }}</a>
         <button class="btn btn-primary" onclick="prepCat()"><i class="bi bi-plus-lg"></i> {{ t('obs.cat.new','فئة جديدة') }}</button>
     </div>
 </div>
@@ -63,7 +63,7 @@
                     <td>@if($c->riskLevel)<span class="badge" style="background:{{ $c->riskLevel->color }}">{{ app()->getLocale()==='en' ? $c->riskLevel->name_en : $c->riskLevel->name_ar }}</span>@else <span class="text-muted">—</span> @endif</td>
                     <td>{{ optional($c->responsibleDepartment)->name ?? '—' }}</td>
                     <td class="small">{{ $c->default_sla_hours ? $c->default_sla_hours.' '.t('obs.hours','س') : '—' }}</td>
-                    <td class="text-center"><span class="badge text-bg-light">{{ $c->items_count }}</span></td>
+                    <td class="text-center"><a href="{{ route("obs.catalog.index", ["department_id" => $c->department_id, "category_id" => $c->id]) }}" class="badge text-bg-light text-decoration-none">{{ $c->items_count }}</a></td>
                     <td class="text-center"><span class="badge text-bg-light">{{ $c->observations_count }}</span></td>
                     <td class="text-center">{!! $c->active ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-dash-circle text-secondary"></i>' !!}</td>
                     <td class="text-end text-nowrap">

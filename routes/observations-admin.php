@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\Observations\AreaController;
+use App\Http\Controllers\Web\Observations\CatalogItemController;
 use App\Http\Controllers\Web\Observations\CategoryController;
 use App\Http\Controllers\Web\Observations\RiskLevelController;
 use Illuminate\Support\Facades\Route;
@@ -24,3 +25,10 @@ Route::post('/admin/observation-categories', [CategoryController::class, 'store'
 Route::post('/admin/observation-categories/reorder', [CategoryController::class, 'reorder'])->name('obs.categories.reorder');
 Route::put('/admin/observation-categories/{category}', [CategoryController::class, 'update'])->name('obs.categories.update');
 Route::delete('/admin/observation-categories/{category}', [CategoryController::class, 'destroy'])->name('obs.categories.destroy');
+
+// ---- Observation catalog items ----
+Route::get('/admin/observation-catalog', [CatalogItemController::class, 'index'])->name('obs.catalog.index');
+Route::post('/admin/observation-catalog', [CatalogItemController::class, 'store'])->name('obs.catalog.store');
+Route::put('/admin/observation-catalog/{item}', [CatalogItemController::class, 'update'])->name('obs.catalog.update');
+Route::post('/admin/observation-catalog/{item}/toggle', [CatalogItemController::class, 'toggle'])->name('obs.catalog.toggle');
+Route::delete('/admin/observation-catalog/{item}', [CatalogItemController::class, 'destroy'])->name('obs.catalog.destroy');
