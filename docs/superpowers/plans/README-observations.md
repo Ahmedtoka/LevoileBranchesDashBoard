@@ -671,6 +671,14 @@ $svc->approveVisit($visit->fresh(), $manager, ['silent' => true, 'due_from' => $
 - `POST /api/tickets/{id}/reply` body `{state: working|solved, note (required, min 3, max 2000), photo_path? (max 255), photo? (image, web form only)}` (`ReplyTicketRequest`) → 403 `{"message":"غير مصرح."}` unless `canReply`; 422 from the FormRequest or `{"message": "انتقال غير مسموح في دورة الحالة."}` when the ticket is already `waiting_approval` / `closed`. Response `{message, ticket: <TicketController::item(full)>}` (`ticket.status` = `in_progress` or `waiting_approval`, `assigned_to` set). The mobile uploads the after photo first with `POST /api/tickets/{id}/evidence` (`kind=after`) — then `photo_path` may be omitted or repeated (deduplicated) — or passes any `path` returned by an upload endpoint.
 - The fine-grained ticket endpoints (`status`, `send-for-approval`, `approve`, `reject`, `assign`, `departments/ticket/{id}/status`) are unchanged.
 
+**Added at the D + H merge for the mobile app (`tests/Feature/Observations/MobileContractTest.php`):**
+
+- Every ticket item of `Api\TicketController` (`show.ticket`, `mine`, `raised`, department boards, the `reply` / `status` responses) carries `source` (`visit` | `observation` | …) and `observation_id` (int or null); the app shows the reply buttons only when `source == 'observation'`.
+- The visit item carries `user: {id, name}` (the recorder; eager-loaded `user:id,name`), next to `approved_by: {id, name} | null`.
+- `POST /api/tickets/{id}/evidence` answers `{message, url, path}`; `path` is the relative public-disk path to pass as `photo_path` to `POST /tickets/{id}/reply`.
+- Free-point upsert: an item with neither `catalog_item_id` nor `category_id` and `kind` issue (or omitted) is saved with `category_id` = the reporting department's category with slug `other` (null when the department has none). The category is a label only: its policy defaults (risk, responsible, cc, kind) are NOT applied, so the row keeps the employee's own values and still counts in `pending_points`. Positive / activity / assessment free points stay uncategorised.
+- `GET /observations/meta → branches[]` has no `name_ar`: the `branches` table has a single `branch_name` column; the app falls back to `name`.
+
 ### Admin web (`routes/observations-approval.php`, required once from the `auth` group of `routes/web.php`)
 
 | Method | Path | Name | Policy |

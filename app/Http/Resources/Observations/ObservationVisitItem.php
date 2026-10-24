@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class ObservationVisitItem
 {
     /** Relations to eager-load before serializing a list. */
-    public const WITH = ['department:id,name', 'branch:id,branch_name', 'approver:id,name'];
+    public const WITH = ['department:id,name', 'branch:id,branch_name', 'user:id,name', 'approver:id,name'];
 
     /** Counts to load with `withCount()` / `loadCount()` before serializing. */
     public static function counts(): array
@@ -34,6 +34,8 @@ class ObservationVisitItem
             'source' => $m->source,
             'department' => $m->department ? ['id' => $m->department->id, 'name' => $m->department->name] : null,
             'branch' => $m->branch ? ['id' => $m->branch->id, 'name' => $m->branch->branch_name] : null,
+            // The recorder (the approval list shows who submitted).
+            'user' => $m->user ? ['id' => $m->user->id, 'name' => $m->user->name] : null,
             'visit_date' => $m->visit_date?->toDateString(),
             'started_at' => $m->started_at?->toIso8601String(),
             'checkin_latitude' => $m->checkin_latitude,

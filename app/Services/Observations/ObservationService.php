@@ -1019,6 +1019,13 @@ class ObservationService
         $categoryId = ! empty($item['category_id']) ? (int) $item['category_id'] : $catalog?->category_id;
         $category = $catalog?->category_id === $categoryId ? $catalog?->category : ($categoryId ? ObservationCategory::find($categoryId) : null);
 
+        // Plan H: a free issue point (no catalog item, no category) is filed under the reporting department's
+        // "other" category as a label only. The category's policy defaults are NOT applied: the point keeps
+        // the employee's routing (usually none) so the manager classifies it before approval.
+        if ($categoryId === null && $catalog === null && ($item['kind'] ?? 'issue') === 'issue') {
+            $categoryId = ObservationCategory::where('department_id', $v->department_id)->where('slug', 'other')->value('id');
+        }
+
         // An update that omits the cc key (a resumed draft re-sends rows without it) keeps the row's own cc;
         // an explicit empty array still clears it. Catalog / category cc keep their precedence in the resolver.
         if ($existing !== null && ! array_key_exists('cc_department_ids', $item)) {

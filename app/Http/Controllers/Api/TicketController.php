@@ -191,7 +191,8 @@ class TicketController extends Controller
         $path = $request->file('photo')->store('evidence/tickets/'.$ticket->id, 'public');
         $this->service->addEvidence($ticket, $path, $data['kind'] ?? 'after', $request->user());
 
-        return response()->json(['message' => 'Evidence uploaded.', 'url' => asset('storage/'.$path)]);
+        // `path` is what POST /tickets/{id}/reply accepts as photo_path (deduplicated against this row).
+        return response()->json(['message' => 'Evidence uploaded.', 'url' => asset('storage/'.$path), 'path' => $path]);
     }
 
     /** POST /api/tickets/{ticket}/reply (Plan H) — the responsible department answers: working | solved, with a note. */
@@ -533,6 +534,9 @@ class TicketController extends Controller
             'overdue' => $t->isOverdue(),
             'age_hours' => $t->ageInHours(),
             'created_at' => $t->created_at->toDateTimeString(),
+            // Where the ticket came from: 'observation' tickets get the one-tap reply buttons in the app.
+            'source' => $t->source,
+            'observation_id' => $t->observation_id !== null ? (int) $t->observation_id : null,
         ];
 
         if ($full) {
