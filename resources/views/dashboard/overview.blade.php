@@ -14,22 +14,56 @@
             <span class="badge align-middle ms-1" style="background:{{ $scopeDept->color ?? '#9c1e6e' }}">{{ $scopeDept->name }}</span>
         @endif
     </h4>
-    @php $isAdmin = optional(auth()->user()->role)->slug === 'super_admin' || optional(auth()->user())->is_admin; @endphp
-    @if($isAdmin)
+    @if(auth()->user()->hasRole('super_admin'))
     <div class="d-flex gap-2">
-        <form method="POST" action="{{ route('demo.generate') }}"
-              onsubmit="return confirm('سيتم توليد بيانات ديمو كاملة لكل الأدوار. متابعة؟');">
-            @csrf
-            <button class="btn btn-sm btn-primary"><i class="bi bi-magic me-1"></i> {{ dt('توليد بيانات ديمو','Generate demo data') }}</button>
-        </form>
-        <form method="POST" action="{{ route('demo.wipe') }}"
-              onsubmit="return confirm('سيتم مسح كل بيانات النظام (تذاكر، زيارات، شيك ليستات، مشتريات) مع الإبقاء على المستخدمين والإدارات والفروع. متابعة؟');">
-            @csrf
-            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash3 me-1"></i> {{ dt('مسح كل البيانات','Wipe all data') }}</button>
-        </form>
+        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#demoGenerateModal">
+            <i class="bi bi-magic me-1"></i> {{ dt('توليد بيانات تجريبية','Generate demo data') }}
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#demoWipeModal">
+            <i class="bi bi-trash3 me-1"></i> {{ dt('مسح كل البيانات','Wipe all data') }}
+        </button>
     </div>
     @endif
 </div>
+
+@if(auth()->user()->hasRole('super_admin'))
+<div class="modal fade" id="demoGenerateModal" tabindex="-1" aria-labelledby="demoGenerateTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" action="{{ route('demo.generate') }}" class="modal-content">
+            @csrf
+            <div class="modal-header">
+                <h5 class="modal-title" id="demoGenerateTitle"><i class="bi bi-magic me-1"></i> {{ dt('توليد بيانات تجريبية','Generate demo data') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ dt('إغلاق','Close') }}"></button>
+            </div>
+            <div class="modal-body small">
+                {{ dt('سيتم توليد بيانات تجريبية كاملة لكل الأدوار: شيك ليستات وتذاكر، وزيارات وملاحظات ومخاطر بكل الحالات. البيانات التجريبية السابقة للملاحظات تُستبدل. متابعة؟','Full demo data will be generated for every role: checklists and tickets, plus observation visits and risks in every status. Previous observation demo data is replaced. Continue?') }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">{{ dt('إلغاء','Cancel') }}</button>
+                <button type="submit" class="btn btn-sm btn-primary">{{ dt('توليد','Generate') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal fade" id="demoWipeModal" tabindex="-1" aria-labelledby="demoWipeTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" action="{{ route('demo.wipe') }}" class="modal-content">
+            @csrf
+            <div class="modal-header">
+                <h5 class="modal-title text-danger" id="demoWipeTitle"><i class="bi bi-trash3 me-1"></i> {{ dt('مسح كل البيانات','Wipe all data') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ dt('إغلاق','Close') }}"></button>
+            </div>
+            <div class="modal-body small">
+                {{ dt('سيتم مسح كل بيانات النظام (تذاكر، زيارات، شيك ليستات، ملاحظات ومخاطر وصورها، مشتريات) مع الإبقاء على المستخدمين والإدارات والفروع وإعدادات الملاحظات. لا يمكن التراجع. متابعة؟','All system data will be deleted (tickets, visits, checklists, observations and their photos, purchasing). Users, departments, branches and the observation setup are kept. This cannot be undone. Continue?') }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">{{ dt('إلغاء','Cancel') }}</button>
+                <button type="submit" class="btn btn-sm btn-danger">{{ dt('مسح','Wipe') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
 
 @if(session('status'))
     <div class="alert alert-success py-2 small">{{ session('status') }}</div>

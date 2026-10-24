@@ -416,4 +416,43 @@ class ObservationServiceDraftTest extends TestCase
         $this->assertSame(2, Observation::count());
         $this->assertCount(2, $saved->pluck('reference')->unique());
     }
+
+    /** A resumed draft (web page / mobile) re-sends its rows without ai_classification_id or cc: both are kept. */
+    public function test_update_without_ai_id_or_cc_keeps_classification_status_and_cc(): void
+    {
+        $service = new ObservationService;
+        $visit = $this->draftVisit();
+        $hr = Seeds::department('hr');
+        $ai = AiClassification::create(['observation_visit_id' => $visit->id, 'request_hash' => 'h2', 'input_text' => 't', 'status' => 'ok']);
+
+        $row = $service->upsertObservations($visit, [[
+            'kind' => 'issue', 'description' => 'نقطة مفحوصة', 'ai_classification_id' => $ai->id,
+            'responsible_department_id' => $this->operation->id, 'cc_department_ids' => [$hr->id],
+        ]], $this->user)->first();
+        $this->assertSame('ai_pending_review', $row->classification_status);
+        $this->assertSame([$hr->id], $row->cc_department_ids);
+
+        // Edited later without the AI id and without the cc key.
+        $edited = $service->upsertObservations($visit, [[
+            'id' => $row->id, 'kind' => 'issue', 'description' => 'نقطة مفحوصة (معدلة)', 'responsible_department_id' => $this->operation->id,
+        ]], $this->user)->first();
+        $this->assertSame('ai_pending_review', $edited->classification_status);
+        $this->assertSame([$hr->id], $edited->cc_department_ids);
+        $this->assertSame('نقطة مفحوصة (معدلة)', $edited->description);
+
+        // An explicit empty cc still clears it; a catalog pick still makes the row a catalog row.
+        $cleared = $service->upsertObservations($visit, [[
+            'id' => $row->id, 'kind' => 'issue', 'description' => 'x', 'responsible_department_id' => $this->operation->id, 'cc_department_ids' => [],
+        ]], $this->user)->first();
+        $this->assertNull($cleared->cc_department_ids);
+        $this->assertSame('ai_pending_review', $cleared->classification_status);
+
+        $item = $this->catalog($this->category(['default_responsible_department_id' => $this->operation->id]));
+        $picked = $service->upsertObservations($visit, [['id' => $row->id, 'catalog_item_id' => $item->id, 'kind' => 'issue']], $this->user)->first();
+        $this->assertSame('catalog', $picked->classification_status);
+
+        // A new row without an AI id is still manual.
+        $new = $service->upsertObservations($visit, [['kind' => 'issue', 'description' => 'جديدة', 'responsible_department_id' => $this->operation->id]], $this->user)->first();
+        $this->assertSame('manual', $new->classification_status);
+    }
 }

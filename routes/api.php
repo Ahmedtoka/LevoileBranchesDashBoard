@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DemoUserController;
 use App\Http\Controllers\Api\MaintenanceController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ObservationController;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 
 // ---- Auth ----
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/demo-users', [DemoUserController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);

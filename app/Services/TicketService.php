@@ -277,6 +277,27 @@ class TicketService
         return $ticket;
     }
 
+    /**
+     * Close a ticket because its observation was closed without action (duplicate, recording error).
+     * An explicit admin action: it bypasses the after-photo rule, writes one `cancelled` log row, and does
+     * NOT go through changeStatus nor fire TicketStatusChanged (the caller sets the observation's status).
+     */
+    public function cancel(Ticket $ticket, User $actor, string $note): Ticket
+    {
+        if (! $this->canClose($ticket, $actor)) {
+            throw TicketTransitionDenied::notAllowed();
+        }
+        if ($ticket->status === 'closed') {
+            throw TicketTransitionDenied::invalidTransition();
+        }
+
+        $from = $ticket->status;
+        $ticket->update(['status' => 'closed', 'closed_at' => now()]);
+        $this->log($ticket, $actor->id, 'cancelled', $from, 'closed', $note);
+
+        return $ticket;
+    }
+
     public function addEvidence(Ticket $ticket, string $path, string $kind = 'after', ?User $actor = null): TicketUpdate
     {
         return $this->log($ticket, optional($actor)->id, 'evidence', null, null,

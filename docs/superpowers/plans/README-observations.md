@@ -575,3 +575,45 @@ Sidebar: one `@include('dashboard.observations.partials.admin-nav')` in `layouts
 - The web pages assume `ObservationSetupSeeder` has run (risk levels / categories); the screens show an empty-state hint otherwise.
 - Blade `@json(...)` breaks on any comma inside the expression; the views precompute arrays in `@php` blocks first.
 - No browser smoke test was run in this session (feature tests assert 200 on every index page).
+
+## Ops web as built (filled in by the Plan D session at hand-off)
+
+> Branch `feat/observations-ops-web`, tasks 0, 0b, 1–6 plus a whole-branch fix wave; master (Plans C + F) merged in before the final review. Tests: `php artisan test` → 221 passed on the merged tree. Controller `App\Http\Controllers\Web\Observations\ObservationController` (`index, export, show, create, beforeAfter, dashboard, reroute, raiseRisk, closeNoAction`), filters `App\Support\ObservationFilters`, metrics `App\Support\ObservationMetrics`, labels `App\Support\ObservationLabels`, views under `resources/views/dashboard/observations/` (`index, show, new, before-after, dashboard`, partials `nav, status-pill, risk-badge`), JS `public/js/observations-visit.js` (vanilla, no build).
+
+### Routes (in `routes/web.php`, `auth` group)
+
+| Method | Path | Name | Gate |
+|---|---|---|---|
+| POST | `/login/quick` (`email`) | `login.quick` | guest; 404 unless `config('app.demo_login')`; email must be in `DemoUsersSeeder::users()` |
+| GET | `/api/demo-users` (`routes/api.php`, no auth) | — | 404 unless `demo_login`; `{data:[{email,name,role,hint}]}` |
+| POST | `/demo/generate`, `/demo/wipe` | `demo.generate` / `demo.wipe` | super_admin only (403); overview buttons behind Bootstrap modals |
+| GET | `/observations` (`?range=today|3d|week|month|custom|all&from&to&reporting_department_id&responsible_department_id&area_id&branch_id&category_id&risk&status&kind&classification_status&outside_catalog=1&q`) | `observations.index` | `viewAny` + `ObservationScope` |
+| GET | `/observations/export.csv` (same query) | `observations.export` | same query builder as index |
+| GET | `/observations/new` (`?visit={id}` resumes an own draft) | `observations.create` | `create` on `ObservationVisit`; `?visit` needs `update` (owner + draft) |
+| GET | `/observations/before-after` (`?branch_id&status`) | `observations.beforeAfter` | `viewAny`; branch must be in the user's scoped list |
+| GET | `/observations/dashboard` (same filters as the register) | `observations.dashboard` | `viewAny` + scope |
+| GET | `/observations/{observation}` | `observations.show` | `view` |
+| POST | `/observations/{observation}/reroute` (`responsible_department_id`, `reason?`) | `observations.reroute` | `reroute` |
+| POST | `/observations/{observation}/raise-risk` (`risk_level_slug`, `reason`) | `observations.raiseRisk` | `raiseRisk` (new ability, same roles as reroute) |
+| POST | `/observations/{observation}/close-no-action` (`reason`) | `observations.closeNoAction` | `closeNoAction` |
+| * | `/web-api/…` | `web-api.` | Plan B's 13 API routes mounted again under the web `auth` group (session + CSRF); the laptop page calls them with `Accept: application/json`, `X-CSRF-TOKEN`, same-origin credentials. `/api/*` is unchanged. |
+
+Sidebar: `@include('dashboard.observations.partials.nav')` directly above Plan C's `admin-nav`. Section shown when `can('viewAny', Observation::class)`; "زيارة ملاحظات جديدة" when `can('create', ObservationVisit::class)`; the dashboard link is hidden for store/branch managers and department employees (spec §10). Strings `obs.nav.section|register|new_visit|before_after|dashboard` appended to the `obs` block of `TranslationSeeder`.
+
+### Behaviour decisions (Plan D)
+
+- **Register/CSV/before-after/dashboard list only observations of SUBMITTED visits** (draft rows are excluded in `ObservationFilters`'s base scope; `GET /api/observations` still returns drafts). `reroute`, `raiseRisk`, `closeNoAction` refuse draft rows (422 `status`).
+- **Dates:** filters and metrics use `COALESCE(observations.event_date, observation_visits.visit_date)` so Plan F's undated rows fall on their visit's week; the register shows "تاريخ غير مؤكد" for them. `range=all` (no date bound) exists on the register and dashboard only; `App\Support\DateRange::$presets` is unchanged.
+- **Dashboard (spec §12):** `visits` = submitted field visits; `observations_per_visit` divides by ALL submitted visits; `on_time_pct`/`avg_hours`/`closed` exclude tickets with a `cancelled` log row and treat a closed ticket without `due_at` as not on time; **`overdue_now` is a "now" state, never bounded by the period** (tile + list + both week-compare windows; its links use `range=all`); `open_issues` stays range-bound; `repeated_branches` top 20; additive `departments` key for the per-department table.
+- **Close without action:** `ObservationService::closeNoAction(Observation, User, string $reason)` → `TicketService::cancel(Ticket, User, string $note)` (sets `closed`/`closed_at`, writes ONE `cancelled` log row, requires `canClose`, bypasses the after-photo rule, fires NO `TicketStatusChanged`) then sets `closed_no_action` + new columns `observations.close_reason, closed_by, closed_at` (migration `2026_10_24_000002`, guarded, additive). Cancelled tickets have `status=closed`, so legacy `KpiController` counts them as closed.
+- **Photos from the client:** `UpsertObservationsRequest.photos.*` and `VerifyObservationRequest.photo_path` must match `^evidence/observations/(\d+)/[^/]+\.(jpe?g|png|webp)$` with that visit owned by the caller; uploads accept jpg/jpeg/png/webp only. Observation photo URLs are built only from relative paths.
+- **Laptop page:** desk + "كل الفروع" offers only activity-kind catalog items/categories (server refuses tickets without a branch); drafts autosave (debounced, retry with back-off, `beforeunload` guard); desk-multi = one visit per branch, submit stops at the first failure and shows per-visit status; `?visit={id}` resumes an own draft; the "مسوداتي" card lists the caller's drafts.
+- **Demo data:** `DemoUsersSeeder` (idempotent; passwords set only on create; never replaces a real area manager nor moves real branches — the demo area manager reaches Saraya + City Stars through `branch_user`, deviation from the table above), `DemoObservationsSeeder` (`import_source='demo'`, purges its own rows first, 6 visits / 16 observations / 12 tickets over the last 9 days covering every status + one `ai_pending_review`; runs `ObservationSetupSeeder` only when risk levels / catalog are missing; needs catalog codes `CCTV-OPEN-LATE, CCTV-CASH-COUNT-ALONE, CCTV-FIT-OVER-5, CCTV-FLOOR-NO-NAMETAG, CCTV-CAMERA-DOWN, STK-ORG-UNORGANIZED, STK-TRN-COUNT-SHEET, MRC-QLT-MISSING-BUTTON`; one real classifier call per generate when `ANTHROPIC_API_KEY` is set). **The observations demo (users + data) runs only when `config('app.demo_login')` is true**; the legacy checklist generate always runs. `wipe` additionally clears every observation table, `evidence/observations` files and all tickets (including Plan F's import). `ObservationService::applyRepeatEscalation` ignores demo rows when scoring a non-demo observation.
+
+### Hazards for Plan G
+
+- Run `composer install` (Plan F's phpspreadsheet) and `php artisan migrate` after pulling master; `php artisan config:clear` after editing `DEMO_LOGIN`.
+- `public/js/observations-visit.js` is not versioned — hard refresh after deploy. Chart.js and Bootstrap come from CDNs.
+- Dev DB contains browser smoke-run visits OV-00114..OV-00124 (+ tickets); the wipe button removes them (and the import).
+- A web draft can be resumed only by its owner; mobile drafts appear in "مسوداتي" too (same table).
+- Register tile links from the dashboard (`kind=issue`) count more rows than the tile for open/on-time; only `overdue` matches exactly (`range=all`).

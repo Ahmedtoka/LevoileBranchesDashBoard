@@ -27,7 +27,7 @@ class Observation extends Model
         'product_or_area', 'extra_values', 'rating', 'event_date', 'ticket_id', 'status',
         'classification_status', 'classification_reviewed_by', 'classification_reviewed_at',
         'repeat_count', 'escalated_from_risk_level_id', 'created_by', 'import_source', 'import_row',
-        'last_overdue_notified_at',
+        'last_overdue_notified_at', 'close_reason', 'closed_by', 'closed_at',
     ];
 
     protected $casts = [
@@ -37,6 +37,7 @@ class Observation extends Model
         'classification_reviewed_at' => 'datetime',
         'repeat_count' => 'integer',
         'last_overdue_notified_at' => 'datetime',
+        'closed_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -64,11 +65,7 @@ class Observation extends Model
     {
         return $q->where('kind', 'issue')
             ->whereIn('status', ['open', 'in_progress', 'reopened'])
-            ->whereHas('ticket', function ($t) {
-                $t->whereNotNull('due_at')
-                    ->where('due_at', '<', now())
-                    ->whereNotIn('status', ['closed', 'waiting_approval']);
-            });
+            ->whereHas('ticket', fn (Builder $t) => $t->overdue());
     }
 
     public function visit(): BelongsTo
@@ -136,5 +133,16 @@ class Observation extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /** Who closed it without action (closed_no_action). */
+    public function closer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'closed_by');
+    }
+
+    public function escalatedFrom(): BelongsTo
+    {
+        return $this->belongsTo(RiskLevel::class, 'escalated_from_risk_level_id');
     }
 }

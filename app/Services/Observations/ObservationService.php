@@ -33,6 +33,9 @@ class ObservationService
     /** Management roles that may record for any reporting department (others: their own one only). */
     public const ALL_DEPARTMENTS_ROLES = ['super_admin', 'ops_manager', 'area_manager', 'branch_director', 'vm_manager'];
 
+    /** Statuses after which an observation can no longer be closed without action. */
+    public const FINAL_STATUSES = ['closed_no_action', 'verified_closed', 'positive'];
+
     public function __construct(private ?RiskResolver $resolver = null, private ?TicketService $tickets = null)
     {
         $this->resolver ??= new RiskResolver;
@@ -383,6 +386,7 @@ class ObservationService
      */
     public function reroute(Observation $o, int $responsibleDepartmentId, User $u, ?string $reason = null): Observation
     {
+        $this->assertNotDraft($o);
         $department = Department::find($responsibleDepartmentId);
         if ($department === null) {
             throw ValidationException::withMessages(['responsible_department_id' => dt('الإدارة غير موجودة.', 'The department does not exist.')]);
@@ -420,6 +424,7 @@ class ObservationService
      */
     public function raiseRisk(Observation $o, RiskLevel $to, User $u, string $reason): Observation
     {
+        $this->assertNotDraft($o);
         $reason = trim($reason);
         if ($reason === '') {
             throw ValidationException::withMessages(['risk_override_reason' => dt('سبب رفع درجة الخطورة مطلوب.', 'A reason is required to raise the risk level.')]);
@@ -452,6 +457,52 @@ class ObservationService
         });
 
         return $o->fresh();
+    }
+
+    /**
+     * Close without action (duplicate, recording error). A ticket that is not closed is cancelled
+     * (TicketService::cancel: no after photo needed, no TicketStatusChanged), then the observation is
+     * marked `closed_no_action` with the reason. Does NOT self-authorize: callers check `can('closeNoAction')`.
+     */
+    public function closeNoAction(Observation $o, User $u, string $reason): Observation
+    {
+        $this->assertNotDraft($o);
+        $reason = trim($reason);
+        if ($reason === '') {
+            throw ValidationException::withMessages(['reason' => dt('سبب الإغلاق مطلوب.', 'A closing reason is required.')]);
+        }
+
+        DB::transaction(function () use ($o, $u, $reason) {
+            $locked = Observation::whereKey($o->id)->lockForUpdate()->firstOrFail();
+            if (in_array($locked->status, self::FINAL_STATUSES, true)) {
+                throw ValidationException::withMessages(['status' => dt('الملاحظة مغلقة بالفعل.', 'The observation is already closed.')]);
+            }
+
+            $ticket = $locked->ticket_id ? Ticket::whereKey($locked->ticket_id)->lockForUpdate()->first() : null;
+            if ($ticket !== null && $ticket->status !== 'closed') {
+                $this->tickets->cancel($ticket, $u, 'أُغلقت بدون إجراء: '.$reason);
+            }
+
+            $locked->update([
+                'status' => 'closed_no_action',
+                'close_reason' => $reason,
+                'closed_by' => $u->id,
+                'closed_at' => now(),
+            ]);
+        });
+
+        return $o->fresh();
+    }
+
+    /**
+     * Admin actions (reroute / raise risk / close without action) are refused on a row of a draft visit: it is
+     * not routed yet, and its author's next autosave would silently overwrite status, responsible and risk.
+     */
+    private function assertNotDraft(Observation $o): void
+    {
+        if (ObservationVisit::whereKey($o->observation_visit_id)->value('status') === 'draft') {
+            throw ValidationException::withMessages(['status' => dt('الملاحظة ما زالت مسودة.', 'The observation is still a draft.')]);
+        }
     }
 
     /** Same chain as RiskResolver (spec section 7), ending at the row's own risk instead of the policy default. */
@@ -613,6 +664,10 @@ class ObservationService
             $query = Observation::where('branch_id', $o->branch_id)
                 ->whereKeyNot($o->id)
                 ->where('created_at', '>=', now()->subDays(30));
+            // Demo rows (DemoObservationsSeeder) never count as repeats of a real observation; demo-on-demo does.
+            if ($o->import_source !== 'demo') {
+                $query->where(fn ($q) => $q->whereNull('import_source')->orWhere('import_source', '!=', 'demo'));
+            }
             $o->catalog_item_id !== null
                 ? $query->where('catalog_item_id', $o->catalog_item_id)
                 : $query->whereNull('catalog_item_id')->where('category_id', $o->category_id);
@@ -729,6 +784,12 @@ class ObservationService
         $categoryId = ! empty($item['category_id']) ? (int) $item['category_id'] : $catalog?->category_id;
         $category = $catalog?->category_id === $categoryId ? $catalog?->category : ($categoryId ? ObservationCategory::find($categoryId) : null);
 
+        // An update that omits the cc key (a resumed draft re-sends rows without it) keeps the row's own cc;
+        // an explicit empty array still clears it. Catalog / category cc keep their precedence in the resolver.
+        if ($existing !== null && ! array_key_exists('cc_department_ids', $item)) {
+            $item['cc_department_ids'] = $existing->cc_department_ids;
+        }
+
         $resolved = $this->resolver->resolve($item, $catalog, $category);
 
         if (! in_array($resolved['kind'], Observation::KINDS, true)) {
@@ -762,7 +823,7 @@ class ObservationService
             'extra_values' => $item['extra_values'] ?? null,
             'rating' => $item['rating'] ?? null,
             'event_date' => $v->visit_date,
-            'classification_status' => $catalog ? 'catalog' : (! empty($item['ai_classification_id']) ? 'ai_pending_review' : 'manual'),
+            'classification_status' => $this->classificationStatus($item, $catalog, $existing),
             'status' => match ($resolved['kind']) {
                 'positive' => 'positive',
                 'activity' => 'closed_no_action',
@@ -798,6 +859,26 @@ class ObservationService
         }
 
         return $observation;
+    }
+
+    /**
+     * catalog pick -> `catalog`; an AI suggestion id -> `ai_pending_review`. An update without the AI id keeps an
+     * AI status already on the row (a resumed draft never re-sends the id, and the row must stay in the review
+     * queue); anything else is `manual`.
+     */
+    private function classificationStatus(array $item, ?ObservationCatalogItem $catalog, ?Observation $existing): string
+    {
+        if ($catalog !== null) {
+            return 'catalog';
+        }
+        if (! empty($item['ai_classification_id'])) {
+            return 'ai_pending_review';
+        }
+        if ($existing !== null && in_array($existing->classification_status, ['ai_pending_review', 'ai_reviewed'], true)) {
+            return $existing->classification_status;
+        }
+
+        return 'manual';
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Models\Observation;
 use App\Models\ObservationCatalogItem;
 use App\Models\ObservationVisit;
 use App\Models\RiskLevel;
+use App\Rules\OwnObservationPhotoPath;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -36,7 +37,7 @@ class UpsertObservationsRequest extends FormRequest
             'items.*.extra_values' => ['nullable', 'array'],
             'items.*.rating' => ['nullable', 'in:good,average,poor'],
             'items.*.photos' => ['nullable', 'array'],
-            'items.*.photos.*' => ['string', 'max:255'],
+            'items.*.photos.*' => ['string', 'max:255', new OwnObservationPhotoPath($this->user()?->id)],
             'items.*.photo_source' => ['nullable', 'in:camera,gallery'],
             'items.*.cc_department_ids' => ['nullable', 'array'],
             'items.*.cc_department_ids.*' => ['integer', 'exists:departments,id'],

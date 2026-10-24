@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Observations;
 
 use App\Models\ObservationVerification;
+use App\Rules\OwnObservationPhotoPath;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,7 +23,7 @@ class VerifyObservationRequest extends FormRequest
         return [
             'result' => ['required', Rule::in(ObservationVerification::RESULTS)],
             'notes' => ['nullable', 'string', 'max:2000'],
-            'photo_path' => ['nullable', 'string', 'max:255'],
+            'photo_path' => ['nullable', 'string', 'max:255', new OwnObservationPhotoPath($this->user()?->id)],
             'observation_visit_id' => ['nullable', 'integer', 'exists:observation_visits,id'],
         ];
     }
