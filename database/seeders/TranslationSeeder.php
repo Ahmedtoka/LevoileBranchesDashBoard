@@ -176,6 +176,11 @@ class TranslationSeeder extends Seeder
             ['roles', 'roles.user', 'مستخدم', 'users'],
 
             // observations module: admin screens (Plan C) — group `obs`
+            ['obs', 'obs.nav.section', 'الملاحظات', 'Observations'],
+            ['obs', 'obs.nav.register', 'سجل الملاحظات', 'Observation register'],
+            ['obs', 'obs.nav.new_visit', 'زيارة ملاحظات جديدة', 'New observation visit'],
+            ['obs', 'obs.nav.before_after', 'كنا وبقينا', 'Before and after'],
+            ['obs', 'obs.nav.dashboard', 'داشبورد الإدارات', 'Departments dashboard'],
             ['obs', 'obs.nav.settings', 'إعدادات الملاحظات', 'Observation settings'],
             ['obs', 'obs.nav.review', 'اعتماد التصنيفات', 'Classification review'],
             ['obs', 'obs.nav.categories', 'فئات الملاحظات', 'Observation categories'],

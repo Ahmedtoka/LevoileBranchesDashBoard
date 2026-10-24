@@ -82,6 +82,7 @@
         @endif
     @endif
 
+    @include('dashboard.observations.partials.nav')
     @include('dashboard.observations.partials.admin-nav')
 
     <div class="nav-label">{{ dt('المشتريات','Purchasing') }}</div>
