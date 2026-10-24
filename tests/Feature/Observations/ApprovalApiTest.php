@@ -4,6 +4,7 @@ namespace Tests\Feature\Observations;
 
 use App\Models\Branch;
 use App\Models\Department;
+use App\Models\AiClassification;
 use App\Models\Notification;
 use App\Models\Observation;
 use App\Models\ObservationCategory;
@@ -11,6 +12,9 @@ use App\Models\ObservationVisit;
 use App\Models\RiskLevel;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Services\Observations\Ai\ClassificationBatch;
+use App\Services\Observations\Ai\ClassificationResult;
+use App\Services\Observations\Ai\ClassifierContract;
 use Illuminate\Support\Carbon;
 use Laravel\Sanctum\Sanctum;
 use Tests\Support\Seeds;
@@ -212,5 +216,160 @@ class ApprovalApiTest extends TestCase
         $draft = $this->visit();
         Sanctum::actingAs($this->ops);
         $this->postJson("/api/observation-visits/{$draft->id}/approve")->assertForbidden();
+    }
+
+    private function fakeClassifier(string $status, array $results): void
+    {
+        $this->app->instance(ClassifierContract::class, new class($status, $results) implements ClassifierContract
+        {
+            public array $calls = [];
+
+            public function __construct(private string $status, private array $results) {}
+
+            public function classify(int $departmentId, ?int $branchId, array $points): ClassificationBatch
+            {
+                $this->calls[] = [$departmentId, $branchId, $points];
+
+                return new ClassificationBatch($this->status, $this->results, 'claude-test', 100, 20, 250, $this->status === 'failed' ? 'boom' : null);
+            }
+        });
+    }
+
+    public function test_classify_with_the_null_driver_is_skipped_and_changes_nothing(): void
+    {
+        $visit = $this->submitted();
+        $free = $this->observation($visit, ['responsible_department_id' => null, 'risk_level_id' => null, 'description' => 'نقطة حرة', 'title' => 'نقطة حرة']);
+
+        Sanctum::actingAs($this->recorder);
+        $this->postJson("/api/observation-visits/{$visit->id}/classify")->assertForbidden();
+
+        Sanctum::actingAs($this->cctvManager);
+        $response = $this->postJson("/api/observation-visits/{$visit->id}/classify")->assertOk()
+            ->assertJsonStructure(['status', 'message', 'observations' => [['id', 'visit_status', 'can_edit_classification']]]);
+
+        $this->assertSame('skipped', $response->json('status'));
+        $this->assertSame('الفحص غير متاح، اختر الفئة يدوياً', $response->json('message'));
+        $this->assertSame('submitted', $response->json('observations.0.visit_status'));
+        $this->assertTrue($response->json('observations.0.can_edit_classification'));
+        $this->assertNull($response->json('observations.0.responsible_department'));
+        $free->refresh();
+        $this->assertNull($free->responsible_department_id);
+        $this->assertSame('manual', $free->classification_status);
+        $this->assertSame(1, AiClassification::where('observation_id', $free->id)->where('status', 'skipped')->count());
+
+        // Only submitted visits are classified by the manager.
+        $draft = $this->visit();
+        $this->postJson("/api/observation-visits/{$draft->id}/classify")->assertForbidden();
+    }
+
+    public function test_classify_writes_suggestions_on_the_free_observations_only(): void
+    {
+        $category = ObservationCategory::create(['department_id' => $this->cctv->id, 'slug' => 'emergency', 'name_ar' => 'طوارئ', 'name_en' => 'Emergency', 'default_kind' => 'issue', 'active' => true]);
+        $visit = $this->submitted();
+        $catalog = $this->observation($visit, ['catalog_item_id' => null, 'classification_status' => 'catalog', 'risk_level_id' => $this->risks['low']->id]);
+        $catalogItem = \App\Models\ObservationCatalogItem::create(['category_id' => $category->id, 'code' => 'CCTV-X', 'label_ar' => 'بند', 'label_en' => 'Item', 'kind' => 'issue', 'keywords' => [], 'extra_fields' => [], 'active' => true]);
+        $catalog->update(['catalog_item_id' => $catalogItem->id, 'category_id' => $category->id]);
+        $first = $this->observation($visit, ['responsible_department_id' => null, 'risk_level_id' => null, 'description' => 'باب الطوارئ مقفول بجنزير', 'title' => 'باب الطوارئ مقفول بجنزير']);
+        $second = $this->observation($visit, ['responsible_department_id' => null, 'risk_level_id' => null, 'description' => 'نقطة بلا اقتراح', 'title' => 'نقطة بلا اقتراح']);
+
+        $this->fakeClassifier('ok', [new ClassificationResult(0, null, $category->id, 'issue', 'high', $this->stock->id, 0.9, 'سبب')]);
+        Sanctum::actingAs($this->cctvManager);
+
+        $response = $this->postJson("/api/observation-visits/{$visit->id}/classify")->assertOk();
+
+        $this->assertSame('ok', $response->json('status'));
+        $this->assertNull($response->json('message'));
+        $this->assertCount(3, $response->json('observations'));
+        $classifier = $this->app->make(ClassifierContract::class);
+        $this->assertSame([[$this->cctv->id, $this->branch->id, [[0, 'باب الطوارئ مقفول بجنزير'], [1, 'نقطة بلا اقتراح']]]], $classifier->calls, 'only the rows without a catalog item');
+
+        $first->refresh();
+        $this->assertSame($this->stock->id, $first->responsible_department_id);
+        $this->assertSame($this->risks['high']->id, $first->risk_level_id);
+        $this->assertSame($category->id, $first->category_id);
+        $this->assertSame('ai_pending_review', $first->classification_status);
+        $row = AiClassification::where('observation_id', $first->id)->sole();
+        $this->assertSame('ok', $row->status);
+        $this->assertSame($this->stock->id, $row->suggested['responsible_department_id']);
+        $this->assertSame($visit->id, (int) $row->observation_visit_id);
+        $this->assertSame('باب الطوارئ مقفول بجنزير', $row->input_text);
+
+        $second->refresh();
+        $this->assertNull($second->responsible_department_id);
+        $this->assertSame('manual', $second->classification_status);
+        $this->assertNull(AiClassification::where('observation_id', $second->id)->sole()->suggested);
+
+        $catalog->refresh();
+        $this->assertSame($this->operation->id, $catalog->responsible_department_id);
+        $this->assertSame('catalog', $catalog->classification_status);
+        $this->assertSame(0, AiClassification::where('observation_id', $catalog->id)->count());
+
+        $item = collect($response->json('observations'))->firstWhere('id', $first->id);
+        $this->assertSame(['id' => $this->stock->id, 'name' => $this->stock->name], $item['responsible_department']);
+        $this->assertSame('high', $item['risk']['slug']);
+        $this->assertSame(1, $response->json('visit.pending_points'));
+    }
+
+    public function test_classify_failure_changes_nothing(): void
+    {
+        $visit = $this->submitted();
+        $free = $this->observation($visit, ['responsible_department_id' => null, 'risk_level_id' => null]);
+        $this->fakeClassifier('failed', []);
+        Sanctum::actingAs($this->ops);
+
+        $response = $this->postJson("/api/observation-visits/{$visit->id}/classify")->assertOk();
+
+        $this->assertSame('failed', $response->json('status'));
+        $this->assertSame('الفحص غير متاح، اختر الفئة يدوياً', $response->json('message'));
+        $this->assertNull($free->fresh()->responsible_department_id);
+        $this->assertSame('manual', $free->fresh()->classification_status);
+        $this->assertSame('boom', AiClassification::where('observation_id', $free->id)->sole()->error);
+    }
+
+    public function test_manager_edits_an_observation_until_the_visit_is_approved(): void
+    {
+        $category = ObservationCategory::create(['department_id' => $this->cctv->id, 'slug' => 'emergency', 'name_ar' => 'طوارئ', 'name_en' => 'Emergency', 'default_kind' => 'issue', 'active' => true]);
+        $foreign = ObservationCategory::create(['department_id' => $this->stock->id, 'slug' => 'stock', 'name_ar' => 'مخزون', 'name_en' => 'Stock', 'default_kind' => 'issue', 'active' => true]);
+        $visit = $this->submitted();
+        $o = $this->observation($visit, ['responsible_department_id' => null, 'risk_level_id' => null, 'description' => 'نقطة حرة', 'title' => 'نقطة حرة']);
+
+        Sanctum::actingAs($this->recorder);
+        $this->putJson("/api/observations/{$o->id}", ['responsible_department_id' => $this->operation->id])->assertForbidden();
+        $show = $this->getJson("/api/observations/{$o->id}")->assertOk();
+        $this->assertFalse($show->json('observation.can_edit_classification'));
+        $this->assertSame('submitted', $show->json('observation.visit_status'));
+
+        Sanctum::actingAs($this->stockManager);
+        $this->putJson("/api/observations/{$o->id}", ['responsible_department_id' => $this->operation->id])->assertForbidden();
+
+        Sanctum::actingAs($this->cctvManager);
+        $this->putJson("/api/observations/{$o->id}", ['category_id' => $foreign->id])
+            ->assertUnprocessable()->assertJsonValidationErrors(['category_id']);
+        $this->putJson("/api/observations/{$o->id}", ['risk_level_slug' => 'extreme'])
+            ->assertUnprocessable()->assertJsonValidationErrors(['risk_level_slug']);
+
+        $response = $this->putJson("/api/observations/{$o->id}", [
+            'responsible_department_id' => $this->operation->id, 'risk_level_slug' => 'high', 'category_id' => $category->id,
+            'description' => 'باب الطوارئ مقفول بجنزير', 'kind' => 'issue',
+        ])->assertOk()->assertJsonStructure(['message', 'observation' => ['id', 'visit_status', 'can_edit_classification']]);
+
+        $this->assertSame(['id' => $this->operation->id, 'name' => $this->operation->name], $response->json('observation.responsible_department'));
+        $this->assertSame('high', $response->json('observation.risk.slug'));
+        $this->assertSame($category->id, $response->json('observation.category_id'));
+        $this->assertSame('باب الطوارئ مقفول بجنزير', $response->json('observation.description'));
+        $this->assertSame('باب الطوارئ مقفول بجنزير', $response->json('observation.title'), 'a title derived from the text follows it');
+        $this->assertTrue($response->json('observation.can_edit_classification'));
+
+        // kind changes keep the draft status rules; clearing the responsible department is allowed.
+        $this->putJson("/api/observations/{$o->id}", ['kind' => 'positive'])->assertOk()->assertJsonPath('observation.status', 'positive');
+        $this->putJson("/api/observations/{$o->id}", ['kind' => 'issue', 'responsible_department_id' => null])->assertOk()
+            ->assertJsonPath('observation.status', 'open')->assertJsonPath('observation.responsible_department', null);
+
+        // Once approved nothing moves (403) and the item says so.
+        $this->putJson("/api/observations/{$o->id}", ['responsible_department_id' => $this->operation->id])->assertOk();
+        $this->postJson("/api/observation-visits/{$visit->id}/approve")->assertOk();
+        $this->putJson("/api/observations/{$o->id}", ['risk_level_slug' => 'low'])->assertForbidden();
+        $this->assertFalse($this->getJson("/api/observations/{$o->id}")->json('observation.can_edit_classification'));
+        $this->assertSame('approved', $this->getJson("/api/observations/{$o->id}")->json('observation.visit_status'));
     }
 }

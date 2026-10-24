@@ -27,9 +27,6 @@ use Illuminate\Pagination\LengthAwarePaginator;
  */
 class ObservationVisitController extends Controller
 {
-    /** Spec section 8: shown when the classifier is unavailable (failed / skipped). */
-    private const AI_UNAVAILABLE = 'الفحص غير متاح، اختر الفئة يدوياً';
-
     public function __construct(private ObservationService $service) {}
 
     /** GET /api/observation-visits?status=&mine=1&branch_id=&department_id=&scope=to_approve */
@@ -145,7 +142,7 @@ class ObservationVisitController extends Controller
 
         return response()->json([
             'status' => $batch->status,
-            'message' => $batch->status === 'ok' ? null : self::AI_UNAVAILABLE,
+            'message' => $batch->status === 'ok' ? null : ObservationService::AI_UNAVAILABLE,
             'results' => $results,
             'classification_ids' => array_map(fn (AiClassification $c) => $c->id, $created),
         ]);
@@ -185,6 +182,25 @@ class ObservationVisitController extends Controller
             'message' => config('observations.manager_approval', true) ? 'تم إرسال الزيارة وهي بانتظار اعتماد المدير.' : 'تم إرسال الزيارة.',
             'visit' => $this->visitItem($result['visit']),
             'created_tickets' => $this->createdTickets($result['created_tickets']),
+        ]);
+    }
+
+    /**
+     * POST /api/observation-visits/{visit}/classify (Plan H): the manager runs the classifier on the visit's
+     * free points; suggestions are written on the rows. HTTP 200 in every case (status ok / failed / skipped).
+     */
+    public function classify(Request $request, ObservationVisit $visit): JsonResponse
+    {
+        $u = $request->user();
+        $this->allow($u->can('classify', $visit));
+
+        $result = $this->service->classifyVisit($visit, $u);
+
+        return response()->json([
+            'status' => $result['status'],
+            'message' => $result['message'],
+            'visit' => $this->visitItem($visit->fresh()),
+            'observations' => ObservationItem::many($result['observations']),
         ]);
     }
 

@@ -82,9 +82,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/observation-visits/{visit}/ai-check', [ObservationVisitController::class, 'aiCheck'])->whereNumber('visit');
     Route::post('/observation-visits/{visit}/observations', [ObservationVisitController::class, 'upsert'])->whereNumber('visit');
     Route::post('/observation-visits/{visit}/submit', [ObservationVisitController::class, 'submit'])->whereNumber('visit');
+    Route::post('/observation-visits/{visit}/classify', [ObservationVisitController::class, 'classify'])->whereNumber('visit');
     Route::post('/observation-visits/{visit}/approve', [ObservationVisitController::class, 'approve'])->whereNumber('visit');
     Route::get('/observations', [ObservationController::class, 'index']);
     Route::get('/observations/{observation}', [ObservationController::class, 'show'])->whereNumber('observation');
+    Route::put('/observations/{observation}', [ObservationController::class, 'update'])->whereNumber('observation');
     Route::delete('/observations/{observation}', [ObservationController::class, 'destroyDraft'])->whereNumber('observation');
     Route::post('/observations/{observation}/verify', [ObservationController::class, 'verify'])->whereNumber('observation');
     Route::get('/branches/{branch}/observations/pending-verification', [ObservationController::class, 'pendingVerification'])->whereNumber('branch');

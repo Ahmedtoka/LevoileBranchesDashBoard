@@ -17,6 +17,7 @@ use App\Models\Ticket;
 use App\Models\TicketUpdate;
 use App\Models\User;
 use App\Services\Observations\Ai\ClassificationBatch;
+use App\Services\Observations\Ai\ClassifierContract;
 use App\Services\TicketService;
 use App\Support\ObservationScope;
 use Carbon\Carbon;
@@ -30,6 +31,9 @@ class ObservationService
 {
     /** Ticket statuses meaning someone is working on it: the observation shows `in_progress`. */
     private const TICKET_WORKING = ['assigned', 'on_the_way', 'in_progress'];
+
+    /** Spec section 8: shown when the classifier is unavailable (failed / skipped). */
+    public const AI_UNAVAILABLE = 'الفحص غير متاح، اختر الفئة يدوياً';
 
     /** Management roles that may record for any reporting department (others: their own one only). */
     public const ALL_DEPARTMENTS_ROLES = ['super_admin', 'ops_manager', 'area_manager', 'branch_director', 'vm_manager'];
@@ -313,6 +317,152 @@ class ObservationService
                 'link' => '/observations/visits/to-approve/'.$visit->id,
             ]);
         }
+    }
+
+    /**
+     * Manager-side "فحص" (Plan H): classify every observation of a not-yet-approved visit that has no
+     * catalog item, from the saved descriptions, and write the suggestions (responsible department, risk,
+     * category) straight onto those rows as `ai_pending_review`. One ai_classifications row per point,
+     * linked by `observation_id`. A classifier failure changes no observation (the rows still record the
+     * failed/skipped batch). Catalog rows are never touched. The caller authorizes (`classify` policy).
+     *
+     * @return array{status: string, message: ?string, observations: Collection<int, Observation>}
+     */
+    public function classifyVisit(ObservationVisit $v, User $u, ?ClassifierContract $classifier = null): array
+    {
+        if ($v->status === 'approved') {
+            throw ValidationException::withMessages(['visit' => dt('الزيارة معتمدة بالفعل.', 'The visit is already approved.')]);
+        }
+
+        $targets = $v->observations()->whereNull('catalog_item_id')->orderBy('id')->get()->values();
+        if ($targets->isEmpty()) {
+            return ['status' => 'ok', 'message' => null, 'observations' => $this->visitObservations($v)];
+        }
+
+        $points = $targets->map(fn (Observation $o, int $i) => [$i, (string) $o->description])->all();
+        $batch = ($classifier ?? app(ClassifierContract::class))->classify((int) $v->department_id, $v->branch_id, $points);
+        $byIndex = [];
+        foreach ($batch->results as $result) {
+            $byIndex[$result->index] = $result;
+        }
+        $categoryIds = ObservationCategory::where('department_id', $v->department_id)->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        DB::transaction(function () use ($v, $targets, $batch, $byIndex, $categoryIds) {
+            foreach ($targets as $i => $o) {
+                $result = $byIndex[$i] ?? null;
+
+                AiClassification::create([
+                    'observation_visit_id' => $v->id,
+                    'observation_id' => $o->id,
+                    'request_hash' => sha1($v->department_id.'|'.$o->description),
+                    'input_text' => $o->description,
+                    'suggested' => $result?->toArray(),
+                    'model' => $batch->model,
+                    'status' => $batch->status,
+                    'error' => $batch->error,
+                    'latency_ms' => $batch->latencyMs,
+                    'input_tokens' => $i === 0 ? $batch->inputTokens : null,
+                    'output_tokens' => $i === 0 ? $batch->outputTokens : null,
+                ]);
+
+                if ($batch->status !== 'ok' || $result === null) {
+                    continue;
+                }
+
+                $attributes = ['classification_status' => 'ai_pending_review'];
+                if ($result->responsibleDepartmentId !== null) {
+                    $attributes['responsible_department_id'] = $result->responsibleDepartmentId;
+                }
+                if ($result->categoryId !== null && in_array($result->categoryId, $categoryIds, true)) {
+                    $attributes['category_id'] = $result->categoryId;
+                }
+                if ($risk = RiskLevel::bySlug($result->riskLevelSlug)) {
+                    $attributes['risk_level_id'] = $risk->id;
+                }
+                $o->update($attributes);
+            }
+        });
+
+        return [
+            'status' => $batch->status,
+            'message' => $batch->status === 'ok' ? null : self::AI_UNAVAILABLE,
+            'observations' => $this->visitObservations($v),
+        ];
+    }
+
+    /**
+     * Manager correction of one point before approval (Plan H). Keys (each optional, null clears):
+     * responsible_department_id, risk_level_slug, category_id (must belong to the visit's reporting
+     * department), description, kind. A category change away from the row's catalog item unlinks the item
+     * (`manual`); a kind change re-applies the draft status rules (positive / closed_no_action / open).
+     * The caller authorizes (`updateClassification` policy); the visit must not be approved.
+     */
+    public function updateClassification(Observation $o, array $data, User $u): Observation
+    {
+        $visitStatus = $o->visit?->status;
+        if ($visitStatus === 'approved') {
+            throw ValidationException::withMessages(['visit' => dt('الزيارة معتمدة ولا يمكن تعديل نقاطها.', 'The visit is approved; its points can no longer be edited.')]);
+        }
+
+        $attributes = [];
+
+        if (array_key_exists('responsible_department_id', $data)) {
+            $attributes['responsible_department_id'] = $data['responsible_department_id'] !== null ? (int) $data['responsible_department_id'] : null;
+        }
+
+        if (array_key_exists('risk_level_slug', $data)) {
+            if ($data['risk_level_slug'] === null || $data['risk_level_slug'] === '') {
+                $attributes['risk_level_id'] = null;
+            } else {
+                $risk = RiskLevel::bySlug((string) $data['risk_level_slug']);
+                if ($risk === null) {
+                    throw ValidationException::withMessages(['risk_level_slug' => dt('درجة الخطورة غير صحيحة.', 'Invalid risk level.')]);
+                }
+                $attributes['risk_level_id'] = $risk->id;
+            }
+        }
+
+        if (! empty($data['category_id'])) {
+            $category = ObservationCategory::find($data['category_id']);
+            if ($category === null || (int) $category->department_id !== (int) $o->reporting_department_id) {
+                throw ValidationException::withMessages(['category_id' => dt('الفئة من إدارة أخرى.', 'The category belongs to another department.')]);
+            }
+            $attributes['category_id'] = $category->id;
+            if ($o->catalog_item_id !== null && (int) ObservationCatalogItem::whereKey($o->catalog_item_id)->value('category_id') !== (int) $category->id) {
+                $attributes['catalog_item_id'] = null;
+                $attributes['classification_status'] = 'manual';
+            }
+        }
+
+        $description = trim((string) ($data['description'] ?? ''));
+        if ($description !== '' && $description !== (string) $o->description) {
+            $attributes['description'] = $description;
+            if ((string) $o->title === '' || (string) $o->title === mb_substr((string) $o->description, 0, 120)) {
+                $attributes['title'] = mb_substr($description, 0, 120);
+            }
+        }
+
+        if (! empty($data['kind']) && in_array($data['kind'], Observation::KINDS, true) && $data['kind'] !== $o->kind) {
+            $attributes['kind'] = $data['kind'];
+            // No ticket exists before approval, so the draft status rules apply.
+            $attributes['status'] = match ($data['kind']) {
+                'positive' => 'positive',
+                'activity' => 'closed_no_action',
+                default => 'open',
+            };
+        }
+
+        if ($attributes !== []) {
+            $o->update($attributes);
+        }
+
+        return $o->fresh();
+    }
+
+    /** @return Collection<int, Observation> the visit's rows with the item relations, ordered by id */
+    private function visitObservations(ObservationVisit $v): Collection
+    {
+        return $v->observations()->with(\App\Http\Resources\Observations\ObservationItem::WITH)->orderBy('id')->get();
     }
 
     /**
