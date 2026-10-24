@@ -3,6 +3,7 @@
 use App\Http\Controllers\Web\Observations\AreaController;
 use App\Http\Controllers\Web\Observations\CatalogItemController;
 use App\Http\Controllers\Web\Observations\CategoryController;
+use App\Http\Controllers\Web\Observations\ReviewController;
 use App\Http\Controllers\Web\Observations\RiskLevelController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,3 +33,11 @@ Route::post('/admin/observation-catalog', [CatalogItemController::class, 'store'
 Route::put('/admin/observation-catalog/{item}', [CatalogItemController::class, 'update'])->name('obs.catalog.update');
 Route::post('/admin/observation-catalog/{item}/toggle', [CatalogItemController::class, 'toggle'])->name('obs.catalog.toggle');
 Route::delete('/admin/observation-catalog/{item}', [CatalogItemController::class, 'destroy'])->name('obs.catalog.destroy');
+
+// ---- Classification review queue (spec 9.6) ----
+Route::get('/observations/review', [ReviewController::class, 'index'])->name('obs.review.index');
+Route::post('/observations/review/bulk-merge', [ReviewController::class, 'bulkMerge'])->name('obs.review.bulk');
+Route::put('/observations/review/{observation}', [ReviewController::class, 'update'])->name('obs.review.update');
+Route::post('/observations/review/{observation}/approve', [ReviewController::class, 'approve'])->name('obs.review.approve');
+Route::post('/observations/review/{observation}/merge', [ReviewController::class, 'merge'])->name('obs.review.merge');
+Route::post('/observations/review/{observation}/promote', [ReviewController::class, 'promote'])->name('obs.review.promote');
