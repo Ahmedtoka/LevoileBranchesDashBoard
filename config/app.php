@@ -28,6 +28,9 @@ return [
         ),
     ],
 
+    // Quick-login demo users on the login page and GET /api/demo-users. Never enable on live.
+    'demo_login' => env('DEMO_LOGIN', false),
+
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),

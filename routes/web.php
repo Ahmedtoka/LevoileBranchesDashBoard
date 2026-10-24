@@ -26,6 +26,7 @@ Route::get('/locale/{locale}', function (string $locale) {
 // Auth
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login/quick', [LoginController::class, 'quick'])->name('login.quick');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
