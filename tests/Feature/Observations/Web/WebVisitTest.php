@@ -77,6 +77,32 @@ class WebVisitTest extends TestCase
         $this->assertSame((int) $this->cctv->id, (int) $visit->department_id);
     }
 
+    /** What the page relies on for row edits / deletes: an emptied saved row is a 422 (not ignored); DELETE only on drafts. */
+    public function test_web_api_row_delete_and_emptied_row(): void
+    {
+        $this->actingAs($this->recorder);
+
+        $visitId = $this->postJson('/web-api/observation-visits', [
+            'type' => 'field', 'branch_id' => $this->branch->id, 'visit_date' => now()->toDateString(), 'simulated' => true,
+        ])->assertCreated()->json('visit.id');
+        [$keepId, $dropId] = $this->postJson("/web-api/observation-visits/{$visitId}/observations", [
+            'items' => [['kind' => 'activity', 'description' => 'يبقى'], ['kind' => 'activity', 'description' => 'يُحذف']],
+        ])->assertOk()->json('data.*.id');
+
+        // A saved row sent emptied is rejected on that row, and the old text is not silently kept as valid.
+        $this->postJson("/web-api/observation-visits/{$visitId}/observations", [
+            'items' => [['id' => $keepId, 'kind' => 'activity', 'description' => null]],
+        ])->assertStatus(422)->assertJsonValidationErrors(['items.0.description']);
+
+        $this->deleteJson("/web-api/observations/{$dropId}")->assertOk();
+        $this->assertNull(Observation::find($dropId));
+        $this->deleteJson("/web-api/observations/{$dropId}")->assertNotFound();
+
+        $this->postJson("/web-api/observation-visits/{$visitId}/submit")->assertOk();
+        $this->deleteJson("/web-api/observations/{$keepId}")->assertForbidden();
+        $this->assertNotNull(Observation::find($keepId));
+    }
+
     public function test_desk_all_branches_forces_activity(): void
     {
         $this->actingAs($this->recorder);

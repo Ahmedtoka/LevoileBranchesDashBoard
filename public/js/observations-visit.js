@@ -23,14 +23,20 @@
         branchId: null,          // field
         branchIds: [],           // desk, several branches
         allBranches: false,      // desk, "all branches" -> branch_id null, ONE visit
-        visits: [],              // [{id, code, branch_id, branch_name, submitted, result}]
+        targets: null,           // [{branch_id, branch_name, visit, error, transient}] fixed by the first add / check-in
+        visits: [],              // the created ones: [{id, code, branch_id, branch_name, submitted, result}]
         creating: null,          // promise while the visits are being created
         rows: [],                // the draft rows (see newRow)
         ai: null,                // {status, message, points: [...]} after "فحص"
         saveTimer: null,
         savePromise: null,
         savePending: false,
+        dirty: false,            // an edit not yet saved by a successful upsert
+        editSeq: 0,
+        retryTimer: null,
+        retryStep: 0,
         pendingDeletes: [],
+        ghosts: new Set(),       // rows deleted in the page whose DELETE failed (still on the server)
         done: false,
     };
     let uidSeq = 0;
@@ -50,6 +56,10 @@
     const hhmm = () => new Date().toTimeString().slice(0, 5);
     /** Desk visit for every branch: branch_id null, one visit, activities only. */
     const allMode = () => S.type === 'desk' && S.allBranches;
+    /** All-branches mode only offers what is already an activity, so the server keeps kind=activity by precedence. */
+    const catalogForMode = () => S.meta.catalog_items.filter((i) => !allMode() || i.kind === 'activity');
+    const categoriesForMode = () => S.meta.categories.filter((c) => !allMode() || c.default_kind === 'activity');
+    const isTransient = (e) => e.status === 0 || e.status === 408 || e.status === 429 || e.status >= 500;
 
     function options(list, value, valueOf, textOf, withBlank) {
         const blank = withBlank ? `<option value="">${esc(T.select)}</option>` : '';
@@ -69,7 +79,9 @@
     function setIndicator(state) {
         const el = $('#obs-save-indicator');
         el.classList.toggle('text-danger', state === 'failed');
-        el.textContent = state === 'saving' ? T.saving : state === 'saved' ? `${T.saved} ${hhmm()}` : state === 'failed' ? T.save_failed : '';
+        el.classList.toggle('text-warning', state === 'retrying');
+        el.textContent = state === 'saving' ? T.saving : state === 'saved' ? `${T.saved} ${hhmm()}`
+            : state === 'failed' ? T.save_failed : state === 'retrying' ? T.save_retrying : '';
     }
 
     /**
@@ -168,47 +180,81 @@
         }
     }
 
-    /** The first add / check-in creates the visit(s): one per branch in desk-multi mode, one with branch_id null for "all branches". */
+    /**
+     * The first add / check-in fixes the targets: one per branch in desk-multi mode, one with branch_id null for
+     * "all branches". Each call creates the targets still missing (a failed one is retried by the next add / save /
+     * submit) and resolves true only when every target visit exists.
+     */
     function ensureVisits() {
-        if (S.visits.length) return Promise.resolve(true);
         if (S.creating) return S.creating;
-
-        let targets;
-        if (S.type === 'field') {
-            if (!S.branchId) { showAlert(T.branch_required); return Promise.resolve(false); }
-            targets = [S.branchId];
-        } else if (allMode()) {
-            targets = [null];
-        } else {
-            if (!S.branchIds.length) { showAlert(T.branches_required); return Promise.resolve(false); }
-            targets = S.branchIds.slice();
+        if (!S.targets) {
+            let branchIds;
+            if (S.type === 'field') {
+                if (!S.branchId) { showAlert(T.branch_required); return Promise.resolve(false); }
+                branchIds = [S.branchId];
+            } else if (allMode()) {
+                branchIds = [null];
+            } else {
+                if (!S.branchIds.length) { showAlert(T.branches_required); return Promise.resolve(false); }
+                branchIds = S.branchIds.slice();
+            }
+            S.targets = branchIds.map((b) => ({ branch_id: b, branch_name: b ? branchName(b) : null, visit: null, error: '', transient: false }));
         }
+        const missing = S.targets.filter((t) => !t.visit);
+        if (!missing.length) return Promise.resolve(true);
 
         S.creating = (async () => {
-            try {
-                for (const branchId of targets) {
-                    const body = { department_id: S.departmentId, branch_id: branchId, type: S.type, visit_date: S.visitDate };
-                    if (S.type === 'field') body.simulated = true; // manual check-in from the laptop, no GPS
+            for (const t of missing) {
+                const body = { department_id: S.departmentId, branch_id: t.branch_id, type: S.type, visit_date: S.visitDate };
+                if (S.type === 'field') body.simulated = true; // manual check-in from the laptop, no GPS
+                try {
                     const res = await api('POST', '/observation-visits', body);
-                    S.visits.push({ id: res.visit.id, code: res.visit.code, branch_id: branchId, branch_name: res.visit.branch?.name || null, submitted: false, result: null });
+                    t.visit = { id: res.visit.id, code: res.visit.code, branch_id: t.branch_id, branch_name: res.visit.branch?.name || t.branch_name, submitted: false, result: null };
+                    S.visits.push(t.visit);
+                    t.error = '';
+                } catch (e) {
+                    t.error = Object.values(e.errors).flat()[0] || e.message;
+                    t.transient = isTransient(e);
                 }
-                showAlert('');
-                return true;
-            } catch (e) {
-                showAlert(Object.values(e.errors).flat()[0] || e.message);
-                return false;
-            } finally {
-                if (S.visits.length) lockSetup();
-                S.creating = null;
             }
-        })();
+            const all = S.targets.every((t) => t.visit);
+            if (S.visits.length) {
+                lockSetup();
+                if (all && S.rows.length) scheduleSave(); // a visit created late still needs the rows
+            } else {
+                S.targets = null; // nothing created yet: the setup stays editable
+            }
+            if (all) showAlert('');
+            else showAlert(`${T.visits_missing} ${missing.filter((t) => t.error).map((t) => t.error).join(' ')}`);
+            renderVisitStatus();
+            return all;
+        })().finally(() => { S.creating = null; });
         return S.creating;
+    }
+
+    /** Per-visit status (branch, code, draft / submitted / not created, error): shown for several visits or any problem. */
+    function renderVisitStatus() {
+        const box = $('#obs-visit-status');
+        const ts = S.targets || [];
+        const partial = S.visits.some((v) => v.submitted) && S.visits.some((v) => !v.submitted);
+        const show = ts.length > 1 || ts.some((t) => !t.visit || t.error);
+        box.classList.toggle('d-none', !show);
+        if (!show) { box.innerHTML = ''; return; }
+        box.innerHTML = `
+            ${partial ? `<div class="alert alert-warning small py-2 mb-2">${esc(T.partial_submit)}</div>` : ''}
+            <ul class="list-unstyled small mb-0">${ts.map((t) => {
+                const [color, text] = !t.visit ? ['danger', T.not_created] : t.visit.submitted ? ['success', T.submitted_status] : ['secondary', T.draft];
+                return `<li class="mb-1"><span class="badge text-bg-${color}">${esc(text)}</span> ${esc(t.branch_name || T.all_branches)}`
+                    + `${t.visit ? ` · ${esc(t.visit.code)}` : ''}${t.error ? ` — <span class="text-danger">${esc(t.error)}</span>` : ''}</li>`;
+            }).join('')}</ul>`;
     }
 
     function wireSetup() {
         document.querySelectorAll('input[name="obs-type"]').forEach((r) => r.addEventListener('change', (e) => {
             S.type = e.target.value;
             applyMode();
+            stripNonActivity();
+            renderCatalog();
             renderRows();
             renderAi();
         }));
@@ -221,6 +267,8 @@
         $('#obs-all-branches').addEventListener('change', (e) => {
             S.allBranches = e.target.checked;
             applyMode();
+            stripNonActivity();
+            renderCatalog();
             renderRows();
             renderAi();
         });
@@ -231,7 +279,8 @@
     function renderCatalog() {
         const q = $('#obs-catalog-search').value.trim().toLowerCase();
         const match = (i) => !q || [i.label_ar, i.label_en, ...(i.keywords || [])].some((t) => String(t || '').toLowerCase().includes(q));
-        const groups = S.meta.categories.map((c) => ({ c, items: S.meta.catalog_items.filter((i) => i.category_id === c.id && match(i)) }))
+        const items = catalogForMode();
+        const groups = S.meta.categories.map((c) => ({ c, items: items.filter((i) => i.category_id === c.id && match(i)) }))
             .filter((g) => g.items.length);
 
         $('#obs-catalog-list').innerHTML = groups.length ? groups.map((g) => `
@@ -291,8 +340,8 @@
             message: ok ? null : (res.message || T.ai_unavailable),
             points: points.map((p, n) => {
                 const r = ok ? (res.results || []).find((x) => x.index === p.index) : null;
-                const sure = !!(r && r.catalog_item_id && catalogById(r.catalog_item_id) && r.confidence >= 0.75);
-                const category = categoryById(r?.category_id);
+                const sure = !!(r && r.catalog_item_id && catalogForMode().some((i) => i.id === r.catalog_item_id) && r.confidence >= 0.75);
+                const category = categoriesForMode().find((c) => c.id === r?.category_id) || null;
                 const point = {
                     index: p.index,
                     text: p.text,
@@ -326,7 +375,7 @@
                 <div class="d-flex flex-wrap align-items-center gap-2 mb-1"><span dir="auto" class="fw-semibold small">${esc(p.text)}</span> ${head}</div>
                 <div class="row g-2">
                     <div class="col-sm-6 col-xl-3"><label class="form-label small text-muted mb-0">${esc(T.category)}</label>
-                        <select class="form-select form-select-sm" data-ai="category_id" ${locked ? 'disabled' : ''}>${options(S.meta.categories, locked ? eff.category?.id : p.category_id, (c) => c.id, nameOf, true)}</select></div>
+                        <select class="form-select form-select-sm" data-ai="category_id" ${locked ? 'disabled' : ''}>${options(locked ? S.meta.categories : categoriesForMode(), locked ? eff.category?.id : p.category_id, (c) => c.id, nameOf, true)}</select></div>
                     <div class="col-sm-6 col-xl-3 ${hideRouting ? 'd-none' : ''}"><label class="form-label small text-muted mb-0">${esc(T.kind)}</label>
                         <select class="form-select form-select-sm" data-ai="kind" ${eff.kindLocked ? 'disabled' : ''}>${options(KINDS, eff.kind, (k) => k, (k) => T.kinds[k], false)}</select></div>
                     <div class="col-sm-6 col-xl-3 ${hideRouting ? 'd-none' : ''}"><label class="form-label small text-muted mb-0">${esc(T.risk)}</label>
@@ -432,11 +481,36 @@
             rating: '',
             photos: [],          // [{path, url}] uploaded once, reused for every visit
             ai_classification_id: null,
+            warning: '',         // shown on the row (e.g. its catalog link was removed for "all branches")
             ids: {},             // visit id -> observation id, after the first save
             errors: {},          // field -> message, from the server's items.{i}.field
             uploading: 0,
             removed: false,
         }, attrs);
+    }
+
+    /**
+     * Switching to "all branches" with rows / checked points whose catalog item or category is not an activity:
+     * their link is removed visibly (warning on the row) instead of silently in the payload.
+     */
+    function stripNonActivity() {
+        if (!allMode()) return;
+        S.rows.forEach((row) => {
+            const item = row.catalog_item_id ? catalogById(row.catalog_item_id) : null;
+            const category = categoryById(row.category_id);
+            if ((item && item.kind !== 'activity') || (!item && category && category.default_kind !== 'activity')) {
+                row.description = row.description.trim() || labelOf(item) || nameOf(category);
+                row.catalog_item_id = null;
+                row.category_id = null;
+                row.source = 'free';
+                row.warning = T.link_removed;
+                scheduleSave();
+            }
+        });
+        (S.ai?.points || []).forEach((p) => {
+            if (p.suggestedItemId && catalogById(p.suggestedItemId)?.kind !== 'activity') { p.suggestedItemId = null; p.useItem = false; }
+            if (p.category_id && categoryById(p.category_id)?.default_kind !== 'activity') p.category_id = null;
+        });
     }
 
     const isValid = (row) => !!row.catalog_item_id || row.description.trim() !== '';
@@ -471,9 +545,10 @@
                 <span class="badge text-bg-light border">${esc(T.kinds[eff.kind] || eff.kind)}</span>
                 <button type="button" class="btn btn-sm btn-outline-danger ms-auto" data-action="delete" title="${esc(T.delete)}"><i class="bi bi-trash"></i></button>
             </div>
+            ${row.warning ? `<div class="alert alert-warning small py-1 px-2 mb-2">${esc(row.warning)}</div>` : ''}
             <div class="row g-2">
                 ${free ? `<div class="col-sm-6 col-xl-3"><label class="form-label small text-muted mb-0">${esc(T.category)}</label>
-                    <select class="form-select form-select-sm" data-field="category_id">${options(S.meta.categories, row.category_id, (c) => c.id, nameOf, true)}</select></div>` : ''}
+                    <select class="form-select form-select-sm" data-field="category_id">${options(categoriesForMode(), row.category_id, (c) => c.id, nameOf, true)}</select></div>` : ''}
                 ${free && !hideRouting ? `<div class="col-sm-6 col-xl-3"><label class="form-label small text-muted mb-0">${esc(T.kind)}</label>
                     <select class="form-select form-select-sm" data-field="kind" ${eff.kindLocked ? `disabled title="${esc(T.from_category)}"` : ''}>${options(KINDS, eff.kind, (k) => k, (k) => T.kinds[k], false)}</select></div>` : ''}
                 ${!hideRouting ? `<div class="col-sm-6 col-xl-3"><label class="form-label small text-muted mb-0">${esc(T.risk)}</label>
@@ -533,17 +608,24 @@
         S.rows = S.rows.filter((r) => r !== row);
         renderRows();
         // Never race a running upsert that still carries this row's id: delete after it.
-        const done = (S.savePromise || Promise.resolve()).catch(() => {}).then(() => removeServerIds(row));
-        S.pendingDeletes.push(done);
+        S.pendingDeletes.push((S.savePromise || Promise.resolve()).catch(() => {}).then(() => removeServerIds(row)));
     }
 
-    /** DELETE /observations/{id} for every visit the row was saved to (draft only). */
+    /**
+     * DELETE /observations/{id} for every visit the row was saved to (draft only). An id is forgotten only once its
+     * DELETE succeeded (404 = already gone); a row that could not be deleted stays in S.ghosts and blocks submit.
+     */
     async function removeServerIds(row) {
-        const ids = Object.values(row.ids);
-        row.ids = {};
-        for (const id of ids) {
-            try { await api('DELETE', `/observations/${id}`); } catch (e) { showAlert(e.message); }
+        for (const [visitId, id] of Object.entries(row.ids)) {
+            try {
+                await api('DELETE', `/observations/${id}`);
+                delete row.ids[visitId];
+            } catch (e) {
+                if (e.status === 404) delete row.ids[visitId];
+                else showAlert(`${T.delete_failed} ${e.message}`);
+            }
         }
+        if (Object.keys(row.ids).length) S.ghosts.add(row); else S.ghosts.delete(row);
     }
 
     async function uploadPhotos(row, files) {
@@ -624,14 +706,11 @@
         if (row.ids[visit.id]) item.id = row.ids[visit.id];
 
         if (allMode()) {
-            // No branch -> no ticket: every row is an activity. A catalog item / category would impose its own kind
-            // (spec 7 precedence), so it is only sent when its kind already is "activity".
+            // No branch -> no ticket: every row is an activity. The picker only offers activity items / categories
+            // (stripNonActivity removes any other link visibly), so the server keeps kind=activity by precedence.
             item.kind = 'activity';
-            const ownKind = eff.item?.kind ?? eff.category?.default_kind ?? null;
-            if (ownKind === 'activity') {
-                if (eff.item) item.catalog_item_id = eff.item.id; else item.category_id = eff.category.id;
-            }
-            if (!item.description) item.description = labelOf(eff.item) || null;
+            if (row.catalog_item_id) item.catalog_item_id = row.catalog_item_id;
+            else if (row.category_id) item.category_id = row.category_id;
         } else {
             item.kind = eff.kind;
             if (row.catalog_item_id) item.catalog_item_id = row.catalog_item_id;
@@ -655,6 +734,8 @@
 
     function scheduleSave() {
         if (!S.visits.length || S.done) return;
+        S.dirty = true;
+        S.editSeq += 1;
         clearTimeout(S.saveTimer);
         S.saveTimer = setTimeout(() => { S.saveTimer = null; saveAll(); }, 800);
     }
@@ -662,23 +743,50 @@
     /** Serialised: a change during a running save triggers exactly one more save after it. Resolves true when clean. */
     function saveAll() {
         if (S.savePromise) { S.savePending = true; return S.savePromise; }
+        clearTimeout(S.retryTimer);
+        S.retryTimer = null;
         S.savePromise = (async () => {
-            let ok;
+            let result;
+            let seq;
             setIndicator('saving');
             do {
                 S.savePending = false;
-                ok = await saveOnce();
+                seq = S.editSeq;
+                result = await saveOnce();
             } while (S.savePending);
-            setIndicator(ok ? 'saved' : 'failed');
-            return ok;
+            if (result.ok) {
+                S.retryStep = 0;
+                if (S.editSeq === seq) S.dirty = false; // an edit made during the save keeps it dirty (its timer saves it)
+            } else if (result.transient && S.dirty) {
+                scheduleRetry();
+            }
+            setIndicator(result.ok ? 'saved' : (result.transient ? 'retrying' : 'failed'));
+            return result.ok;
         })().finally(() => { S.savePromise = null; });
         return S.savePromise;
     }
 
+    /** Network / 5xx failures retry on their own while there are unsaved edits: 2 s, 5 s, then every 15 s. */
+    function scheduleRetry() {
+        const delay = [2000, 5000, 15000][Math.min(S.retryStep, 2)];
+        S.retryStep += 1;
+        clearTimeout(S.retryTimer);
+        S.retryTimer = setTimeout(() => { S.retryTimer = null; if (S.dirty && !S.done) saveAll(); }, delay);
+    }
+
+    /** @returns {{ok: boolean, transient: boolean}} transient = worth retrying on its own (network / 5xx). */
     async function saveOnce() {
-        const rows = S.rows.filter(isValid);
-        if (!rows.length) return true;
         let ok = true;
+        let transient = false;
+        if (S.targets.some((t) => !t.visit) && !(await ensureVisits())) {
+            ok = false; // the missing visits stay listed in the visit status until created
+            transient = S.targets.some((t) => !t.visit && t.transient);
+        }
+
+        // A row already on the server is always sent, even emptied: the server's 422 then shows on the row
+        // instead of the old text silently staying (and being submitted).
+        const rows = S.rows.filter((r) => isValid(r) || Object.keys(r.ids).length);
+        if (!rows.length) return { ok, transient };
         const errors = new Map(rows.map((r) => [r, {}]));
 
         for (const visit of S.visits.filter((v) => !v.submitted)) {
@@ -687,7 +795,7 @@
                 res.data.forEach((o, i) => { rows[i].ids[visit.id] = o.id; });
             } catch (e) {
                 ok = false;
-                if (e.status !== 422) { showAlert(e.message); break; }
+                if (e.status !== 422) { transient = isTransient(e); showAlert(e.message); break; }
                 collectErrors(e.errors, (i) => rows[i], errors);
             }
         }
@@ -696,11 +804,10 @@
             const uploadError = r.errors.photos; // set by uploadPhotos, cleared by its next success
             r.errors = errors.get(r);
             if (uploadError && !r.errors.photos) r.errors.photos = uploadError;
-            if (r.removed) removeServerIds(r); // deleted while this save was running
-            else renderRowErrors(r);
+            renderRowErrors(r); // a row deleted meanwhile is gone from the page; deleteRow deletes it after this save
         });
-        if (ok) showAlert('');
-        return ok;
+        if (ok && !S.ghosts.size) showAlert('');
+        return { ok, transient };
     }
 
     /** `items.{i}.field` -> the row at position i; anything else goes to the page alert. */
@@ -721,7 +828,12 @@
         if (!(await ensureVisits())) return;
         clearTimeout(S.saveTimer);
         S.saveTimer = null;
+        // Every delete must have reached the server: a row still there would be submitted (and shift the error index).
         await Promise.all(S.pendingDeletes);
+        S.pendingDeletes = [];
+        for (const ghost of Array.from(S.ghosts)) await removeServerIds(ghost);
+        if (S.ghosts.size) { showAlert(T.delete_blocked); return; }
+        // Pre-check: every visit must save cleanly before any is submitted.
         if (!(await saveAll())) { showAlert(T.fix_errors); return; }
         if (!window.confirm(T.confirm_submit)) return;
 
@@ -729,20 +841,30 @@
         const label = btn.innerHTML;
         btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${esc(T.submitting)}`;
         let failed = false;
+        // Sequential, stopping at the first failure: the rows are the same on every visit, so a 422 on one would
+        // repeat on the next, and the visits never drift apart silently (the per-visit status shows where each is).
         for (const visit of S.visits.filter((v) => !v.submitted)) {
+            const target = S.targets.find((t) => t.visit === visit);
             try {
                 visit.result = await api('POST', `/observation-visits/${visit.id}/submit`);
                 visit.submitted = true;
+                target.error = '';
             } catch (e) {
                 failed = true;
-                if (e.status !== 422) { showAlert(e.message); break; }
-                // Submit errors use the row's position in the visit's observations ordered by id.
-                const ordered = S.rows.filter((r) => r.ids[visit.id]).sort((a, b) => a.ids[visit.id] - b.ids[visit.id]);
-                const errors = new Map(S.rows.map((r) => [r, r.errors]));
-                collectErrors(e.errors, (i) => ordered[i], errors);
-                S.rows.forEach(renderRowErrors);
+                target.error = e.status === 422 ? T.fix_errors : e.message;
+                if (e.status === 422) {
+                    // Submit errors use the row's position in the visit's observations ordered by id.
+                    const ordered = S.rows.filter((r) => r.ids[visit.id]).sort((a, b) => a.ids[visit.id] - b.ids[visit.id]);
+                    const errors = new Map(S.rows.map((r) => [r, r.errors]));
+                    collectErrors(e.errors, (i) => ordered[i], errors);
+                    S.rows.forEach(renderRowErrors);
+                } else {
+                    showAlert(e.message);
+                }
+                break;
             }
         }
+        renderVisitStatus();
         btn.disabled = false;
         btn.innerHTML = label;
 
@@ -793,7 +915,7 @@
         wireRows();
         $('#obs-submit').addEventListener('click', submitVisit);
         window.addEventListener('beforeunload', (e) => {
-            if (!S.done && (S.saveTimer || S.savePromise)) { e.preventDefault(); e.returnValue = ''; }
+            if (!S.done && (S.dirty || S.saveTimer || S.savePromise || S.ghosts.size)) { e.preventDefault(); e.returnValue = ''; }
         });
     });
 })();

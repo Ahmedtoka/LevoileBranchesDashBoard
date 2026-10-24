@@ -51,6 +51,7 @@
         <div id="obs-all-branches-note" class="alert alert-warning small mt-3 mb-0 d-none">
             <i class="bi bi-info-circle"></i> {{ dt('بدون فرع لا يمكن فتح تيكتات — تُسجَّل كأنشطة', 'Without a branch no ticket can be opened — rows are recorded as activities') }}
         </div>
+        <div id="obs-visit-status" class="mt-3 d-none" aria-live="polite"></div>
     </div>
 
     <div class="row g-3 mb-3">
@@ -109,6 +110,15 @@
     'saving' => dt('جارٍ الحفظ…', 'Saving…'),
     'saved' => dt('تم الحفظ', 'Saved'),
     'save_failed' => dt('تعذر الحفظ — راجع الأخطاء', 'Could not save — check the errors'),
+    'save_retrying' => dt('تعذر الحفظ — جارٍ إعادة المحاولة…', 'Could not save — retrying…'),
+    'visits_missing' => dt('لم تُنشأ كل الزيارات بعد، ستُعاد المحاولة مع الإضافة أو الحفظ التالي.', 'Not every visit was created yet; it is retried with the next add or save.'),
+    'not_created' => dt('لم تُنشأ', 'Not created'),
+    'draft' => dt('مسودة', 'Draft'),
+    'submitted_status' => dt('تم الإرسال', 'Submitted'),
+    'partial_submit' => dt('بعض الزيارات أُرسلت وبعضها لا يزال مسودة — التعديلات تُحفظ على المسودات فقط. صحّح ثم أعد الإرسال لإكمالها.', 'Some visits were submitted, others are still drafts — edits only reach the drafts. Fix and submit again to finish them.'),
+    'delete_failed' => dt('تعذر حذف ملاحظة من الخادم:', 'Could not delete an observation on the server:'),
+    'delete_blocked' => dt('ملاحظة محذوفة لم تُحذف من الخادم بعد — لا يمكن الإرسال قبل حذفها. أعد المحاولة.', 'A deleted observation is still on the server — the visit cannot be submitted until it is removed. Try again.'),
+    'link_removed' => dt('أُزيل ربط البند/الفئة لأنه ليس نشاطاً — بدون فرع تُسجَّل الملاحظة كنشاط.', 'The item/category link was removed because it is not an activity — without a branch the row is recorded as an activity.'),
     'network' => dt('تعذر الاتصال بالخادم.', 'Could not reach the server.'),
     'session_expired' => dt('انتهت الجلسة، أعد تحميل الصفحة.', 'The session expired, reload the page.'),
     'no_items' => dt('لا توجد بنود.', 'No items.'),
