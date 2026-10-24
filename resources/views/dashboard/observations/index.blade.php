@@ -10,7 +10,10 @@
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
     <h4 class="fw-bold mb-0">{{ dt('الملاحظات', 'Observations') }}</h4>
     <span class="badge text-bg-light border">{{ $observations->total() }}</span>
-    <a href="{{ route('observations.beforeAfter') }}" class="btn btn-sm btn-outline-primary ms-auto">
+    <a href="{{ route('observations.dashboard', array_intersect_key($qs, array_flip(array_merge(['range', 'from', 'to'], \App\Support\ObservationMetrics::FILTER_KEYS)))) }}" class="btn btn-sm btn-outline-primary ms-auto">
+        <i class="bi bi-speedometer2"></i> {{ dt('الداشبورد', 'Dashboard') }}
+    </a>
+    <a href="{{ route('observations.beforeAfter') }}" class="btn btn-sm btn-outline-primary">
         <i class="bi bi-images"></i> {{ dt('كنا وبقينا', 'Before & after') }}
     </a>
     <a href="{{ route('observations.export', $qs) }}" class="btn btn-sm btn-outline-success">

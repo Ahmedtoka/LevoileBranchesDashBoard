@@ -65,11 +65,7 @@ class Observation extends Model
     {
         return $q->where('kind', 'issue')
             ->whereIn('status', ['open', 'in_progress', 'reopened'])
-            ->whereHas('ticket', function ($t) {
-                $t->whereNotNull('due_at')
-                    ->where('due_at', '<', now())
-                    ->whereNotIn('status', ['closed', 'waiting_approval']);
-            });
+            ->whereHas('ticket', fn (Builder $t) => $t->overdue());
     }
 
     public function visit(): BelongsTo

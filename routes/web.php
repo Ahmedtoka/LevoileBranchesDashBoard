@@ -109,6 +109,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/observations', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'index'])->name('observations.index');
     Route::get('/observations/export.csv', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'export'])->name('observations.export');
     Route::get('/observations/new', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'create'])->name('observations.create');
+    Route::get('/observations/dashboard', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'dashboard'])->name('observations.dashboard');
     Route::get('/observations/before-after', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'beforeAfter'])->name('observations.beforeAfter');
     Route::get('/observations/{observation}', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'show'])->whereNumber('observation')->name('observations.show');
     Route::post('/observations/{observation}/reroute', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'reroute'])->whereNumber('observation')->name('observations.reroute');

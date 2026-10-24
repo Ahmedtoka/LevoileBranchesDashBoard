@@ -18,8 +18,10 @@ use App\Models\RiskLevel;
 use App\Models\User;
 use App\Services\Observations\ObservationService;
 use App\Support\ClassificationPresenter;
+use App\Support\DateRange;
 use App\Support\ObservationFilters;
 use App\Support\ObservationLabels;
+use App\Support\ObservationMetrics;
 use App\Support\ObservationScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -47,24 +49,55 @@ class ObservationController extends Controller
         $filters = ObservationFilters::fromRequest($request);
         $user = $request->user();
 
-        // Area / store managers only get their own branches (and those branches' areas) in the dropdowns.
-        $branchIds = $user->scopedBranchIds();
-        $branches = Branch::where('active', true)->when($branchIds !== null, fn ($q) => $q->whereIn('id', $branchIds));
-        $areas = Area::where('active', true)->when($branchIds !== null, fn ($q) => $q->whereIn('id', Branch::whereIn('id', $branchIds)->whereNotNull('area_id')->select('area_id')));
-
         return view('dashboard.observations.index', [
             'observations' => $this->query($filters, $user)->paginate(30)->withQueryString(),
             'filters' => $filters,
             'range' => $filters->range,
-            'reportingDepartments' => Department::where('is_reporting', true)->orderBy('name')->get(),
-            'departments' => Department::orderBy('name')->get(),
-            'areas' => $areas->orderBy('sort_order')->orderBy('name')->get(),
-            'branches' => $branches->orderBy('branch_name')->get(),
             'categories' => ObservationCategory::where('active', true)
                 ->when($filters->get('reporting_department_id'), fn ($q, $id) => $q->where('department_id', $id))
                 ->orderBy('sort_order')->orderBy('id')->get(),
             'riskLevels' => RiskLevel::where('active', true)->orderBy('sort_order')->get(),
-        ]);
+        ] + $this->filterOptions($user));
+    }
+
+    /**
+     * GET /observations/dashboard (spec 12): KPI tiles, departments table, risk chart, repeated branches,
+     * overdue list and the week comparison, all from ObservationMetrics over the user's scope.
+     */
+    public function dashboard(Request $request)
+    {
+        Gate::authorize('viewAny', Observation::class);
+
+        $user = $request->user();
+        $range = DateRange::fromRequest($request);
+        $filters = ObservationFilters::fromRequest($request);
+        // Only the range and the dashboard's own filters count here and travel back to the register on every link.
+        $qs = array_intersect_key($filters->toQueryString(), array_flip(array_merge(['range', 'from', 'to'], ObservationMetrics::FILTER_KEYS)));
+
+        return view('dashboard.observations.dashboard', [
+            'metrics' => ObservationMetrics::for($user, $range, $qs),
+            'overdue' => ObservationMetrics::overdueTickets($user, $range, $qs),
+            'weeks' => ObservationMetrics::weekWindows($range),
+            'qs' => $qs,
+            'filters' => $filters,
+            'range' => $range,
+            'riskLevels' => RiskLevel::where('active', true)->orderBy('sort_order')->get(),
+        ] + $this->filterOptions($user));
+    }
+
+    /** Filter dropdowns shared by the register and the dashboard; area / store managers only get their own branches (and their areas). */
+    private function filterOptions(User $user): array
+    {
+        $branchIds = $user->scopedBranchIds();
+        $branches = Branch::where('active', true)->when($branchIds !== null, fn ($q) => $q->whereIn('id', $branchIds));
+        $areas = Area::where('active', true)->when($branchIds !== null, fn ($q) => $q->whereIn('id', Branch::whereIn('id', $branchIds)->whereNotNull('area_id')->select('area_id')));
+
+        return [
+            'reportingDepartments' => Department::where('is_reporting', true)->orderBy('name')->get(),
+            'departments' => Department::orderBy('name')->get(),
+            'areas' => $areas->orderBy('sort_order')->orderBy('name')->get(),
+            'branches' => $branches->orderBy('branch_name')->get(),
+        ];
     }
 
     public function export(Request $request): StreamedResponse

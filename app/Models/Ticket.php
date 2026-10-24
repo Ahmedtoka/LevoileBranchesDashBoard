@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -124,6 +125,14 @@ class Ticket extends Model
     public function updates(): HasMany
     {
         return $this->hasMany(TicketUpdate::class)->latest();
+    }
+
+    /** SQL twin of isOverdue(): past due_at and not closed / waiting approval. The one overdue condition for queries. */
+    public function scopeOverdue(Builder $q): Builder
+    {
+        return $q->whereNotNull($q->qualifyColumn('due_at'))
+            ->where($q->qualifyColumn('due_at'), '<', now())
+            ->whereNotIn($q->qualifyColumn('status'), ['closed', 'waiting_approval']);
     }
 
     public function isOverdue(): bool
