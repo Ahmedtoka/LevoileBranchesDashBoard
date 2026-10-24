@@ -534,3 +534,44 @@ Dates: `visit_date` and `event_date` are `YYYY-MM-DD`. Every other timestamp is 
 - `items.*.description` is `required_without:items.*.catalog_item_id`.
 - `submit` has a (rule-less) `SubmitObservationVisitRequest`; `DELETE` has no FormRequest.
 - `ai-check` always returns HTTP 200 with `status` ok|failed|skipped and `message` (Arabic) for non-ok; `ai_classifications` token counts are stored on the first row of the batch only.
+
+## Admin web as built (filled in by the Plan C session at hand-off)
+
+> Branch `feat/observations-admin-web`, tasks 1–6. Tests: 126 passed (1436 assertions) with `php artisan test`. Controllers live in `App\Http\Controllers\Web\Observations\`, FormRequests in `App\Http\Requests\Observations\`, views under `resources/views/dashboard/observations/{areas,risk-levels,categories,catalog,review}/`.
+
+### Routes (all in `routes/observations-admin.php`, required once from the `auth` group of `routes/web.php`)
+
+| Method | Path | Name | Policy |
+|---|---|---|---|
+| GET / POST | `/admin/areas` | `obs.areas.index` / `.store` | `manageAreas` |
+| PUT / DELETE | `/admin/areas/{area}` | `obs.areas.update` / `.destroy` | `manageAreas` |
+| POST | `/admin/areas/{area}/branches` (`branch_ids[]` = the full list) | `obs.areas.branches` | `manageAreas` |
+| GET | `/admin/risk-levels` | `obs.risk.index` | `manageRiskLevels` |
+| PUT | `/admin/risk-levels/{riskLevel}` | `obs.risk.update` | `manageRiskLevels` |
+| GET / POST | `/admin/observation-categories` (`?department_id=`) | `obs.categories.index` / `.store` | `manageCategory` |
+| POST | `/admin/observation-categories/reorder` (`ids[]`) | `obs.categories.reorder` | `manageCategory` per row |
+| PUT / DELETE | `/admin/observation-categories/{category}` | `obs.categories.update` / `.destroy` | `manageCategory` |
+| GET / POST | `/admin/observation-catalog` (`?department_id=&category_id=&q=`) | `obs.catalog.index` / `.store` | `manageCategory` |
+| PUT / DELETE | `/admin/observation-catalog/{item}` | `obs.catalog.update` / `.destroy` | `manageCategory` |
+| POST | `/admin/observation-catalog/{item}/toggle` | `obs.catalog.toggle` | `manageCategory` |
+| GET | `/observations/review` (`?department_id=`) | `obs.review.index` | super_admin or manager of a reporting department |
+| PUT | `/observations/review/{observation}` | `obs.review.update` | `review` |
+| POST | `/observations/review/{observation}/approve` / `merge` / `promote` | `obs.review.approve` / `.merge` / `.promote` | `review` (+ `manageCategory` for promote) |
+| POST | `/observations/review/bulk-merge` (`observation_ids[]`, `catalog_item_id`) | `obs.review.bulk` | `review` per row |
+
+Sidebar: one `@include('dashboard.observations.partials.admin-nav')` in `layouts/app.blade.php` (before Purchasing). The partial shows "إعدادات الملاحظات" to super_admin and managers of reporting departments; areas and risk levels to super_admin only. Operational links (`/observations`, dashboard, before-after) are Plan D's.
+
+### Behaviour decisions
+
+- **Areas.** Saving an area or its branches re-syncs `branch_user` for every affected manager (previous and new manager, and managers of areas the branches left) to exactly the branches of the areas they manage (spec decision 13). A manager who no longer manages any area ends with no `branch_user` rows. Deleting an area is refused while it has branches. **Deactivating an area** only hides it from pickers (API `meta.areas` lists active ones); its branches keep `area_id` and the area manager's scope is unchanged.
+- **Risk levels.** Only `name_ar, name_en, color, default_sla_hours (>= 1 or empty = no deadline), requires_field_verification, active` are written; `slug`, `sort_order`, `ticket_priority` are ignored even if posted.
+- **Categories.** `slug` = `Str::slug(name_en, '_')`, unique per department, immutable after create. The department of an existing category never changes. Destroy is refused (flash) when the category has items or observations. Empty cc is stored as NULL.
+- **Catalog items.** `code` is upper-cased, `^[A-Z0-9][A-Z0-9_\-]*$`, unique, editable. `extra_fields` rows are stored as `{key, label_ar, label_en, type, options|null, required}`; `escalation_rules` rows as `{field, gte|lte|eq: value, risk}` (RiskResolver's shape; integral values stored as int). Destroy is refused when `usage_count > 0` or an observation references the item; `toggle` flips `active`. A manager may not move an item into another department's category.
+- **Review queue.** `App\Services\Observations\ClassificationReviewService` (`approve`, `update`, `merge`, `promote`, static `snapshot`). Every decision writes `admin_final` (same keys as `employee_final`) on `Observation::classification()` (the latest row), sets `classification_reviewed_by/at`, and `classification_status` = `ai_reviewed` (approve/update) or `catalog` (merge/promote). Responsible-department changes go through `ObservationService::reroute` (note prefixed `إعادة توجيه من مراجعة التصنيف`); raising the risk goes through `ObservationService::raiseRisk`; **lowering** the risk is done in the review service (priority + SLA + `priority` log row), since ObservationService only raises. Closed tickets are left alone. `kind` is never changed by the review. Merge increments `usage_count` only when the observation was not already linked to that item; a category/item of another department is a 422 on `category_id` / `catalog_item_id`. Promote creates the item (no extra fields / rules; add them from the catalog screen) then merges.
+
+### Hazards for Plan D / G
+
+- `TranslationSeeder` got a block of `obs.*` rows (group `obs`) appended at the end of `$rows`; Plan D adding rows at the same place will conflict trivially. Dynamic keys `obs.kind.{issue|activity|assessment|positive}` are seeded.
+- The web pages assume `ObservationSetupSeeder` has run (risk levels / categories); the screens show an empty-state hint otherwise.
+- Blade `@json(...)` breaks on any comma inside the expression; the views precompute arrays in `@php` blocks first.
+- No browser smoke test was run in this session (feature tests assert 200 on every index page).

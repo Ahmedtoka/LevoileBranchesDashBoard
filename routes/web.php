@@ -124,4 +124,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/sections/{section}/questions', [TemplateController::class, 'storeQuestion'])->name('questions.store');
     Route::put('/questions/{question}', [TemplateController::class, 'updateQuestion'])->name('questions.update');
     Route::delete('/questions/{question}', [TemplateController::class, 'destroyQuestion'])->name('questions.destroy');
+
+    require __DIR__.'/observations-admin.php';
 });
