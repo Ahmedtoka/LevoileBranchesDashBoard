@@ -192,6 +192,15 @@ class DemoDataController extends Controller
             }
         });
 
+        // The observations demo creates known-password demo accounts and adjusts the demo branches' managers
+        // and area: only on an environment that runs the demo logins (DEMO_LOGIN), never on a real one.
+        if (! config('app.demo_login')) {
+            return back()->with('status', dt(
+                "تم توليد ديمو حقيقي — {$visits} شيك ليست و{$created} تذكرة موزّعة على الإدارات. لم يتم توليد مستخدمي/بيانات الملاحظات التجريبية لأن DEMO_LOGIN غير مفعّل.",
+                "Demo generated: {$visits} checklists and {$created} tickets across departments. The demo observation users/data were not generated because DEMO_LOGIN is off."
+            ));
+        }
+
         // Observations & Risk module through the real services. The seeder owns its preparation: demo
         // users, and the module setup only when it is missing (so a wipe never leaves the catalog empty
         // and the owner's catalog edits are never reset).

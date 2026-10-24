@@ -3,7 +3,10 @@
 namespace App\Support;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * The observations register filter set (spec section 10). One object builds the query for the
@@ -21,6 +24,15 @@ class ObservationFilters
         'kind' => 'kind',
         'classification_status' => 'classification_status',
     ];
+
+    /** The observations screens' own extra preset (not in the shared DateRange::$presets): no date bound at all. */
+    public const ALL = 'all';
+
+    /**
+     * The observation's date: event_date, or its visit's date when the row is undated (imported rows).
+     * The register, the CSV and every dashboard number filter and sort on this one expression.
+     */
+    public const DATE_SQL = 'COALESCE(observations.event_date, (SELECT ov.visit_date FROM observation_visits ov WHERE ov.id = observations.observation_visit_id))';
 
     public DateRange $range;
 
@@ -49,7 +61,28 @@ class ObservationFilters
             unset($values['outside_catalog']);
         }
 
-        return new self(DateRange::fromRequest($request), $values);
+        return new self(self::rangeFromRequest($request), $values);
+    }
+
+    /** DateRange::fromRequest plus the `range=all` preset (key `all`, never applied as a bound). */
+    public static function rangeFromRequest(Request $request): DateRange
+    {
+        if ($request->query('range') !== self::ALL) {
+            return DateRange::fromRequest($request);
+        }
+
+        $range = new DateRange;
+        $range->key = self::ALL;
+        $range->label = 'All dates';
+        $range->to = Carbon::now()->endOfDay();
+        $range->from = Carbon::create(2000, 1, 1)->startOfDay(); // for display / week windows only
+
+        return $range;
+    }
+
+    public static function isAll(DateRange $range): bool
+    {
+        return $range->key === self::ALL;
     }
 
     public function get(string $key): ?string
@@ -59,14 +92,23 @@ class ObservationFilters
 
     public function apply(Builder $query): Builder
     {
-        $this->range->apply($query, $query->qualifyColumn('event_date'));
+        if (! self::isAll($this->range)) {
+            // Undated rows fall on their visit's date (DATE_SQL), so they are never silently dropped.
+            $query->whereRaw(self::DATE_SQL.' BETWEEN ? AND ?', [$this->range->from, $this->range->to]);
+        }
 
         return $this->applyWithoutRange($query);
     }
 
-    /** Every filter except the date range (for "now" states such as overdue that no period bounds). */
+    /**
+     * Every filter except the date range (for "now" states such as overdue that no period bounds).
+     * Also the base scope of every consumer: observations of a draft visit are never listed or counted
+     * (they are still being written, and the author's next autosave would undo any admin action on them).
+     */
     public function applyWithoutRange(Builder $query): Builder
     {
+        $query->whereIn($query->qualifyColumn('observation_visit_id'), self::submittedVisitIds());
+
         foreach (self::COLUMNS as $key => $column) {
             if (isset($this->values[$key])) {
                 $query->where($query->qualifyColumn($column), $this->values[$key]);
@@ -95,6 +137,12 @@ class ObservationFilters
         }
 
         return $query;
+    }
+
+    /** Ids of the submitted visits, as a subquery (the draft exclusion of applyWithoutRange). */
+    public static function submittedVisitIds(): QueryBuilder
+    {
+        return DB::table('observation_visits')->where('observation_visits.status', 'submitted')->select('observation_visits.id');
     }
 
     /** Only the active filters (plus the date range), ready for route('observations.index', ...). */

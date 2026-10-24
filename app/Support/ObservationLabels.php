@@ -78,4 +78,19 @@ class ObservationLabels
             default => $kind,
         };
     }
+
+    /**
+     * Public URL of a photo / evidence path on the public disk, or null when the path is not a plain relative
+     * storage path (an absolute URL, a protocol-relative or scheme-bearing value, or one that climbs out with `..`).
+     * Observation photo paths come from clients, so the pages never echo an absolute value as a link or image.
+     */
+    public static function storageUrl(?string $path): ?string
+    {
+        $path = trim((string) $path);
+        if ($path === '' || str_starts_with($path, '/') || str_starts_with($path, '\\') || str_contains($path, ':') || str_contains($path, '..')) {
+            return null;
+        }
+
+        return asset('storage/'.$path);
+    }
 }

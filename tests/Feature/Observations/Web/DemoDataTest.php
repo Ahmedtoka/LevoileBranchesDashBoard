@@ -32,6 +32,8 @@ class DemoDataTest extends TestCase
         parent::setUp();
 
         Storage::fake('public');
+        // The observations demo runs only where the demo logins are on.
+        config(['app.demo_login' => true]);
         // Never call the real classifier from a test.
         $this->app->instance(ClassifierContract::class, new NullClassifier);
 
@@ -195,5 +197,49 @@ class DemoDataTest extends TestCase
             ->assertSee('demoGenerateModal')
             ->assertSee('demoWipeModal')
             ->assertDontSee('return confirm(', false);
+    }
+
+    public function test_generate_without_demo_login_creates_no_observations_or_demo_users(): void
+    {
+        config(['app.demo_login' => false]);
+        $users = User::count();
+
+        $this->actingAs($this->admin)->from('/dashboard')->post(route('demo.generate'))
+            ->assertRedirect('/dashboard')
+            ->assertSessionHas('status', fn (string $status) => str_contains($status, 'DEMO_LOGIN'));
+
+        $this->assertSame(0, Observation::count());
+        $this->assertSame(0, ObservationVisit::count());
+        $this->assertSame($users, User::count());
+        $this->assertSame(0, User::where('email', 'like', '%@levoile.test')->count());
+    }
+
+    public function test_imported_rows_survive_generate(): void
+    {
+        $cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $branch = Seeds::branch('Imported Branch', ['active' => true]);
+        $importer = Seeds::user('super_admin', ['active' => false]);
+        $visit = ObservationVisit::create([
+            'type' => 'field', 'department_id' => $cctv->id, 'branch_id' => $branch->id, 'user_id' => $importer->id,
+            'visit_date' => now()->subDays(30)->toDateString(), 'status' => 'submitted', 'source' => 'import',
+        ]);
+        $imported = Observation::create([
+            'observation_visit_id' => $visit->id, 'branch_id' => $branch->id, 'reporting_department_id' => $cctv->id,
+            'kind' => 'issue', 'title' => 'Imported', 'description' => 'Imported row', 'event_date' => null,
+            'created_by' => $importer->id, 'status' => 'open', 'classification_status' => 'manual',
+            'import_source' => 'levoile_control_center_oct2026.xlsx', 'import_row' => 7,
+        ]);
+        $ticket = Ticket::create([
+            'reference' => 'TK-IMP01', 'title' => 'Imported ticket', 'branch_id' => $branch->id, 'department_id' => $cctv->id,
+            'status' => 'open', 'source' => 'observation', 'observation_id' => $imported->id,
+        ]);
+        $imported->update(['ticket_id' => $ticket->id]);
+
+        $this->generate();
+        $this->generate();
+
+        $this->assertTrue(Observation::whereKey($imported->id)->where('ticket_id', $ticket->id)->exists());
+        $this->assertTrue(Ticket::whereKey($ticket->id)->exists());
+        $this->assertTrue(ObservationVisit::whereKey($visit->id)->exists());
     }
 }

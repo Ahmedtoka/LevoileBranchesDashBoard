@@ -11,6 +11,7 @@ use App\Models\ObservationVisit;
 use App\Models\RiskLevel;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Support\DateRange;
 use App\Support\ObservationFilters;
 use Illuminate\Http\Request;
 use Tests\Support\Seeds;
@@ -36,16 +37,17 @@ class RegisterTest extends TestCase
         $this->low = RiskLevel::create(['slug' => 'low', 'name_ar' => 'منخفض', 'name_en' => 'Low', 'color' => '#16a34a', 'sort_order' => 4]);
     }
 
-    private function observation(Branch $branch, array $attrs = []): Observation
+    private function observation(Branch $branch, array $attrs = [], array $visitAttrs = []): Observation
     {
-        $visit = ObservationVisit::create([
+        $visit = ObservationVisit::create(array_merge([
             'type' => 'field',
             'department_id' => $this->cctv->id,
             'branch_id' => $branch->id,
             'user_id' => $this->creator->id,
             'visit_date' => now()->toDateString(),
+            'status' => 'submitted',
             'source' => 'web',
-        ]);
+        ], $visitAttrs));
 
         return Observation::create(array_merge([
             'observation_visit_id' => $visit->id,
@@ -306,5 +308,74 @@ class RegisterTest extends TestCase
         $this->assertContains("'-5 degrees", $titles);
         $this->assertContains('Safe title', $titles);
         $this->assertSame('\'=HYPERLINK("http://x")', $rows[1][2]);
+    }
+
+    public function test_undated_observation_falls_on_its_visit_date(): void
+    {
+        $branch = Seeds::branch('Heliopolis');
+        $this->observation($branch, ['title' => 'Dated today']);
+        $this->observation($branch, ['title' => 'Undated in week', 'event_date' => null], ['visit_date' => now()->subDays(3)->toDateString()]);
+        $this->observation($branch, ['title' => 'Dated 5 days', 'event_date' => now()->subDays(5)->toDateString()]);
+        $this->observation($branch, ['title' => 'Undated old', 'event_date' => null], ['visit_date' => now()->subDays(20)->toDateString()]);
+        $admin = Seeds::user('super_admin');
+
+        $page = $this->actingAs($admin)->get(route('observations.index'))->assertOk()
+            ->assertSee('Undated in week')->assertSee('تاريخ غير مؤكد')
+            ->assertSee(now()->subDays(3)->toDateString())
+            ->assertDontSee('Undated old');
+        // Newest first by the same date: the undated row sits on its visit's date.
+        $this->assertSame(['Dated today', 'Undated in week', 'Dated 5 days'], $page->viewData('observations')->pluck('title')->all());
+
+        $this->assertSame(['Dated 5 days', 'Dated today', 'Undated in week', 'Undated old'], $this->titles($admin, ['range' => 'month']));
+
+        $rows = $this->csvRows($this->actingAs($admin)->get(route('observations.export'))->streamedContent());
+        $this->assertCount(1 + 3, $rows);
+        $undated = collect($rows)->firstWhere(5, 'Undated in week');
+        $this->assertNotNull($undated);
+        $this->assertStringStartsWith(now()->subDays(3)->toDateString(), $undated[1]);
+
+        // The detail page shows the visit date as unconfirmed too.
+        $obs = Observation::where('title', 'Undated in week')->firstOrFail();
+        $this->actingAs($admin)->get(route('observations.show', $obs))->assertOk()
+            ->assertSee(now()->subDays(3)->toDateString())->assertSee('تاريخ غير مؤكد');
+    }
+
+    public function test_range_all_lists_every_date(): void
+    {
+        $branch = Seeds::branch('Heliopolis');
+        $old = now()->subYears(2)->toDateString();
+        $this->observation($branch, ['title' => 'Recent']);
+        $this->observation($branch, ['title' => 'Two years old', 'event_date' => $old], ['visit_date' => $old]);
+        $this->observation($branch, ['title' => 'Undated two years', 'event_date' => null], ['visit_date' => $old]);
+        $admin = Seeds::user('super_admin');
+
+        $this->assertSame(['Recent'], $this->titles($admin));
+        $this->assertSame(['Recent', 'Two years old', 'Undated two years'], $this->titles($admin, ['range' => 'all']));
+        $this->assertSame(['Recent', 'Two years old', 'Undated two years'], $this->titles($admin, ['range' => 'all', 'from' => '2026-01-01', 'to' => '2026-01-02']));
+
+        $res = $this->actingAs($admin)->get(route('observations.index', ['range' => 'all']))->assertOk()->assertSee('كل التواريخ');
+        $this->assertSame(['range' => 'all'], $res->viewData('filters')->toQueryString());
+
+        $rows = $this->csvRows($this->actingAs($admin)->get(route('observations.export', ['range' => 'all']))->streamedContent());
+        $this->assertCount(1 + 3, $rows);
+
+        // The shared presets of the other screens are untouched.
+        $this->assertArrayNotHasKey('all', DateRange::$presets);
+    }
+
+    public function test_draft_visit_rows_are_not_listed_or_exported(): void
+    {
+        $branch = Seeds::branch('Heliopolis');
+        $this->observation($branch, ['title' => 'Submitted row']);
+        $this->observation($branch, ['title' => 'Draft row'], ['status' => 'draft']);
+        $admin = Seeds::user('super_admin');
+
+        $this->actingAs($admin)->get(route('observations.index'))->assertOk()
+            ->assertSee('Submitted row')->assertDontSee('Draft row');
+        $this->assertSame(['Submitted row'], $this->titles($admin, ['range' => 'all']));
+
+        $body = $this->actingAs($admin)->get(route('observations.export', ['range' => 'all']))->streamedContent();
+        $this->assertStringContainsString('Submitted row', $body);
+        $this->assertStringNotContainsString('Draft row', $body);
     }
 }

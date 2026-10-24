@@ -4,7 +4,7 @@
  * (session cookie + X-CSRF-TOKEN). Server shapes: see README-observations.md "API contract".
  *
  * Sections: 1 state · 2 helpers · 3 api() · 4 visit setup · 5 catalog picker · 6 free text + AI check
- *           7 draft rows · 8 auto-save · 9 submit · 10 boot
+ *           7 draft rows · 8 auto-save · 9 submit · 10 draft continuation · 11 boot
  */
 (function () {
     'use strict';
@@ -847,7 +847,7 @@
         if (!(await saveAll())) { showAlert(T.fix_errors); return; }
         await drainDeletes(); // a row deleted during the pre-check save
         if (S.ghosts.size) { showAlert(T.delete_blocked); return; }
-        if (!window.confirm(T.confirm_submit)) return;
+        if (!(await confirmSubmit())) return;
 
         btn.disabled = true;
         const label = btn.innerHTML;
@@ -886,6 +886,31 @@
         renderSuccess();
     }
 
+    /**
+     * The submit confirmation: a Bootstrap modal (#obs-submit-modal) summarising the rows and the visits, never a
+     * browser dialog. Resolves true only when its confirm button is clicked; closing it any other way resolves false.
+     */
+    function confirmSubmit() {
+        const el = $('#obs-submit-modal');
+        const visits = S.visits.filter((v) => !v.submitted);
+        $('#obs-submit-summary').innerHTML = `
+            <p class="mb-2">${esc(T.confirm_submit)}</p>
+            <ul class="mb-0">
+                <li>${esc(T.summary_rows)}: <b>${S.rows.length}</b></li>
+                <li>${esc(T.summary_visits)}: <b>${visits.length}</b>
+                    <ul>${visits.map((v) => `<li>${esc(v.code)} · ${esc(v.branch_name || T.all_branches)}</li>`).join('')}</ul></li>
+            </ul>`;
+        const modal = window.bootstrap.Modal.getOrCreateInstance(el);
+        const ok = $('#obs-submit-confirm');
+        return new Promise((resolve) => {
+            let confirmed = false;
+            const onOk = () => { confirmed = true; modal.hide(); };
+            ok.addEventListener('click', onOk);
+            el.addEventListener('hidden.bs.modal', () => { ok.removeEventListener('click', onOk); resolve(confirmed); }, { once: true });
+            modal.show();
+        });
+    }
+
     function renderSuccess() {
         const u = CFG.urls;
         const blocks = S.visits.map((v) => {
@@ -915,18 +940,90 @@
         box.classList.remove('d-none');
     }
 
-    // ===================================================================== 10. Boot
+    // ===================================================================== 10. Draft continuation (spec 9.3)
+    /**
+     * ?visit={id} (CFG.resumeVisitId, owner + draft checked by the page): load the visit and its observations and
+     * continue it here, also a draft started on mobile. One target with that visit; rows keep their server ids,
+     * so the next auto-save updates them instead of creating copies. Submitted visits are never reopened.
+     */
+    async function resumeDraft(id) {
+        showAlert('');
+        setIndicator('');
+        $('#obs-visit-codes').textContent = T.resuming;
+        let res;
+        try {
+            res = await api('GET', `/observation-visits/${encodeURIComponent(id)}`);
+        } catch (e) {
+            showAlert(e.message);
+            return;
+        }
+        const v = res.visit;
+        if (v.status !== 'draft') { showAlert(T.resume_not_draft); return; }
+
+        const branchId = v.branch ? v.branch.id : null;
+        S.type = v.type === 'desk' ? 'desk' : 'field';
+        S.visitDate = v.visit_date || CFG.today;
+        if (S.type === 'field') {
+            S.branchId = branchId;
+        } else {
+            S.allBranches = branchId === null; // desk "all branches": branch_id null
+            S.branchIds = branchId === null ? [] : [branchId];
+        }
+        const departmentId = v.department ? Number(v.department.id) : S.departmentId;
+        if (departmentId && departmentId !== Number(S.meta.department_id)) {
+            try {
+                S.meta = await api('GET', `/observations/meta?department_id=${encodeURIComponent(departmentId)}`);
+            } catch (e) {
+                showAlert(e.message);
+                return;
+            }
+        }
+        S.departmentId = departmentId;
+
+        const visit = { id: v.id, code: v.code, branch_id: branchId, branch_name: v.branch?.name || null, submitted: false, result: null };
+        S.targets = [{ branch_id: branchId, branch_name: visit.branch_name, visit, error: '', transient: false }];
+        S.visits = [visit];
+        const plainObject = (x) => (x && typeof x === 'object' && !Array.isArray(x) ? x : {});
+        S.rows = (res.observations || []).map((o) => newRow({
+            source: o.catalog_item_id ? 'catalog' : 'free',
+            catalog_item_id: o.catalog_item_id || null,
+            category_id: o.catalog_item_id ? null : (o.category_id || null),
+            kind: o.kind,
+            risk_level_slug: o.risk?.slug || '',
+            risk_override_reason: o.risk_override_reason || '',
+            responsible_department_id: o.responsible_department?.id ?? null,
+            description: o.description || '',
+            product_or_area: o.product_or_area || '',
+            extra_values: plainObject(o.extra_values),
+            rating: o.rating || '',
+            photos: (o.photos || []).map((p) => ({ path: p.path, url: p.url })),
+            ids: { [v.id]: o.id },
+        }));
+
+        const radio = document.querySelector(`input[name="obs-type"][value="${S.type}"]`);
+        if (radio) radio.checked = true;
+        $('#obs-all-branches').checked = S.allBranches;
+        renderSetup();
+        lockSetup();
+        renderCatalog();
+        renderAi();
+        renderRows();
+        renderVisitStatus();
+    }
+
+    // ===================================================================== 11. Boot
     document.addEventListener('DOMContentLoaded', () => {
         renderSetup();
         renderCatalog();
         // A global role without a department of its own: start on the first reporting department.
-        if (!S.departmentId && S.meta.reporting_departments.length) onDepartmentChange(S.meta.reporting_departments[0].id);
+        if (!CFG.resumeVisitId && !S.departmentId && S.meta.reporting_departments.length) onDepartmentChange(S.meta.reporting_departments[0].id);
         renderRows();
         wireSetup();
         wireCatalog();
         wireAi();
         wireRows();
         $('#obs-submit').addEventListener('click', submitVisit);
+        if (CFG.resumeVisitId) resumeDraft(CFG.resumeVisitId);
         window.addEventListener('beforeunload', (e) => {
             if (!S.done && (S.dirty || S.saveTimer || S.savePromise || S.ghosts.size)) { e.preventDefault(); e.returnValue = ''; }
         });

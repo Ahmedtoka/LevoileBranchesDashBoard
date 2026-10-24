@@ -4,7 +4,9 @@
 @section('content')
 @use('App\Support\ObservationLabels')
 @php
-    $photoUrl = fn (string $path) => str_starts_with($path, 'http') ? $path : asset('storage/'.$path);
+    // Photo paths come from clients: only a relative storage path becomes a URL, never an absolute one.
+    $photoUrl = fn (?string $path) => ObservationLabels::storageUrl($path);
+    $isDraft = $observation->visit?->status === 'draft';
     $photoKinds = [
         'before' => dt('قبل', 'Before'),
         'after' => dt('بعد', 'After'),
@@ -18,6 +20,7 @@
     @include('dashboard.observations.partials.status-pill', ['status' => $observation->status])
     @include('dashboard.observations.partials.risk-badge', ['risk' => $observation->riskLevel])
     <span class="badge text-bg-light border">{{ ObservationLabels::kind($observation->kind) }}</span>
+    @if($isDraft)<span class="badge text-bg-secondary">{{ dt('مسودة', 'Draft') }}</span>@endif
     <span class="text-muted small" dir="auto">{{ $observation->title }}</span>
 </div>
 
@@ -39,7 +42,15 @@
                 <dd class="col-8">{{ $observation->branch?->branch_name ?? dt('بدون فرع', 'No branch') }}</dd>
 
                 <dt class="col-4">{{ dt('تاريخ الحدث', 'Event date') }}</dt>
-                <dd class="col-8">{{ $observation->event_date?->format('Y-m-d') ?? '—' }}</dd>
+                <dd class="col-8">
+                    @if($observation->event_date)
+                        {{ $observation->event_date->format('Y-m-d') }}
+                    @elseif($observation->visit?->visit_date)
+                        {{ $observation->visit->visit_date->format('Y-m-d') }} <span class="text-muted">({{ dt('تاريخ غير مؤكد', 'Date not confirmed') }})</span>
+                    @else
+                        —
+                    @endif
+                </dd>
 
                 <dt class="col-4">{{ dt('الإدارة المُبلِّغة', 'Reporting department') }}</dt>
                 <dd class="col-8">{{ $observation->reportingDepartment?->name ?? '—' }}</dd>
@@ -117,7 +128,8 @@
                         <div class="small fw-semibold mb-1">{{ $kindLabel }}</div>
                         <div class="d-flex gap-2 flex-wrap mb-2">
                             @foreach($photoGroups[$kind] as $photo)
-                                <a href="{{ $photoUrl($photo->path) }}" target="_blank"><img src="{{ $photoUrl($photo->path) }}" alt="{{ $kindLabel }}" style="height:90px;border-radius:.4rem"></a>
+                                @continue($photoUrl($photo->path) === null)
+                                <a href="{{ $photoUrl($photo->path) }}" target="_blank" rel="noopener"><img src="{{ $photoUrl($photo->path) }}" alt="{{ $kindLabel }}" style="height:90px;border-radius:.4rem"></a>
                             @endforeach
                         </div>
                     @endif
@@ -157,7 +169,7 @@
                         <a href="{{ route('tickets.show', $t) }}" class="fw-semibold small text-decoration-none">{{ $t->reference }}</a>
                         @include('partials.status-badge', ['status' => $t->status])
                     </div>
-                    @include('partials.ticket-timeline', ['updates' => $t->updates])
+                    @include('partials.ticket-timeline', ['updates' => $t->updates, 'relativeEvidenceOnly' => true])
                 @endforeach
             @endif
         </div>
@@ -205,8 +217,13 @@
         </div>
     </div>
 
-    {{-- Actions --}}
+    {{-- Actions: none on a draft-visit row (its author's next autosave would undo them). --}}
     <div class="col-lg-4">
+        @if($isDraft)
+            <div class="card p-3 mb-3 small text-muted">
+                <span><span class="badge text-bg-secondary">{{ dt('مسودة', 'Draft') }}</span> {{ dt('الزيارة لم تُرسل بعد؛ الإجراءات تظهر بعد الإرسال.', 'The visit is not submitted yet; actions appear once it is submitted.') }}</span>
+            </div>
+        @else
         @can('reroute', $observation)
             <div class="card p-3 mb-3">
                 <h6 class="fw-bold">{{ dt('إعادة توجيه', 'Reroute') }}</h6>
@@ -247,14 +264,32 @@
                 <div class="card p-3 mb-3">
                     <h6 class="fw-bold">{{ dt('إغلاق بدون إجراء', 'Close without action') }}</h6>
                     <p class="small text-muted mb-2">{{ dt('مثلاً: مكررة أو خطأ تسجيل. التيكت المفتوح هيتقفل.', 'E.g. a duplicate or a recording error. An open ticket is closed too.') }}</p>
-                    <form method="POST" action="{{ route('observations.closeNoAction', $observation) }}">
-                        @csrf
-                        <textarea name="reason" class="form-control form-control-sm mb-2" rows="2" maxlength="1000" required placeholder="{{ dt('السبب (مطلوب)', 'Reason (required)') }}"></textarea>
-                        <button class="btn btn-sm btn-outline-dark w-100" onclick="return confirm('{{ dt('إغلاق الملاحظة بدون إجراء؟', 'Close this observation without action?') }}')">{{ dt('إغلاق بدون إجراء', 'Close without action') }}</button>
-                    </form>
+                    <button type="button" class="btn btn-sm btn-outline-dark w-100" data-bs-toggle="modal" data-bs-target="#closeNoActionModal">{{ dt('إغلاق بدون إجراء', 'Close without action') }}</button>
+                </div>
+
+                <div class="modal fade" id="closeNoActionModal" tabindex="-1" aria-labelledby="closeNoActionTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <form method="POST" action="{{ route('observations.closeNoAction', $observation) }}" class="modal-content">
+                            @csrf
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="closeNoActionTitle">{{ dt('إغلاق الملاحظة بدون إجراء؟', 'Close this observation without action?') }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ dt('إغلاق', 'Close') }}"></button>
+                            </div>
+                            <div class="modal-body small">
+                                <p class="text-muted">{{ dt('التيكت المفتوح هيتقفل ولن يُحسب كحل.', 'An open ticket is closed too and does not count as resolved.') }}</p>
+                                <label class="form-label" for="closeNoActionReason">{{ dt('السبب (مطلوب)', 'Reason (required)') }}</label>
+                                <textarea name="reason" id="closeNoActionReason" class="form-control form-control-sm" rows="3" maxlength="1000" required>{{ old('reason') }}</textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">{{ dt('إلغاء', 'Cancel') }}</button>
+                                <button type="submit" class="btn btn-sm btn-dark">{{ dt('إغلاق بدون إجراء', 'Close without action') }}</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             @endif
         @endcan
+        @endif
     </div>
 </div>
 @endsection

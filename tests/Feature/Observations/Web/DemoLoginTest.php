@@ -95,4 +95,54 @@ class DemoLoginTest extends TestCase
         $ops = User::where('email', 'operation.emp@levoile.test')->firstOrFail();
         $this->assertEqualsCanonicalizing([$zayed->id, $stars->id], $ops->branches()->pluck('branches.id')->all());
     }
+
+    public function test_seeder_never_resets_passwords_or_touches_real_people_and_areas(): void
+    {
+        // A real world first: the two demo branches already in a real area with a real manager, Saraya with a real store manager.
+        $realAreaManager = Seeds::user('area_manager', ['email' => 'real.area@levoile.com']);
+        $realStore = Seeds::user('store_manager', ['email' => 'real.store@levoile.com']);
+        $real = Area::create(['name' => 'Real West', 'slug' => 'real-west', 'manager_id' => $realAreaManager->id]);
+        $zayed = Seeds::branch('Sheikh Zayed - Saraya Mall', ['area_id' => $real->id, 'manager_id' => $realStore->id]);
+        $stars = Seeds::branch('Nasr City - City Stars Mall', ['area_id' => $real->id]);
+        $untouched = fn () => [
+            User::whereKey($realAreaManager->id)->first(['password', 'role_id', 'name', 'branch_id'])->toArray(),
+            User::whereKey($realStore->id)->first(['password', 'role_id', 'name', 'branch_id'])->toArray(),
+        ];
+        $before = $untouched();
+
+        (new DemoUsersSeeder)->run();
+
+        // A demo user changed their password; the next run keeps it.
+        $admin = User::where('email', 'admin@levoile.test')->firstOrFail();
+        $admin->update(['password' => 'changed-by-owner']);
+        $hash = $admin->fresh()->password;
+
+        (new DemoUsersSeeder)->run();
+
+        $this->assertSame($hash, User::where('email', 'admin@levoile.test')->value('password'));
+        $this->assertSame($before, $untouched());
+        $this->assertSame($realAreaManager->id, (int) $real->fresh()->manager_id);
+        $this->assertSame($real->id, (int) $zayed->fresh()->area_id);
+        $this->assertSame($real->id, (int) $stars->fresh()->area_id);
+        $this->assertSame($realStore->id, (int) $zayed->fresh()->manager_id);
+
+        // The demo people still see their branches (branch_user / branch_id), without changing the real rows.
+        $am = User::where('email', 'area.cairo@levoile.test')->firstOrFail();
+        $this->assertEqualsCanonicalizing([$zayed->id, $stars->id], $am->scopedBranchIds());
+        $store = User::where('email', 'store.zayed@levoile.test')->firstOrFail();
+        $this->assertSame([$zayed->id], $store->scopedBranchIds());
+    }
+
+    public function test_login_form_prefills_demo_credentials_only_when_enabled(): void
+    {
+        config(['app.demo_login' => false]);
+        $this->get('/login')->assertOk()
+            ->assertDontSee('admin@levoile.test')
+            ->assertDontSee('value="password"', false);
+
+        config(['app.demo_login' => true]);
+        $this->get('/login')->assertOk()
+            ->assertSee('value="admin@levoile.test"', false)
+            ->assertSee('value="password"', false);
+    }
 }

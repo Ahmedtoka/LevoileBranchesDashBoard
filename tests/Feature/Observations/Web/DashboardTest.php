@@ -97,8 +97,9 @@ class DashboardTest extends TestCase
         // tiles link back to the register with the same filters
         $html = html_entity_decode($res->getContent());
         $this->assertStringContainsString(route('observations.index', ['range' => 'week', 'kind' => 'issue']), $html);
-        // the overdue tile is not period-bound, so its register link carries no range
-        $this->assertStringContainsString('href="'.route('observations.index', ['kind' => 'issue']).'"', $html);
+        // the overdue tile is not period-bound, so its register link carries range=all (the register then lists every date)
+        $this->assertStringContainsString('href="'.route('observations.index', ['range' => 'all', 'kind' => 'issue']).'"', $html);
+        $this->actingAs($am)->get(route('observations.index', ['range' => 'all', 'kind' => 'issue']))->assertOk()->assertSee($old->reference);
 
         $this->actingAs(Seeds::user('super_admin'))->get(route('observations.dashboard'))
             ->assertOk()
@@ -138,7 +139,7 @@ class DashboardTest extends TestCase
 
         $html = html_entity_decode($res->getContent());
         $this->assertStringContainsString(route('observations.index', ['range' => 'month', 'branch_id' => $b->id, 'kind' => 'issue']), $html);
-        $this->assertStringContainsString('href="'.route('observations.index', ['branch_id' => $b->id, 'kind' => 'issue']).'"', $html);
+        $this->assertStringContainsString('href="'.route('observations.index', ['branch_id' => $b->id, 'range' => 'all', 'kind' => 'issue']).'"', $html);
     }
 
     public function test_super_admin_dashboard_renders_with_empty_db(): void

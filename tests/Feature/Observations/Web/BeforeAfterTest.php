@@ -37,7 +37,7 @@ class BeforeAfterTest extends TestCase
     {
         $visit = ObservationVisit::create([
             'type' => 'field', 'department_id' => $this->cctv->id, 'branch_id' => $branch->id,
-            'user_id' => $this->recorder->id, 'visit_date' => now()->toDateString(), 'source' => 'web',
+            'user_id' => $this->recorder->id, 'visit_date' => now()->toDateString(), 'status' => 'submitted', 'source' => 'web',
         ]);
 
         return Observation::create(array_merge([

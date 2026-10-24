@@ -11,6 +11,25 @@
 
 <div id="obs-alert" class="alert alert-danger small d-none" role="alert"></div>
 
+{{-- The caller's own draft visits (spec 9.3): reopen one here, also one started on mobile. --}}
+@if($drafts->isNotEmpty())
+    <div class="card p-3 mb-3" id="obs-drafts">
+        <h6 class="fw-bold mb-2"><i class="bi bi-pencil-square"></i> {{ dt('مسوداتي', 'My drafts') }}</h6>
+        <div class="list-group list-group-flush small">
+            @foreach($drafts as $draft)
+                <a href="{{ route('observations.create', ['visit' => $draft->id]) }}"
+                   class="list-group-item list-group-item-action d-flex flex-wrap align-items-center gap-2 {{ $resumeVisitId === $draft->id ? 'active' : '' }}">
+                    <span class="fw-semibold">{{ $draft->code }}</span>
+                    <span class="badge text-bg-light border">{{ \App\Support\ObservationLabels::visitType($draft->type) }}</span>
+                    <span>{{ $draft->branch?->branch_name ?? dt('كل الفروع', 'All branches') }}</span>
+                    <span class="text-muted">· {{ $draft->department?->name ?? '—' }} · {{ $draft->visit_date?->format('Y-m-d') }}</span>
+                    <span class="ms-auto badge text-bg-secondary">{{ $draft->observations_count }} {{ dt('ملاحظة', 'observations') }}</span>
+                </a>
+            @endforeach
+        </div>
+    </div>
+@endif
+
 <div id="obs-editor">
     {{-- 1. The visit: type, department, date, branch(es) --}}
     <div class="card p-3 mb-3">
@@ -93,6 +112,23 @@
 
 {{-- 5. After submit --}}
 <div id="obs-success" class="d-none"></div>
+
+{{-- Submit confirmation: a Bootstrap modal (window.confirm may be blocked); the JS fills the summary. --}}
+<div class="modal fade" id="obs-submit-modal" tabindex="-1" aria-labelledby="obs-submit-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="obs-submit-title"><i class="bi bi-send"></i> {{ dt('إرسال الزيارة', 'Submit the visit') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ dt('إغلاق', 'Close') }}"></button>
+            </div>
+            <div class="modal-body small" id="obs-submit-summary"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">{{ dt('إلغاء', 'Cancel') }}</button>
+                <button type="button" class="btn btn-sm btn-success" id="obs-submit-confirm"><i class="bi bi-send"></i> {{ dt('تأكيد الإرسال', 'Confirm and submit') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -150,6 +186,10 @@
     'other' => dt('أخرى', 'Other'),
     'submitting' => dt('جارٍ الإرسال…', 'Submitting…'),
     'confirm_submit' => dt('إرسال الزيارة؟ لن يمكن تعديلها بعد الإرسال.', 'Submit the visit? It cannot be edited afterwards.'),
+    'summary_rows' => dt('عدد الملاحظات', 'Observations'),
+    'summary_visits' => dt('الزيارات', 'Visits'),
+    'resuming' => dt('جارٍ فتح المسودة…', 'Opening the draft…'),
+    'resume_not_draft' => dt('هذه الزيارة لم تعد مسودة.', 'This visit is no longer a draft.'),
     'fix_errors' => dt('صحّح الأخطاء الظاهرة بجوار الملاحظات ثم أعد الإرسال.', 'Fix the errors shown next to the observations, then submit again.'),
     'submitted' => dt('تم إرسال الزيارة', 'Visit submitted'),
     'created_tickets' => dt('التيكتات المفتوحة', 'Tickets opened'),

@@ -12,8 +12,11 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Demo users for the quick-login card and the Flutter demo picker.
- * Idempotent (updateOrCreate by email); never deletes; never touches users
- * outside users(). Works on an empty database.
+ * Idempotent (by email); never deletes; never touches users outside users(). Works on an empty database.
+ * The password is set ONLY when a demo user is created: a later run never resets it. On an existing demo
+ * row only name / role / department / branch / is_department_manager / active are kept in line. A branch
+ * manager or an area manager that is not a demo user is never replaced, and a branch already in an area
+ * is never moved: the demo area manager is then given the branches through branch_user instead.
  */
 class DemoUsersSeeder extends Seeder
 {
@@ -67,20 +70,27 @@ class DemoUsersSeeder extends Seeder
                 $role = Role::firstOrCreate(['slug' => $row['role']], ['name' => ucwords(str_replace('_', ' ', $row['role']))]);
                 $department = $row['department'] ? $this->department($row['department']) : null;
 
-                $done[$row['email']] = User::updateOrCreate(['email' => $row['email']], [
+                $user = User::firstOrNew(['email' => $row['email']]);
+                if (! $user->exists) {
+                    $user->password = self::PASSWORD; // hashed by the model cast; never reset on a later run
+                }
+                $user->fill([
                     'name' => $row['name'],
-                    'password' => self::PASSWORD,
                     'role_id' => $role->id,
                     'department_id' => $department?->id,
                     'is_department_manager' => $row['role'] === 'department_manager',
                     'active' => true,
-                ]);
+                ])->save();
+                $done[$row['email']] = $user;
             }
 
             if (isset($done['store.zayed@levoile.test'])) {
                 $store = $done['store.zayed@levoile.test'];
                 $store->update(['branch_id' => $zayed->id]);
-                $zayed->update(['manager_id' => $store->id]);
+                // The store manager sees the branch through branch_id anyway; a real manager is never replaced.
+                if ($zayed->manager_id === null || $this->isDemoUser((int) $zayed->manager_id)) {
+                    $zayed->update(['manager_id' => $store->id]);
+                }
             }
 
             foreach (['operation.emp@levoile.test', 'maintenance.tech@levoile.test'] as $email) {
@@ -113,13 +123,23 @@ class DemoUsersSeeder extends Seeder
             ?? Branch::create(['branch_name' => $fullName, 'area' => $area, 'city' => $city, 'active' => true, 'checkin_radius' => 150]);
     }
 
+    /**
+     * Give the demo area manager both branches. Through their shared area when it has no manager or a demo one;
+     * otherwise branches without an area join the demo area and the others are covered through branch_user
+     * (User::scopedBranchIds merges it), so a real area's manager and a real branch's area are never changed.
+     */
     private function shareArea(Branch $a, Branch $b, User $manager): void
     {
         $a->refresh();
         $b->refresh();
 
         if ($a->area_id && $a->area_id === $b->area_id) {
-            Area::whereKey($a->area_id)->update(['manager_id' => $manager->id]);
+            $area = Area::find($a->area_id);
+            if ($area->manager_id === null || $this->isDemoUser((int) $area->manager_id)) {
+                $area->update(['manager_id' => $manager->id]);
+            } else {
+                $manager->branches()->syncWithoutDetaching([$a->id, $b->id]);
+            }
 
             return;
         }
@@ -129,7 +149,17 @@ class DemoUsersSeeder extends Seeder
             'name_ar' => 'القاهرة (تجريبي)',
             'manager_id' => $manager->id,
         ]);
-        $a->update(['area_id' => $area->id]);
-        $b->update(['area_id' => $area->id]);
+        foreach ([$a, $b] as $branch) {
+            if ($branch->area_id === null || (int) $branch->area_id === (int) $area->id) {
+                $branch->update(['area_id' => $area->id]);
+            } else {
+                $manager->branches()->syncWithoutDetaching([$branch->id]);
+            }
+        }
+    }
+
+    private function isDemoUser(int $id): bool
+    {
+        return User::whereKey($id)->whereIn('email', array_column(self::users(), 'email'))->exists();
     }
 }

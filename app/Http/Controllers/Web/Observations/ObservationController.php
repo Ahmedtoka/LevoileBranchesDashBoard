@@ -37,9 +37,9 @@ class ObservationController extends Controller
     /** The one register query: eager loads + visibility scope + filters. Used by the page and the CSV export. */
     private function query(ObservationFilters $filters, User $user): Builder
     {
-        $query = ObservationScope::apply(Observation::query(), $user)->with(self::WITH);
+        $query = ObservationScope::apply(Observation::query(), $user)->with(array_merge(self::WITH, ['visit']));
 
-        return $filters->apply($query)->orderByDesc('observations.id');
+        return $filters->apply($query);
     }
 
     public function index(Request $request)
@@ -50,7 +50,10 @@ class ObservationController extends Controller
         $user = $request->user();
 
         return view('dashboard.observations.index', [
-            'observations' => $this->query($filters, $user)->paginate(30)->withQueryString(),
+            // Newest first by the same date the filter uses (undated rows on their visit's date).
+            'observations' => $this->query($filters, $user)
+                ->orderByRaw(ObservationFilters::DATE_SQL.' DESC')->orderByDesc('observations.id')
+                ->paginate(30)->withQueryString(),
             'filters' => $filters,
             'range' => $filters->range,
             'categories' => ObservationCategory::where('active', true)
@@ -69,8 +72,8 @@ class ObservationController extends Controller
         Gate::authorize('viewAny', Observation::class);
 
         $user = $request->user();
-        $range = DateRange::fromRequest($request);
         $filters = ObservationFilters::fromRequest($request);
+        $range = $filters->range; // DateRange presets plus `all`
         // Only the range and the dashboard's own filters count here and travel back to the register on every link.
         $qs = array_intersect_key($filters->toQueryString(), array_flip(array_merge(['range', 'from', 'to'], ObservationMetrics::FILTER_KEYS)));
 
@@ -117,7 +120,7 @@ class ObservationController extends Controller
             foreach ($query->lazyById(500, 'observations.id', 'id') as $o) {
                 fputcsv($out, [
                     $o->reference,
-                    $o->event_date?->toDateString(),
+                    $o->event_date?->toDateString() ?? ($o->visit?->visit_date ? $o->visit->visit_date->toDateString().' (تاريخ غير مؤكد)' : null),
                     self::cell($o->branch?->branch_name),
                     self::cell($o->reportingDepartment?->name),
                     self::cell($o->catalogItem ? dt($o->catalogItem->label_ar, $o->catalogItem->label_en) : ($o->category ? dt($o->category->name_ar, $o->category->name_en) : '')),
@@ -143,9 +146,27 @@ class ObservationController extends Controller
     {
         Gate::authorize('create', ObservationVisit::class);
 
+        $user = $request->user();
+
+        // ?visit={id}: continue one of the caller's own drafts (spec 9.3; also a draft started on mobile).
+        // Policy `update` = owner AND still a draft, so another user's visit or a submitted one is a 403.
+        $resumeVisitId = null;
+        if ($request->query('visit') !== null) {
+            $raw = $request->query('visit');
+            abort_unless(is_scalar($raw) && ctype_digit((string) $raw), 404);
+            $visit = ObservationVisit::findOrFail((int) $raw);
+            Gate::authorize('update', $visit);
+            $resumeVisitId = $visit->id;
+        }
+
         return view('dashboard.observations.new', [
             'meta' => app(ApiObservationController::class)->meta($request)->getData(true),
+            'drafts' => ObservationVisit::where('user_id', $user->id)->where('status', 'draft')
+                ->with(['branch', 'department'])->withCount('observations')
+                ->latest('id')->limit(10)->get(),
+            'resumeVisitId' => $resumeVisitId,
             'config' => [
+                'resumeVisitId' => $resumeVisitId,
                 'urls' => [
                     'api' => url('/web-api'),
                     'register' => route('observations.index'),
@@ -188,8 +209,10 @@ class ObservationController extends Controller
             $observations = ObservationScope::apply(Observation::query(), $user)
                 ->where('observations.branch_id', $branchId)
                 ->whereIn('observations.status', $status ? [$status] : self::BEFORE_AFTER_STATUSES)
+                // Draft-visit rows are still being written: not on this page either.
+                ->whereIn('observations.observation_visit_id', ObservationFilters::submittedVisitIds())
                 ->with(['catalogItem', 'category', 'riskLevel', 'ticket.updates', 'verifications.verifier', 'photos'])
-                ->orderByDesc('observations.event_date')->orderByDesc('observations.id')
+                ->orderByRaw(ObservationFilters::DATE_SQL.' DESC')->orderByDesc('observations.id')
                 ->paginate(30)->withQueryString();
         }
 

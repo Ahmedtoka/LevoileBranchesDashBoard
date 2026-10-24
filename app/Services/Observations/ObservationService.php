@@ -386,6 +386,7 @@ class ObservationService
      */
     public function reroute(Observation $o, int $responsibleDepartmentId, User $u, ?string $reason = null): Observation
     {
+        $this->assertNotDraft($o);
         $department = Department::find($responsibleDepartmentId);
         if ($department === null) {
             throw ValidationException::withMessages(['responsible_department_id' => dt('الإدارة غير موجودة.', 'The department does not exist.')]);
@@ -423,6 +424,7 @@ class ObservationService
      */
     public function raiseRisk(Observation $o, RiskLevel $to, User $u, string $reason): Observation
     {
+        $this->assertNotDraft($o);
         $reason = trim($reason);
         if ($reason === '') {
             throw ValidationException::withMessages(['risk_override_reason' => dt('سبب رفع درجة الخطورة مطلوب.', 'A reason is required to raise the risk level.')]);
@@ -464,6 +466,7 @@ class ObservationService
      */
     public function closeNoAction(Observation $o, User $u, string $reason): Observation
     {
+        $this->assertNotDraft($o);
         $reason = trim($reason);
         if ($reason === '') {
             throw ValidationException::withMessages(['reason' => dt('سبب الإغلاق مطلوب.', 'A closing reason is required.')]);
@@ -489,6 +492,17 @@ class ObservationService
         });
 
         return $o->fresh();
+    }
+
+    /**
+     * Admin actions (reroute / raise risk / close without action) are refused on a row of a draft visit: it is
+     * not routed yet, and its author's next autosave would silently overwrite status, responsible and risk.
+     */
+    private function assertNotDraft(Observation $o): void
+    {
+        if (ObservationVisit::whereKey($o->observation_visit_id)->value('status') === 'draft') {
+            throw ValidationException::withMessages(['status' => dt('الملاحظة ما زالت مسودة.', 'The observation is still a draft.')]);
+        }
     }
 
     /** Same chain as RiskResolver (spec section 7), ending at the row's own risk instead of the policy default. */

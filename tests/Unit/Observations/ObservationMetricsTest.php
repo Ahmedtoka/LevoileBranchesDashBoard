@@ -10,8 +10,10 @@ use App\Models\ObservationCategory;
 use App\Models\ObservationVisit;
 use App\Models\RiskLevel;
 use App\Models\Ticket;
+use App\Models\TicketUpdate;
 use App\Models\User;
 use App\Support\DateRange;
+use App\Support\ObservationFilters;
 use App\Support\ObservationMetrics;
 use Illuminate\Http\Request;
 use Tests\Support\Seeds;
@@ -249,5 +251,62 @@ class ObservationMetricsTest extends TestCase
             ['visits', 'branches_visited', 'observations_per_visit', 'open_issues', 'on_time_pct', 'overdue_now'],
             array_keys($m['week_compare']['current'])
         );
+    }
+
+    public function test_open_issues_counts_undated_issue_on_its_visit_date(): void
+    {
+        $this->observation(['event_date' => null]); // visit today
+        $this->observation(['event_date' => null, 'observation_visit_id' => $this->visit(['visit_date' => now()->subDays(40)->toDateString()])->id]);
+
+        $m = $this->metrics();
+        $this->assertSame(1, $m['open_issues']);
+        $this->assertSame(1, $m['week_compare']['current']['open_issues']);
+
+        // range=all: no date bound on the range-bound metrics; the week comparison keeps its own windows.
+        $all = ObservationMetrics::for($this->admin, ObservationFilters::rangeFromRequest(Request::create('/', 'GET', ['range' => 'all'])));
+        $this->assertSame(2, $all['open_issues']);
+        $this->assertSame(2, $all['visits']);
+        $this->assertSame(1, $all['week_compare']['current']['open_issues']);
+    }
+
+    public function test_draft_visit_rows_are_not_counted(): void
+    {
+        $high = RiskLevel::create(['slug' => 'high', 'name_ar' => 'عالي', 'name_en' => 'High', 'color' => '#dc2626', 'sort_order' => 2]);
+        $this->observation(['risk_level_id' => $high->id]);
+        $draft = $this->visit(['status' => 'draft']);
+        $this->observation(['risk_level_id' => $high->id, 'observation_visit_id' => $draft->id]);
+        $this->observation(['risk_level_id' => $high->id, 'observation_visit_id' => $draft->id, 'catalog_item_id' => null]);
+
+        $m = $this->metrics();
+
+        $this->assertSame(1, $m['open_issues']);
+        $risk = collect($m['risk_by_department'])->firstWhere('department', $this->cctv->name);
+        $this->assertSame(['high' => 1], $risk['counts']);
+        $row = collect($m['departments'])->firstWhere('department_id', $this->cctv->id);
+        $this->assertSame(1, $row['observations']);
+    }
+
+    public function test_cancelled_ticket_is_not_resolved(): void
+    {
+        $due = now()->subDay();
+        $onTime = $this->ticket($this->observation(), ['status' => 'closed', 'due_at' => $due, 'closed_at' => $due->copy()->subHour()]);
+        $onTime->forceFill(['created_at' => $onTime->closed_at->copy()->subHours(10)])->save();
+        $before = $this->metrics();
+
+        // Closed without action: cancelled on time and fast, but it was not solved.
+        $cancelled = $this->ticket($this->observation(['status' => 'closed_no_action']), ['status' => 'closed', 'due_at' => $due, 'closed_at' => $due->copy()->subDays(1)]);
+        $cancelled->forceFill(['created_at' => $cancelled->closed_at->copy()->subHour()])->save();
+        TicketUpdate::create(['ticket_id' => $cancelled->id, 'action' => 'cancelled', 'from_status' => 'open', 'to_status' => 'closed']);
+        // ... and a late, really closed one still counts.
+        $late = $this->ticket($this->observation(), ['status' => 'closed', 'due_at' => $due, 'closed_at' => $due->copy()->addHours(2)]);
+        $late->forceFill(['created_at' => $late->closed_at->copy()->subHours(30)])->save();
+
+        $this->assertEquals(100, $before['on_time_pct']);
+        $m = $this->metrics();
+        $this->assertEquals(50, $m['on_time_pct']);
+        $perf = collect($m['responsible_performance'])->firstWhere('department', $this->maintenance->name);
+        $this->assertSame(2, $perf['closed']);
+        $this->assertEquals(20, $perf['avg_hours']);
+        $this->assertEquals(50, $perf['on_time_pct']);
     }
 }

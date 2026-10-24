@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * The observations dashboard numbers (spec section 12, definitions verbatim). Every figure is a SQL
@@ -100,7 +101,10 @@ class ObservationMetrics
 
     // ---- base queries: scope + range + filters -------------------------------------------------
 
-    /** Observations by event_date (or over all dates when $r is null), through ObservationScope and the register's own filter code. */
+    /**
+     * Observations by ObservationFilters::DATE_SQL (event_date, else the visit date; over all dates when $r is null
+     * or `all`), submitted visits only, through ObservationScope and the register's own filter code.
+     */
     private function observations(?DateRange $r): Builder
     {
         $query = ObservationScope::apply(Observation::query(), $this->user);
@@ -115,7 +119,9 @@ class ObservationMetrics
     {
         $q = ObservationScope::apply(ObservationVisit::query(), $this->user, 'branch_id', 'department_id')
             ->where('observation_visits.status', 'submitted');
-        $r->apply($q, 'observation_visits.visit_date');
+        if (! ObservationFilters::isAll($r)) {
+            $r->apply($q, 'observation_visits.visit_date');
+        }
 
         if (isset($this->filters['reporting_department_id'])) {
             $q->where('observation_visits.department_id', $this->filters['reporting_department_id']);
@@ -170,9 +176,12 @@ class ObservationMetrics
                     array_merge(['issue'], self::OPEN_STATUSES)
                 )
                 ->groupBy('observations.reporting_department_id')->toBase()->get()->keyBy('department_id'),
-            // Closed linked tickets per responsible department (tickets.department_id follows reroutes).
+            // Closed linked tickets per responsible department (tickets.department_id follows reroutes). A ticket
+            // cancelled by "close without action" was not resolved: it counts in neither closed, on time nor avg.
             'tickets' => $this->tickets($r)
                 ->where('tickets.status', 'closed')->whereNotNull('tickets.closed_at')
+                ->whereNotExists(fn ($u) => $u->select(DB::raw(1))->from('ticket_updates')
+                    ->whereColumn('ticket_updates.ticket_id', 'tickets.id')->where('ticket_updates.action', 'cancelled'))
                 ->selectRaw('tickets.department_id AS department_id, COUNT(*) AS closed,
                     SUM(CASE WHEN tickets.due_at IS NOT NULL AND tickets.closed_at <= tickets.due_at THEN 1 ELSE 0 END) AS on_time,
                     AVG(TIMESTAMPDIFF(SECOND, tickets.created_at, tickets.closed_at)) AS avg_seconds')
@@ -221,7 +230,7 @@ class ObservationMetrics
         $rows = $this->observations($r)
             ->whereNotNull('observations.catalog_item_id')->whereNotNull('observations.branch_id')
             ->selectRaw('observations.catalog_item_id AS item_id, observations.branch_id AS branch_id,
-                COUNT(*) AS n, MAX(observations.event_date) AS last_at')
+                COUNT(*) AS n, MAX('.ObservationFilters::DATE_SQL.') AS last_at')
             ->groupBy('observations.catalog_item_id', 'observations.branch_id')
             ->havingRaw('COUNT(*) >= 2')
             ->orderByDesc('n')->orderByDesc('last_at')

@@ -29,8 +29,16 @@
             <a href="{{ request()->fullUrlWithQuery(['range' => $key, 'from' => null, 'to' => null, 'page' => null]) }}"
                class="btn {{ $range->key === $key ? 'btn-primary' : 'btn-outline-secondary' }}">{{ t('range.'.$key, $label) }}</a>
         @endforeach
+        <a href="{{ request()->fullUrlWithQuery(['range' => \App\Support\ObservationFilters::ALL, 'from' => null, 'to' => null, 'page' => null]) }}"
+           class="btn {{ $range->key === \App\Support\ObservationFilters::ALL ? 'btn-primary' : 'btn-outline-secondary' }}">{{ dt('كل التواريخ', 'All dates') }}</a>
     </div>
-    <span class="text-muted small ms-auto">{{ $range->from->format('d M') }} – {{ $range->to->format('d M Y') }}</span>
+    <span class="text-muted small ms-auto">
+        @if($range->key === \App\Support\ObservationFilters::ALL)
+            {{ dt('كل التواريخ', 'All dates') }}
+        @else
+            {{ $range->from->format('d M') }} – {{ $range->to->format('d M Y') }}
+        @endif
+    </span>
 </div>
 
 <form class="card p-3 mb-3" method="GET" action="{{ route('observations.index') }}">
@@ -144,7 +152,16 @@
         @forelse($observations as $o)
             <tr style="cursor:pointer" onclick="if (!event.target.closest('a')) location.href='{{ route('observations.show', $o) }}'">
                 <td class="fw-semibold text-nowrap"><a href="{{ route('observations.show', $o) }}" class="text-decoration-none">{{ $o->reference }}</a></td>
-                <td class="text-nowrap">{{ $o->event_date?->format('Y-m-d') }}</td>
+                <td class="text-nowrap">
+                    @if($o->event_date)
+                        {{ $o->event_date->format('Y-m-d') }}
+                    @elseif($o->visit?->visit_date)
+                        {{ $o->visit->visit_date->format('Y-m-d') }}
+                        <div class="text-muted" style="font-size:.7rem">{{ dt('تاريخ غير مؤكد', 'Date not confirmed') }}</div>
+                    @else
+                        <span class="text-muted">—</span>
+                    @endif
+                </td>
                 <td>{{ $o->branch?->branch_name ?? '—' }}</td>
                 <td>{{ $o->reportingDepartment?->name ?? '—' }}</td>
                 <td>

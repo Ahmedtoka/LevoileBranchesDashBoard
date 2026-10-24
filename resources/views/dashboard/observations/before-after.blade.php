@@ -3,7 +3,7 @@
 
 @section('content')
 @php
-    $storageUrl = fn (?string $path) => $path === null || $path === '' ? null : (preg_match('#^https?://#i', $path) ? $path : asset('storage/'.$path));
+    $storageUrl = fn (?string $path) => \App\Support\ObservationLabels::storageUrl($path); // relative storage paths only
 @endphp
 
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">

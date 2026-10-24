@@ -8,6 +8,8 @@ use App\Models\Observation;
 use App\Models\ObservationVisit;
 use App\Models\Ticket;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\Support\Seeds;
 use Tests\TestCase;
 
@@ -137,5 +139,75 @@ class WebVisitTest extends TestCase
         $this->assertSame('closed_no_action', Observation::findOrFail($rowId)->status);
         $this->assertSame(1, Observation::where('observation_visit_id', $visitId)->count());
         $this->assertSame(0, Ticket::count());
+    }
+
+    private function draftVisit(User $owner, array $attrs = []): ObservationVisit
+    {
+        return ObservationVisit::create(array_merge([
+            'type' => 'field', 'department_id' => $this->cctv->id, 'branch_id' => $this->branch->id,
+            'user_id' => $owner->id, 'visit_date' => now()->toDateString(), 'status' => 'draft', 'source' => 'web',
+        ], $attrs));
+    }
+
+    public function test_upsert_photo_paths_must_be_uploads_of_the_callers_visits(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($this->recorder);
+        $visitId = $this->postJson('/web-api/observation-visits', [
+            'type' => 'field', 'branch_id' => $this->branch->id, 'visit_date' => now()->toDateString(), 'simulated' => true,
+        ])->assertCreated()->json('visit.id');
+        $upsert = fn (array $photos) => $this->postJson("/web-api/observation-visits/{$visitId}/observations", [
+            'items' => [['kind' => 'activity', 'description' => 'صورة', 'photos' => $photos]],
+        ]);
+
+        $upsert(['http://evil/x.png'])->assertStatus(422)->assertJsonValidationErrors(['items.0.photos.0']);
+        $upsert(['evidence/observations/'.$visitId.'/../../x.png'])->assertStatus(422);
+
+        $other = $this->draftVisit(Seeds::user('department_employee', ['department_id' => $this->cctv->id]));
+        $upsert(["evidence/observations/{$other->id}/stolen.jpg"])->assertStatus(422)->assertJsonValidationErrors(['items.0.photos.0']);
+
+        $path = $this->post("/web-api/observation-visits/{$visitId}/photos", ['photo' => UploadedFile::fake()->image('shelf.jpg'), 'kind' => 'before'],
+            ['Accept' => 'application/json'])->assertOk()->json('path');
+        Storage::disk('public')->assertExists($path);
+        $upsert([$path])->assertOk()->assertJsonPath('data.0.photos.0.path', $path);
+
+        // The same upload reused for the caller's other (desk-multi) visit is accepted.
+        $second = $this->draftVisit($this->recorder, ['type' => 'desk', 'branch_id' => Seeds::branch('Second', ['active' => true])->id]);
+        $this->postJson("/web-api/observation-visits/{$second->id}/observations", [
+            'items' => [['kind' => 'activity', 'description' => 'صورة', 'photos' => [$path]]],
+        ])->assertOk();
+    }
+
+    public function test_new_page_lists_own_drafts_and_resumes_only_own_drafts(): void
+    {
+        $mine = $this->draftVisit($this->recorder);
+        $submitted = $this->draftVisit($this->recorder, ['status' => 'submitted']);
+        $theirs = $this->draftVisit(Seeds::user('department_employee', ['department_id' => $this->cctv->id]));
+
+        $this->actingAs($this->recorder)->get('/observations/new')->assertOk()
+            ->assertSee('مسوداتي')
+            ->assertSee($mine->code)
+            ->assertSee(route('observations.create', ['visit' => $mine->id]), false)
+            ->assertDontSee($theirs->code)
+            ->assertDontSee($submitted->code)
+            ->assertSee('"resumeVisitId":null', false);
+
+        $this->actingAs($this->recorder)->get(route('observations.create', ['visit' => $mine->id]))->assertOk()
+            ->assertSee('"resumeVisitId":'.$mine->id, false);
+        $this->actingAs($this->recorder)->get(route('observations.create', ['visit' => $theirs->id]))->assertForbidden();
+        $this->actingAs($this->recorder)->get(route('observations.create', ['visit' => $submitted->id]))->assertForbidden();
+        $this->actingAs($this->recorder)->get(route('observations.create', ['visit' => 'abc']))->assertNotFound();
+
+        // What the page loads to hydrate the draft.
+        $this->actingAs($this->recorder)->getJson("/web-api/observation-visits/{$mine->id}")->assertOk()
+            ->assertJsonPath('visit.status', 'draft')->assertJsonPath('visit.type', 'field')
+            ->assertJsonPath('visit.branch.id', $this->branch->id);
+    }
+
+    public function test_visit_page_uses_a_modal_not_confirm(): void
+    {
+        $this->actingAs($this->recorder)->get('/observations/new')->assertOk()
+            ->assertSee('obs-submit-modal', false)->assertSee('obs-submit-confirm', false);
+        $this->assertStringNotContainsString('confirm(', file_get_contents(public_path('js/observations-visit.js')));
     }
 }

@@ -17,7 +17,8 @@ class UploadObservationPhotoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'photo' => ['required', 'image', 'max:8192'],
+            // Only the formats a saved path may have (OwnObservationPhotoPath), so an upload never yields an unusable path.
+            'photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
             'kind' => ['nullable', Rule::in(ObservationPhoto::KINDS)],
         ];
     }

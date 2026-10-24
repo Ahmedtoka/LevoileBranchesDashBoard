@@ -8,8 +8,9 @@
     $register = fn (array $extra = []) => route('observations.index', $qs + $extra);
     $pct = fn ($v) => $v === null ? '—' : rtrim(rtrim(number_format($v, 1), '0'), '.').'%';
     $hours = fn ($v) => $v === null ? '—' : $v.' '.dt('س', 'h');
-    // "متأخر الآن" is not bounded by the period: its links carry the non-range filters only.
-    $overdueLink = route('observations.index', array_diff_key($qs, array_flip(['range', 'from', 'to'])) + ['kind' => 'issue']);
+    // "متأخر الآن" is not bounded by the period: its links carry the non-range filters and range=all, so the
+    // register lists every date the tile counts.
+    $overdueLink = route('observations.index', array_diff_key($qs, array_flip(['range', 'from', 'to'])) + ['range' => \App\Support\ObservationFilters::ALL, 'kind' => 'issue']);
     $notPeriod = dt('غير مرتبط بالفترة المختارة', 'Not limited to the selected period');
 
     // The six KPI tiles (spec 12): key => [label, icon, colour, register link].
@@ -50,8 +51,16 @@
             <a href="{{ request()->fullUrlWithQuery(['range' => $key, 'from' => null, 'to' => null]) }}"
                class="btn {{ $range->key === $key ? 'btn-primary' : 'btn-outline-secondary' }}">{{ t('range.'.$key, $label) }}</a>
         @endforeach
+        <a href="{{ request()->fullUrlWithQuery(['range' => \App\Support\ObservationFilters::ALL, 'from' => null, 'to' => null]) }}"
+           class="btn {{ $range->key === \App\Support\ObservationFilters::ALL ? 'btn-primary' : 'btn-outline-secondary' }}">{{ dt('كل التواريخ', 'All dates') }}</a>
     </div>
-    <span class="text-muted small ms-auto">{{ $range->from->format('d M') }} – {{ $range->to->format('d M Y') }}</span>
+    <span class="text-muted small ms-auto">
+        @if($range->key === \App\Support\ObservationFilters::ALL)
+            {{ dt('كل التواريخ', 'All dates') }}
+        @else
+            {{ $range->from->format('d M') }} – {{ $range->to->format('d M Y') }}
+        @endif
+    </span>
 </div>
 
 <form class="card p-3 mb-3" method="GET" action="{{ route('observations.dashboard') }}">

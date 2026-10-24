@@ -17,11 +17,11 @@
             @csrf
             <div class="mb-3">
                 <label class="form-label small">Email</label>
-                <input type="email" name="email" value="{{ old('email', 'admin@levoile.test') }}" class="form-control" required autofocus>
+                <input type="email" name="email" value="{{ old('email', config('app.demo_login') ? 'admin@levoile.test' : '') }}" class="form-control" required autofocus>
             </div>
             <div class="mb-3">
                 <label class="form-label small">Password</label>
-                <input type="password" name="password" value="password" class="form-control" required>
+                <input type="password" name="password" @if(config('app.demo_login')) value="password" @endif class="form-control" required>
             </div>
             <div class="form-check mb-3">
                 <input type="checkbox" name="remember" class="form-check-input" id="remember">

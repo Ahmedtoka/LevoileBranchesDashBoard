@@ -50,7 +50,7 @@ class DetailTest extends TestCase
         }
     }
 
-    private function observation(?Branch $branch, array $attrs = [], string $visitType = 'field'): Observation
+    private function observation(?Branch $branch, array $attrs = [], string $visitType = 'field', string $visitStatus = 'submitted'): Observation
     {
         $visit = ObservationVisit::create([
             'type' => $visitType,
@@ -58,6 +58,7 @@ class DetailTest extends TestCase
             'branch_id' => $branch?->id,
             'user_id' => $this->recorder->id,
             'visit_date' => now()->toDateString(),
+            'status' => $visitStatus,
             'source' => 'web',
         ]);
 
@@ -268,5 +269,46 @@ class DetailTest extends TestCase
         $this->assertSame($operation->id, $observation->fresh()->responsible_department_id);
         $this->assertSame($operation->id, $ticket->fresh()->department_id);
         $this->assertTrue(TicketUpdate::where('ticket_id', $ticket->id)->where('note', 'إعادة توجيه: Wrong department')->exists());
+    }
+
+    public function test_draft_visit_row_offers_no_actions_and_refuses_them(): void
+    {
+        $observation = $this->observation(Seeds::branch('Heliopolis'), ['risk_level_id' => $this->risks['medium']->id], 'field', 'draft');
+
+        $this->actingAs($this->ops)->get(route('observations.show', $observation))
+            ->assertOk()
+            ->assertSee('مسودة')
+            ->assertDontSee(route('observations.reroute', $observation))
+            ->assertDontSee(route('observations.raiseRisk', $observation))
+            ->assertDontSee(route('observations.closeNoAction', $observation));
+
+        $this->actingAs($this->ops)->postJson(route('observations.closeNoAction', $observation), ['reason' => 'Duplicate'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['status'])
+            ->assertJsonPath('errors.status.0', 'الملاحظة ما زالت مسودة.');
+        $this->actingAs($this->ops)->postJson(route('observations.reroute', $observation), ['responsible_department_id' => $this->cctv->id])
+            ->assertUnprocessable()->assertJsonValidationErrors(['status']);
+        $this->actingAs($this->ops)->postJson(route('observations.raiseRisk', $observation), ['risk_level_slug' => 'critical', 'reason' => 'x'])
+            ->assertUnprocessable()->assertJsonValidationErrors(['status']);
+
+        $fresh = $observation->fresh();
+        $this->assertSame('open', $fresh->status);
+        $this->assertNull($fresh->close_reason);
+        $this->assertSame($this->maintenance->id, (int) $fresh->responsible_department_id);
+        $this->assertSame($this->risks['medium']->id, (int) $fresh->risk_level_id);
+    }
+
+    public function test_photo_and_evidence_links_are_built_from_relative_paths_only(): void
+    {
+        $observation = $this->observation(Seeds::branch('Heliopolis'));
+        ObservationPhoto::create(['observation_id' => $observation->id, 'path' => 'http://evil.example/x.png', 'kind' => 'before', 'uploaded_by' => $this->recorder->id]);
+        ObservationPhoto::create(['observation_id' => $observation->id, 'path' => 'evidence/observations/1/ok.jpg', 'kind' => 'before', 'uploaded_by' => $this->recorder->id]);
+        $ticket = $this->ticketFor($observation, 'MAI-0009');
+        TicketUpdate::create(['ticket_id' => $ticket->id, 'action' => 'evidence', 'evidence_path' => '//evil.example/y.png', 'evidence_kind' => 'before']);
+
+        $this->actingAs($this->ops)->get(route('observations.show', $observation))
+            ->assertOk()
+            ->assertSee(asset('storage/evidence/observations/1/ok.jpg'))
+            ->assertDontSee('evil.example');
     }
 }

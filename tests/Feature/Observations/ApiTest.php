@@ -403,7 +403,7 @@ class ApiTest extends TestCase
             'items' => [
                 [
                     'kind' => 'issue', 'description' => 'نقطة حرة', 'responsible_department_id' => $this->operation->id,
-                    'cc_department_ids' => [$this->stock->id], 'photos' => ['evidence/observations/1/cam.jpg'], 'photo_source' => 'camera',
+                    'cc_department_ids' => [$this->stock->id], 'photos' => ["evidence/observations/{$visit->id}/cam.jpg"], 'photo_source' => 'camera',
                 ],
                 // A catalog quick-pick needs no text: the description falls back to the catalog label.
                 ['catalog_item_id' => $item->id, 'kind' => 'issue'],
@@ -557,7 +557,7 @@ class ApiTest extends TestCase
             ->assertUnprocessable()->assertJsonValidationErrors(['notes']);
 
         $response = $this->postJson("/api/observations/{$observation->id}/verify", [
-            'result' => 'resolved', 'notes' => 'تمام', 'photo_path' => 'evidence/observations/check.jpg',
+            'result' => 'resolved', 'notes' => 'تمام', 'photo_path' => "evidence/observations/{$observation->observation_visit_id}/check.jpg",
         ])->assertOk()->assertJsonStructure([
             'message',
             'verification' => ['id', 'result', 'notes', 'verified_by' => ['id', 'name'], 'verified_at'],
@@ -567,7 +567,7 @@ class ApiTest extends TestCase
         $this->assertSame('verified_closed', $response->json('observation.status'));
         $this->assertSame($this->recorder->id, $response->json('verification.verified_by.id'));
         $this->assertSame('verified_closed', $observation->fresh()->status);
-        $this->assertTrue(ObservationPhoto::where('observation_id', $observation->id)->where('path', 'evidence/observations/check.jpg')->exists());
+        $this->assertTrue(ObservationPhoto::where('observation_id', $observation->id)->where('path', "evidence/observations/{$observation->observation_visit_id}/check.jpg")->exists());
     }
 
     public function test_pending_verification_lists_branch_rows(): void
