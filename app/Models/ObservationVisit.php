@@ -11,13 +11,13 @@ class ObservationVisit extends Model
 {
     public const TYPES = ['field', 'desk'];
 
-    public const STATUSES = ['draft', 'submitted'];
+    public const STATUSES = ['draft', 'submitted', 'approved'];
 
     public const SOURCES = ['mobile', 'web', 'import'];
 
     protected $fillable = [
         'code', 'type', 'department_id', 'branch_id', 'user_id', 'visit_date',
-        'started_at', 'submitted_at', 'checkin_latitude', 'checkin_longitude',
+        'started_at', 'submitted_at', 'approved_by', 'approved_at', 'checkin_latitude', 'checkin_longitude',
         'checkin_simulated', 'status', 'general_notes', 'source',
     ];
 
@@ -25,6 +25,7 @@ class ObservationVisit extends Model
         'visit_date' => 'date',
         'started_at' => 'datetime',
         'submitted_at' => 'datetime',
+        'approved_at' => 'datetime',
         'checkin_simulated' => 'boolean',
         'checkin_latitude' => 'float',
         'checkin_longitude' => 'float',
@@ -60,6 +61,12 @@ class ObservationVisit extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** The manager who approved the visit (tickets were created at that moment). */
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function observations(): HasMany
