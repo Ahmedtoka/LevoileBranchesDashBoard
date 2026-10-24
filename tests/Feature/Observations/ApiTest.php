@@ -392,6 +392,49 @@ class ApiTest extends TestCase
         ])->assertForbidden();
     }
 
+    public function test_upsert_accepts_photo_source_cc_and_catalog_quick_pick(): void
+    {
+        $category = $this->category($this->cctv, ['default_cc_department_ids' => null]);
+        $item = $this->catalog($category, ['label_ar' => 'كاميرا مطفية']);
+        $visit = $this->visit();
+        Sanctum::actingAs($this->recorder);
+
+        $response = $this->postJson("/api/observation-visits/{$visit->id}/observations", [
+            'items' => [
+                [
+                    'kind' => 'issue', 'description' => 'نقطة حرة', 'responsible_department_id' => $this->operation->id,
+                    'cc_department_ids' => [$this->stock->id], 'photos' => ['evidence/observations/1/cam.jpg'], 'photo_source' => 'camera',
+                ],
+                // A catalog quick-pick needs no text: the description falls back to the catalog label.
+                ['catalog_item_id' => $item->id, 'kind' => 'issue'],
+            ],
+        ])->assertOk();
+
+        $free = Observation::findOrFail($response->json('data.0.id'));
+        $this->assertSame([$this->stock->id], $free->cc_department_ids);
+        $this->assertSame([['id' => $this->stock->id, 'name' => $this->stock->name]], $response->json('data.0.cc_departments'));
+        $this->assertSame('camera', ObservationPhoto::where('observation_id', $free->id)->value('source'));
+        $this->assertSame('كاميرا مطفية', $response->json('data.1.description'));
+
+        $this->postJson("/api/observation-visits/{$visit->id}/observations", [
+            'items' => [['kind' => 'issue', 'photo_source' => 'scanner', 'cc_department_ids' => [999999]]],
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors(['items.0.description', 'items.0.photo_source', 'items.0.cc_department_ids.0']);
+    }
+
+    public function test_store_rejects_department_the_user_cannot_report_for(): void
+    {
+        Sanctum::actingAs($this->recorder);
+        $this->postJson('/api/observation-visits', ['type' => 'desk', 'visit_date' => '2026-10-22', 'department_id' => $this->stock->id])
+            ->assertUnprocessable()->assertJsonValidationErrors(['department_id']);
+        $this->assertSame(0, ObservationVisit::count());
+
+        Sanctum::actingAs(Seeds::user('super_admin'));
+        $response = $this->postJson('/api/observation-visits', ['type' => 'desk', 'visit_date' => '2026-10-22', 'department_id' => $this->stock->id])
+            ->assertCreated();
+        $this->assertSame(['id' => $this->stock->id, 'name' => $this->stock->name], $response->json('visit.department'));
+    }
+
     public function test_index_is_scoped_for_store_manager(): void
     {
         $own = $this->observation($this->visit(), ['title' => 'فرعي']);
@@ -584,7 +627,12 @@ class ApiTest extends TestCase
         $observation = $this->waitingVerification();
         AiClassification::create([
             'observation_visit_id' => $observation->observation_visit_id, 'observation_id' => $observation->id,
-            'request_hash' => sha1('z'), 'input_text' => 'باب', 'status' => 'skipped',
+            'request_hash' => sha1('z'), 'input_text' => 'باب', 'status' => 'failed',
+        ]);
+        // A later check linked to the same observation: show returns the latest row.
+        $latest = AiClassification::create([
+            'observation_visit_id' => $observation->observation_visit_id, 'observation_id' => $observation->id,
+            'request_hash' => sha1('z2'), 'input_text' => 'باب', 'status' => 'skipped',
         ]);
         $observation->update(['cc_department_ids' => [$this->stock->id]]);
 
@@ -606,5 +654,6 @@ class ApiTest extends TestCase
         $this->assertSame('2026-10-22', $response->json('observation.event_date'));
         $this->assertSame([], $response->json('verifications'));
         $this->assertSame('skipped', $response->json('classification.status'));
+        $this->assertSame($latest->id, $response->json('classification.id'));
     }
 }

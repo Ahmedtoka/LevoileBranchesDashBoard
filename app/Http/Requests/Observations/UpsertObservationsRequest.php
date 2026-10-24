@@ -31,12 +31,15 @@ class UpsertObservationsRequest extends FormRequest
             'items.*.risk_override_reason' => ['nullable', 'string', 'max:1000'],
             'items.*.responsible_department_id' => ['nullable', 'integer', 'exists:departments,id'],
             'items.*.title' => ['nullable', 'string', 'max:191'],
-            'items.*.description' => ['required', 'string', 'max:5000'],
+            'items.*.description' => ['required_without:items.*.catalog_item_id', 'nullable', 'string', 'max:5000'],
             'items.*.product_or_area' => ['nullable', 'string', 'max:191'],
             'items.*.extra_values' => ['nullable', 'array'],
             'items.*.rating' => ['nullable', 'in:good,average,poor'],
             'items.*.photos' => ['nullable', 'array'],
             'items.*.photos.*' => ['string', 'max:255'],
+            'items.*.photo_source' => ['nullable', 'in:camera,gallery'],
+            'items.*.cc_department_ids' => ['nullable', 'array'],
+            'items.*.cc_department_ids.*' => ['integer', 'exists:departments,id'],
             'items.*.ai_classification_id' => ['nullable', 'integer', 'exists:ai_classifications,id'],
         ];
     }
@@ -45,7 +48,7 @@ class UpsertObservationsRequest extends FormRequest
     {
         return [
             'items.required' => 'أضف ملاحظة واحدة على الأقل.',
-            'items.*.description.required' => 'وصف الملاحظة مطلوب.',
+            'items.*.description.required_without' => 'وصف الملاحظة مطلوب.',
         ];
     }
 

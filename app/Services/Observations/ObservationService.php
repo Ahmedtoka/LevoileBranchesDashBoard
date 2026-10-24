@@ -15,6 +15,7 @@ use App\Models\RiskLevel;
 use App\Models\Ticket;
 use App\Models\TicketUpdate;
 use App\Models\User;
+use App\Services\Observations\Ai\ClassificationBatch;
 use App\Services\TicketService;
 use App\Support\ObservationScope;
 use Carbon\Carbon;
@@ -57,6 +58,10 @@ class ObservationService
             throw ValidationException::withMessages(['branch_id' => dt('الفرع مطلوب للزيارة الميدانية.', 'A field visit requires a branch.')]);
         }
 
+        if (! empty($data['department_id']) && ! $this->reportingDepartmentsFor($u)->contains('id', (int) $data['department_id'])) {
+            throw ValidationException::withMessages(['department_id' => dt('لا يمكنك التسجيل باسم هذه الإدارة.', 'You may not record observations for this department.')]);
+        }
+
         $departmentId = ! empty($data['department_id']) ? (int) $data['department_id'] : $u->defaultReportingDepartmentId();
         if ($departmentId === null) {
             throw ValidationException::withMessages(['department_id' => dt('تعذّر تحديد الإدارة المُبلِّغة.', 'The reporting department could not be determined.')]);
@@ -93,6 +98,43 @@ class ObservationService
         }
 
         return Department::where('is_reporting', true)->whereKey($u->department_id ?? 0)->get(['id', 'slug', 'name']);
+    }
+
+    /**
+     * Persist one ai_classifications row per checked point (spec section 8): `request_hash` =
+     * sha1(department|text), `suggested` = the matching result (null when the classifier gave none), the
+     * batch status / model / error / latency on every row, and the batch token totals on the FIRST row
+     * only (null on the others) so sums over the table stay correct.
+     *
+     * @param  array<int, array{0:int, 1:string}>  $points  [[index, text], ...]
+     * @return list<AiClassification> the created rows, in point order
+     */
+    public function recordClassifications(ObservationVisit $v, array $points, ClassificationBatch $batch): array
+    {
+        $byIndex = [];
+        foreach ($batch->results as $result) {
+            $byIndex[$result->index] = $result;
+        }
+
+        return DB::transaction(function () use ($v, $points, $batch, $byIndex) {
+            $rows = [];
+            foreach (array_values($points) as $n => [$index, $text]) {
+                $rows[] = AiClassification::create([
+                    'observation_visit_id' => $v->id,
+                    'request_hash' => sha1($v->department_id.'|'.$text),
+                    'input_text' => $text,
+                    'suggested' => isset($byIndex[$index]) ? $byIndex[$index]->toArray() : null,
+                    'model' => $batch->model,
+                    'status' => $batch->status,
+                    'error' => $batch->error,
+                    'latency_ms' => $batch->latencyMs,
+                    'input_tokens' => $n === 0 ? $batch->inputTokens : null,
+                    'output_tokens' => $n === 0 ? $batch->outputTokens : null,
+                ]);
+            }
+
+            return $rows;
+        });
     }
 
     /**
@@ -733,9 +775,20 @@ class ObservationService
         $this->addPhotos($observation, (array) ($item['photos'] ?? []), $item['photo_source'] ?? 'gallery', $u);
 
         if (! empty($item['ai_classification_id'])) {
+            // Link the suggestion and record what the employee kept, read from the saved row.
             AiClassification::where('id', $item['ai_classification_id'])
                 ->where(fn ($q) => $q->where('observation_visit_id', $v->id)->orWhereNull('observation_visit_id'))
-                ->update(['observation_id' => $observation->id]);
+                ->first()
+                ?->update([
+                    'observation_id' => $observation->id,
+                    'employee_final' => [
+                        'catalog_item_id' => $observation->catalog_item_id,
+                        'category_id' => $observation->category_id,
+                        'kind' => $observation->kind,
+                        'risk_level' => $observation->risk_level_id ? RiskLevel::whereKey($observation->risk_level_id)->value('slug') : null,
+                        'responsible_department_id' => $observation->responsible_department_id,
+                    ],
+                ]);
         }
 
         return $observation;

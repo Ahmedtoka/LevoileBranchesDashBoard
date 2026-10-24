@@ -111,7 +111,8 @@ class Observation extends Model
 
     public function classification(): HasOne
     {
-        return $this->hasOne(AiClassification::class, 'observation_id');
+        // The latest suggestion linked to this observation (a re-check links a newer row).
+        return $this->hasOne(AiClassification::class, 'observation_id')->latestOfMany();
     }
 
     public function creator(): BelongsTo

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Observations\AiCheckRequest;
 use App\Http\Requests\Observations\StoreObservationVisitRequest;
+use App\Http\Requests\Observations\SubmitObservationVisitRequest;
 use App\Http\Requests\Observations\UploadObservationPhotoRequest;
 use App\Http\Requests\Observations\UpsertObservationsRequest;
 use App\Http\Resources\Observations\ObservationItem;
@@ -13,14 +14,12 @@ use App\Models\AiClassification;
 use App\Models\Observation;
 use App\Models\ObservationVisit;
 use App\Models\Ticket;
-use App\Services\Observations\Ai\ClassificationResult;
 use App\Services\Observations\Ai\ClassifierContract;
 use App\Services\Observations\ObservationService;
 use App\Support\ObservationScope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Observation visits (spec section 11). Thin: validate (FormRequest) -> authorize (policy) -> service -> serialize.
@@ -122,37 +121,17 @@ class ObservationVisitController extends Controller
         $points = array_map(fn (array $p) => [(int) $p['index'], (string) $p['text']], array_values($request->input('points')));
         $batch = app(ClassifierContract::class)->classify((int) $visit->department_id, $visit->branch_id, $points);
 
-        $byIndex = [];
-        foreach ($batch->results as $result) {
-            /** @var ClassificationResult $result */
-            $byIndex[$result->index] = $result;
+        $created = $this->service->recordClassifications($visit, $points, $batch);
+
+        // Row id per point index, to tag each result with its ai_classification_id.
+        $rowIdOf = [];
+        foreach ($created as $n => $row) {
+            $rowIdOf[$points[$n][0]] = $row->id;
         }
-
-        $rows = DB::transaction(function () use ($points, $byIndex, $batch, $visit) {
-            $rows = [];
-            foreach ($points as $n => [$index, $text]) {
-                $rows[$index] = AiClassification::create([
-                    'observation_visit_id' => $visit->id,
-                    'request_hash' => sha1($visit->department_id.'|'.$text),
-                    'input_text' => $text,
-                    'suggested' => isset($byIndex[$index]) ? $byIndex[$index]->toArray() : null,
-                    'model' => $batch->model,
-                    'status' => $batch->status,
-                    'error' => $batch->error,
-                    'latency_ms' => $batch->latencyMs,
-                    // Batch totals on the first row only, so sums over the table stay correct.
-                    'input_tokens' => $n === 0 ? $batch->inputTokens : null,
-                    'output_tokens' => $n === 0 ? $batch->outputTokens : null,
-                ]);
-            }
-
-            return $rows;
-        });
-
         $results = [];
         foreach ($batch->results as $result) {
-            if (isset($rows[$result->index])) {
-                $results[] = $result->toArray() + ['ai_classification_id' => $rows[$result->index]->id];
+            if (isset($rowIdOf[$result->index])) {
+                $results[] = $result->toArray() + ['ai_classification_id' => $rowIdOf[$result->index]];
             }
         }
 
@@ -160,7 +139,7 @@ class ObservationVisitController extends Controller
             'status' => $batch->status,
             'message' => $batch->status === 'ok' ? null : self::AI_UNAVAILABLE,
             'results' => $results,
-            'classification_ids' => array_values(array_map(fn (AiClassification $c) => $c->id, $rows)),
+            'classification_ids' => array_map(fn (AiClassification $c) => $c->id, $created),
         ]);
     }
 
@@ -170,23 +149,11 @@ class ObservationVisitController extends Controller
         $u = $request->user();
         $this->allow($u->can('update', $visit));
 
-        $items = array_values($request->validated('items'));
-        $saved = $this->service->upsertObservations($visit, $items, $u);
-
-        // Record what the employee kept of each AI suggestion, read from the saved row.
-        foreach ($items as $i => $item) {
-            if (empty($item['ai_classification_id']) || ! isset($saved[$i])) {
-                continue;
-            }
-            $o = $saved[$i];
-            AiClassification::whereKey($item['ai_classification_id'])->update(['employee_final' => json_encode([
-                'catalog_item_id' => $o->catalog_item_id,
-                'category_id' => $o->category_id,
-                'kind' => $o->kind,
-                'risk_level' => $o->riskLevel?->slug,
-                'responsible_department_id' => $o->responsible_department_id,
-            ], JSON_UNESCAPED_UNICODE)]);
-        }
+        // validated() builds the array rule by rule, so an item may come out of order: restore the input order
+        // (the response and the service's `items.{i}` error keys follow it).
+        $items = $request->validated('items');
+        ksort($items);
+        $saved = $this->service->upsertObservations($visit, array_values($items), $u);
 
         $rows = Observation::with(ObservationItem::WITH)->whereIn('id', $saved->pluck('id'))->get()->keyBy('id');
 
@@ -196,7 +163,7 @@ class ObservationVisitController extends Controller
     }
 
     /** POST /api/observation-visits/{visit}/submit */
-    public function submit(Request $request, ObservationVisit $visit): JsonResponse
+    public function submit(SubmitObservationVisitRequest $request, ObservationVisit $visit): JsonResponse
     {
         $u = $request->user();
         $this->allow($u->can('submit', $visit));
