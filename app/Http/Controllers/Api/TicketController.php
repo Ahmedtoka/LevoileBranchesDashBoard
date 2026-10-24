@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Exceptions\TicketTransitionDenied;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Tickets\ReplyTicketRequest;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Services\TicketService;
@@ -191,6 +192,26 @@ class TicketController extends Controller
         $this->service->addEvidence($ticket, $path, $data['kind'] ?? 'after', $request->user());
 
         return response()->json(['message' => 'Evidence uploaded.', 'url' => asset('storage/'.$path)]);
+    }
+
+    /** POST /api/tickets/{ticket}/reply (Plan H) — the responsible department answers: working | solved, with a note. */
+    public function reply(ReplyTicketRequest $request, Ticket $ticket): JsonResponse
+    {
+        $user = $request->user();
+        if (! $this->service->canReply($ticket, $user)) {
+            return response()->json(['message' => 'غير مصرح.'], 403);
+        }
+
+        try {
+            $ticket = $this->service->reply($ticket, $user, (string) $request->input('state'), (string) $request->input('note'), $request->input('photo_path'));
+        } catch (TicketTransitionDenied $e) {
+            return response()->json(['message' => $e->getMessage()], $e->status);
+        }
+
+        return response()->json([
+            'message' => $request->input('state') === 'solved' ? 'تم إرسال الحل للاعتماد.' : 'تم تسجيل الرد.',
+            'ticket' => $this->item($ticket->fresh(['branch', 'department', 'assignee', 'creator', 'question']), true),
+        ]);
     }
 
     /** POST /api/tickets/{ticket}/decline — technician rejects an assigned task (note required). */
