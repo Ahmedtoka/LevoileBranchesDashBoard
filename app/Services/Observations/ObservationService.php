@@ -29,6 +29,9 @@ class ObservationService
     /** Ticket statuses meaning someone is working on it: the observation shows `in_progress`. */
     private const TICKET_WORKING = ['assigned', 'on_the_way', 'in_progress'];
 
+    /** Management roles that may record for any reporting department (others: their own one only). */
+    public const ALL_DEPARTMENTS_ROLES = ['super_admin', 'ops_manager', 'area_manager', 'branch_director', 'vm_manager'];
+
     public function __construct(private ?RiskResolver $resolver = null, private ?TicketService $tickets = null)
     {
         $this->resolver ??= new RiskResolver;
@@ -37,7 +40,7 @@ class ObservationService
 
     /**
      * Start a draft visit. Keys: department_id?, branch_id?, type, visit_date, checkin_latitude?,
-     * checkin_longitude?, simulated?, source.
+     * checkin_longitude?, simulated?, general_notes?, source.
      */
     public function createVisit(User $u, array $data): ObservationVisit
     {
@@ -72,8 +75,24 @@ class ObservationService
             'checkin_longitude' => $data['checkin_longitude'] ?? null,
             'checkin_simulated' => (bool) ($data['simulated'] ?? false),
             'status' => 'draft',
+            'general_notes' => $data['general_notes'] ?? null,
             'source' => $data['source'],
         ]));
+    }
+
+    /**
+     * Reporting departments the user may record observations for: every `is_reporting` department for
+     * management roles, else the user's own department when it is reporting, else none.
+     *
+     * @return Collection<int, Department>
+     */
+    public function reportingDepartmentsFor(User $u): Collection
+    {
+        if ($u->hasRole(self::ALL_DEPARTMENTS_ROLES)) {
+            return Department::where('is_reporting', true)->orderBy('name')->get(['id', 'slug', 'name']);
+        }
+
+        return Department::where('is_reporting', true)->whereKey($u->department_id ?? 0)->get(['id', 'slug', 'name']);
     }
 
     /**

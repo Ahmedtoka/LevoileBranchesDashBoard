@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\Observations\ObservationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -56,6 +57,8 @@ class AuthController extends Controller
 
     protected function userPayload($user): array
     {
+        $isReporting = $user->isReportingUser();
+
         return [
             'id' => $user->id,
             'name' => $user->name,
@@ -69,6 +72,12 @@ class AuthController extends Controller
             'branch_name' => optional($user->branch)->branch_name,
             'is_department_manager' => (bool) $user->is_department_manager,
             'avatar_url' => $user->avatar_path ? asset('storage/'.$user->avatar_path) : null,
+            // Observations module: the Flutter app shows the Observations tab when true.
+            'is_reporting_user' => $isReporting,
+            'reporting_departments' => $isReporting
+                ? app(ObservationService::class)->reportingDepartmentsFor($user)
+                    ->map(fn ($d) => ['id' => $d->id, 'slug' => $d->slug, 'name' => $d->name])->values()->all()
+                : [],
         ];
     }
 }
