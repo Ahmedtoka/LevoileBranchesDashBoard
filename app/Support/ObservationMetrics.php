@@ -118,7 +118,7 @@ class ObservationMetrics
     private function visits(DateRange $r): Builder
     {
         $q = ObservationScope::apply(ObservationVisit::query(), $this->user, 'branch_id', 'department_id')
-            ->where('observation_visits.status', 'submitted');
+            ->whereIn('observation_visits.status', ['submitted', 'approved']);
         if (! ObservationFilters::isAll($r)) {
             $r->apply($q, 'observation_visits.visit_date');
         }

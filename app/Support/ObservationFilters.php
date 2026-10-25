@@ -142,7 +142,7 @@ class ObservationFilters
     /** Ids of the submitted visits, as a subquery (the draft exclusion of applyWithoutRange). */
     public static function submittedVisitIds(): QueryBuilder
     {
-        return DB::table('observation_visits')->where('observation_visits.status', 'submitted')->select('observation_visits.id');
+        return DB::table('observation_visits')->whereIn('observation_visits.status', ['submitted', 'approved'])->select('observation_visits.id');
     }
 
     /** Only the active filters (plus the date range), ready for route('observations.index', ...). */
