@@ -18,5 +18,7 @@
     <a href="{{ route('observations.beforeAfter') }}" class="{{ request()->routeIs('observations.beforeAfter') ? 'active' : '' }}"><i class="bi bi-arrow-left-right me-2"></i>{{ t('obs.nav.before_after','كنا وبقينا') }}</a>
     @if($obsNavDashboard)
         <a href="{{ route('observations.dashboard') }}" class="{{ request()->routeIs('observations.dashboard') ? 'active' : '' }}"><i class="bi bi-speedometer me-2"></i>{{ t('obs.nav.dashboard','داشبورد الإدارات') }}</a>
+        <a href="{{ route('observations.weekly') }}" class="{{ request()->routeIs('observations.weekly') ? 'active' : '' }}"><i class="bi bi-calendar-week me-2"></i>{{ t('obs.nav.weekly','تقرير الأسبوع') }}</a>
+        <a href="{{ route('observations.employees') }}" class="{{ request()->routeIs('observations.employees') ? 'active' : '' }}"><i class="bi bi-person-badge me-2"></i>{{ t('obs.nav.employees','تقرير الموظفين') }}</a>
     @endif
 @endif

@@ -22,6 +22,12 @@
                 <dt class="col-4">Comment</dt><dd class="col-8" dir="auto">{{ $ticket->description ?? '—' }}</dd>
                 <dt class="col-4">Due</dt><dd class="col-8">{{ optional($ticket->due_at)->format('d M Y H:i') ?? '—' }} @if($ticket->isOverdue())<span class="badge text-bg-danger">Overdue</span>@endif</dd>
                 <dt class="col-4">Reopened</dt><dd class="col-8">{{ $ticket->reopen_count }}×</dd>
+                @if($ticket->source === 'observation' && $ticket->observation)
+                    <dt class="col-4">{{ dt('الملاحظة', 'Observation') }}</dt><dd class="col-8"><a href="{{ route('observations.show', $ticket->observation) }}">{{ $ticket->observation->reference }}</a></dd>
+                    @if($ticket->observation->employee_name)<dt class="col-4">{{ dt('الموظف', 'Employee') }}</dt><dd class="col-8" dir="auto">{{ $ticket->observation->employee_name }}</dd>@endif
+                    @if($ticket->observation->penalty)<dt class="col-4">{{ dt('الجزاء', 'Penalty') }}</dt><dd class="col-8" dir="auto">{{ $ticket->observation->penalty }}</dd>@endif
+                    @if($ticket->observation->follow_up_at)<dt class="col-4">{{ dt('تاريخ المتابعة', 'Follow-up') }}</dt><dd class="col-8">{{ $ticket->observation->follow_up_at->format('Y-m-d') }}</dd>@endif
+                @endif
             </dl>
         </div>
 

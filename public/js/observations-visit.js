@@ -478,6 +478,7 @@
             responsible_department_id: null,
             description: '',
             product_or_area: '',
+            employee_name: '',
             extra_values: {},
             rating: '',
             photos: [],          // [{path, url}] uploaded once, reused for every visit
@@ -565,6 +566,8 @@
                     <textarea class="form-control form-control-sm" rows="2" data-field="description" dir="auto">${esc(row.description)}</textarea></div>
                 <div class="col-md-4"><label class="form-label small text-muted mb-0">${esc(T.product_or_area)}</label>
                     <input type="text" class="form-control form-control-sm" data-field="product_or_area" value="${esc(row.product_or_area)}" dir="auto"></div>
+                <div class="col-md-4"><label class="form-label small text-muted mb-0">${esc(T.employee)}</label>
+                    <input type="text" class="form-control form-control-sm" data-field="employee_name" value="${esc(row.employee_name || '')}" dir="auto" maxlength="191"></div>
                 ${(eff.item?.extra_fields || []).map((f) => extraFieldInput(row, f)).join('')}
                 <div class="col-12"><label class="form-label small text-muted mb-0"><i class="bi bi-image"></i> ${esc(T.photos)}</label>
                     <div class="d-flex flex-wrap align-items-center gap-2">
@@ -668,7 +671,7 @@
             const row = rowOf(e.target);
             if (!row) return;
             const field = e.target.dataset.field;
-            if (field === 'description' || field === 'product_or_area' || field === 'risk_override_reason') {
+            if (field === 'description' || field === 'product_or_area' || field === 'employee_name' || field === 'risk_override_reason') {
                 row[field] = e.target.value;
                 scheduleSave();
             } else if (e.target.dataset.extra && e.target.tagName !== 'SELECT') {
@@ -735,6 +738,7 @@
         }
 
         if (row.product_or_area.trim()) item.product_or_area = row.product_or_area.trim();
+        if ((row.employee_name || '').trim()) item.employee_name = row.employee_name.trim();
         const extras = Object.fromEntries(Object.entries(row.extra_values).filter(([, v]) => v !== '' && v !== null));
         if (Object.keys(extras).length) item.extra_values = extras;
         if (row.photos.length) { item.photos = row.photos.map((p) => p.path); item.photo_source = 'gallery'; }
@@ -994,6 +998,7 @@
             responsible_department_id: o.responsible_department?.id ?? null,
             description: o.description || '',
             product_or_area: o.product_or_area || '',
+            employee_name: o.employee_name || '',
             extra_values: plainObject(o.extra_values),
             rating: o.rating || '',
             photos: (o.photos || []).map((p) => ({ path: p.path, url: p.url })),

@@ -181,6 +181,8 @@ class TranslationSeeder extends Seeder
             ['obs', 'obs.nav.new_visit', 'زيارة ملاحظات جديدة', 'New observation visit'],
             ['obs', 'obs.nav.before_after', 'كنا وبقينا', 'Before and after'],
             ['obs', 'obs.nav.dashboard', 'داشبورد الإدارات', 'Departments dashboard'],
+            ['obs', 'obs.nav.weekly', 'تقرير الأسبوع', 'Weekly report'],
+            ['obs', 'obs.nav.employees', 'تقرير الموظفين', 'Employee report'],
             ['obs', 'obs.nav.settings', 'إعدادات الملاحظات', 'Observation settings'],
             ['obs', 'obs.nav.review', 'اعتماد التصنيفات', 'Classification review'],
             ['obs', 'obs.nav.categories', 'فئات الملاحظات', 'Observation categories'],

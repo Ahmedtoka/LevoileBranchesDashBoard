@@ -83,6 +83,21 @@
                     <dd class="col-8">{{ $observation->rating }}</dd>
                 @endif
 
+                @if($observation->employee_name)
+                    <dt class="col-4">{{ dt('الموظف', 'Employee') }}</dt>
+                    <dd class="col-8" dir="auto"><a href="{{ route('observations.index', ['range' => \App\Support\ObservationFilters::ALL, 'employee' => $observation->employee_name]) }}" class="text-decoration-none">{{ $observation->employee_name }}</a></dd>
+                @endif
+
+                @if($observation->penalty)
+                    <dt class="col-4">{{ dt('الجزاء', 'Penalty') }}</dt>
+                    <dd class="col-8" dir="auto">{{ $observation->penalty }}</dd>
+                @endif
+
+                @if($observation->follow_up_at)
+                    <dt class="col-4">{{ dt('تاريخ المتابعة', 'Follow-up date') }}</dt>
+                    <dd class="col-8">{{ $observation->follow_up_at->format('Y-m-d') }} @if($observation->follow_up_at->isPast() && ! in_array($observation->status, ['verified_closed', 'closed_no_action', 'positive'], true))<span class="badge text-bg-warning">{{ dt('حان موعدها', 'Due') }}</span>@endif</dd>
+                @endif
+
                 <dt class="col-4">{{ dt('مرات التكرار', 'Repeat count') }}</dt>
                 <dd class="col-8">{{ $observation->repeat_count }}</dd>
 

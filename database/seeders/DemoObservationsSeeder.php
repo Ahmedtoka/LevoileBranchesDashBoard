@@ -191,7 +191,8 @@ class DemoObservationsSeeder extends Seeder
 
         [$late, $cash, $fitA] = $this->record($visitA, $cctv, $atA, [
             ['catalog_item_id' => $this->catalog['CCTV-OPEN-LATE'], 'description' => 'الفرع فتح متأخر 35 دقيقة عن الميعاد',
-                'extra_values' => ['minutes_late' => 35, 'employee' => 'أحمد سمير'], 'photos' => [$this->photo($visitA, 'before')]],
+                'extra_values' => ['minutes_late' => 35, 'employee' => 'أحمد سمير'], 'penalty' => 'إنذار شفهي', 'follow_up_at' => $atA->copy()->addDays(7)->toDateString(),
+                'photos' => [$this->photo($visitA, 'before')]],
             ['catalog_item_id' => $this->catalog['CCTV-CASH-COUNT-ALONE'], 'description' => 'الكاشير بيعد النقدية لوحده آخر اليوم',
                 'photos' => [$this->photo($visitA, 'before')]],
             ['catalog_item_id' => $this->catalog['CCTV-FIT-OVER-5'], 'description' => 'عميلة دخلت الفيتنج بـ 8 قطع',

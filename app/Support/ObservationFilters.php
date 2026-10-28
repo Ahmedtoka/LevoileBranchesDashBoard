@@ -48,7 +48,7 @@ class ObservationFilters
     public static function fromRequest(Request $request): self
     {
         $values = [];
-        $keys = array_merge(array_keys(self::COLUMNS), ['area_id', 'risk', 'outside_catalog', 'q']);
+        $keys = array_merge(array_keys(self::COLUMNS), ['area_id', 'risk', 'outside_catalog', 'q', 'employee']);
 
         foreach ($keys as $key) {
             $value = $request->query($key);
@@ -125,6 +125,10 @@ class ObservationFilters
 
         if (isset($this->values['outside_catalog'])) {
             $query->whereNull($query->qualifyColumn('catalog_item_id'));
+        }
+
+        if (isset($this->values['employee'])) {
+            $query->where($query->qualifyColumn('employee_name'), 'like', '%'.addcslashes($this->values['employee'], '%_\\').'%');
         }
 
         if (isset($this->values['q'])) {

@@ -15,7 +15,8 @@ class DemoUserController extends Controller
 
         return response()->json([
             'data' => array_map(
-                fn (array $u) => array_intersect_key($u, array_flip(['email', 'name', 'role', 'hint'])),
+                fn (array $u) => array_intersect_key($u, array_flip(['email', 'name', 'role', 'hint', 'group']))
+                    + ['group_label' => DemoUsersSeeder::GROUPS[$u['group']] ?? $u['group']],
                 DemoUsersSeeder::users()
             ),
         ]);

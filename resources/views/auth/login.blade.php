@@ -35,11 +35,14 @@
     </div>
 
     @if(config('app.demo_login'))
-        <div class="card p-4 mt-4 w-100" style="max-width: 760px;">
-            <h5 class="fw-bold mb-3"><i class="bi bi-lightning-charge"></i> {{ dt('دخول سريع للتجربة', 'Quick demo login') }}</h5>
+        <div class="card p-4 mt-4 w-100" style="max-width: 1100px;">
+            <h5 class="fw-bold mb-1"><i class="bi bi-lightning-charge"></i> {{ dt('دخول سريع للتجربة', 'Quick demo login') }}</h5>
+            <p class="text-muted small mb-3">{{ dt('اضغط على أي كارت يدخل على طول. الباسورد لكلهم', 'Tap any card to sign in. The password for everyone is') }} <code>password</code>.</p>
+            @foreach(\Database\Seeders\DemoUsersSeeder::grouped() as $groupLabel => $groupUsers)
+            <h6 class="fw-bold text-primary mt-3 mb-2 border-bottom pb-1">{{ $groupLabel }} <span class="badge text-bg-light border">{{ count($groupUsers) }}</span></h6>
             <div class="row g-2">
-                @foreach(\Database\Seeders\DemoUsersSeeder::users() as $demo)
-                    <div class="col-12 col-md-6">
+                @foreach($groupUsers as $demo)
+                    <div class="col-12 col-md-6 col-xl-4">
                         <form method="POST" action="{{ route('login.quick') }}">
                             @csrf
                             <input type="hidden" name="email" value="{{ $demo['email'] }}">
@@ -54,6 +57,7 @@
                     </div>
                 @endforeach
             </div>
+            @endforeach
         </div>
     @endif
 </div>

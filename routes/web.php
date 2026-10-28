@@ -111,6 +111,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/observations/new', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'create'])->name('observations.create');
     Route::get('/observations/dashboard', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'dashboard'])->name('observations.dashboard');
     Route::get('/observations/before-after', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'beforeAfter'])->name('observations.beforeAfter');
+    Route::get('/observations/employees', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'employees'])->name('observations.employees');
+    Route::get('/observations/weekly-report', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'weekly'])->name('observations.weekly');
     Route::get('/observations/{observation}', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'show'])->whereNumber('observation')->name('observations.show');
     Route::post('/observations/{observation}/reroute', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'reroute'])->whereNumber('observation')->name('observations.reroute');
     Route::post('/observations/{observation}/raise-risk', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'raiseRisk'])->whereNumber('observation')->name('observations.raiseRisk');

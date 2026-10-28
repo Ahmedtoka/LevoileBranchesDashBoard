@@ -28,6 +28,9 @@ class UpdateObservationRequest extends FormRequest
             'category_id' => ['nullable', 'integer', 'exists:observation_categories,id'],
             'description' => ['nullable', 'string', 'max:5000'],
             'kind' => ['nullable', Rule::in(Observation::KINDS)],
+            'employee_name' => ['nullable', 'string', 'max:191'],
+            'penalty' => ['nullable', 'string', 'max:500'],
+            'follow_up_at' => ['nullable', 'date'],
         ];
     }
 }

@@ -98,11 +98,20 @@
                 <select name="kind" class="form-select form-select-sm">
                     @foreach($kinds as $k)<option value="{{ $k }}" @selected($o->kind === $k)>{{ $kindLabels[$k] ?? $k }}</option>@endforeach
                 </select></div>
+            <div class="col-md-3"><label class="form-label small mb-0">{{ dt('الموظف (اختياري)', 'Employee (optional)') }}</label>
+                <input type="text" name="employee_name" value="{{ $o->employee_name }}" class="form-control form-control-sm" dir="auto" maxlength="191" placeholder="{{ dt('اسم الموظف المعني', 'Employee concerned') }}"></div>
+            <div class="col-md-5"><label class="form-label small mb-0">{{ dt('الجزاء (اختياري)', 'Penalty (optional)') }}</label>
+                <input type="text" name="penalty" value="{{ $o->penalty }}" class="form-control form-control-sm" dir="auto" maxlength="500" placeholder="{{ dt('مثال: إنذار شفهي / خصم يوم', 'e.g. verbal warning / one-day deduction') }}"></div>
+            <div class="col-md-2"><label class="form-label small mb-0">{{ dt('تاريخ المتابعة', 'Follow-up date') }}</label>
+                <input type="date" name="follow_up_at" value="{{ optional($o->follow_up_at)->format('Y-m-d') }}" class="form-control form-control-sm"></div>
             <div class="col-md-2"><button class="btn btn-sm btn-outline-secondary w-100"><i class="bi bi-save"></i> {{ dt('حفظ', 'Save') }}</button></div>
         </form>
         @else
             <div class="small text-muted mt-2">{{ dt('الإدارة المسؤولة', 'Responsible department') }}: <strong>{{ optional($o->responsibleDepartment)->name ?? '—' }}</strong>
-                · {{ dt('الفئة', 'Category') }}: {{ $o->category ? ($en ? $o->category->name_en : $o->category->name_ar) : '—' }}</div>
+                · {{ dt('الفئة', 'Category') }}: {{ $o->category ? ($en ? $o->category->name_en : $o->category->name_ar) : '—' }}
+                @if($o->employee_name) · {{ dt('الموظف', 'Employee') }}: {{ $o->employee_name }} @endif
+                @if($o->penalty) · {{ dt('الجزاء', 'Penalty') }}: {{ $o->penalty }} @endif
+                @if($o->follow_up_at) · {{ dt('المتابعة', 'Follow-up') }}: {{ $o->follow_up_at->format('Y-m-d') }} @endif</div>
         @endif
     </div>
 @empty

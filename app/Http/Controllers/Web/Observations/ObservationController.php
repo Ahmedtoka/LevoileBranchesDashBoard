@@ -22,7 +22,10 @@ use App\Support\DateRange;
 use App\Support\ObservationFilters;
 use App\Support\ObservationLabels;
 use App\Support\ObservationMetrics;
+use App\Support\ObservationEmployeeReport;
 use App\Support\ObservationScope;
+use App\Support\ObservationWeeklyReport;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -222,6 +225,60 @@ class ObservationController extends Controller
             'status' => $status,
             'statuses' => self::BEFORE_AFTER_STATUSES,
             'observations' => $observations,
+        ]);
+    }
+
+    /** GET /observations/employees (2026-10-28): the points grouped by employee, with the register's filters. */
+    public function employees(Request $request)
+    {
+        Gate::authorize('viewAny', Observation::class);
+
+        $user = $request->user();
+        $filters = ObservationFilters::fromRequest($request);
+
+        return view('dashboard.observations.employees', [
+            'report' => ObservationEmployeeReport::for($user, $filters),
+            'filters' => $filters,
+            'range' => $filters->range,
+            'qs' => $filters->toQueryString(),
+        ] + $this->filterOptions($user));
+    }
+
+    /**
+     * GET /observations/weekly-report?department_id=&date= (2026-10-28): one reporting department, the
+     * Saturday-Friday week containing `date` (default: this week). Department managers only get their own.
+     */
+    public function weekly(Request $request)
+    {
+        Gate::authorize('viewAny', Observation::class);
+
+        $user = $request->user();
+        $departments = app(ObservationService::class)->reportingDepartmentsFor($user);
+        if ($departments->isEmpty() && $user->hasRole(ObservationScope::BRANCH_ROLES)) {
+            // A store manager reads every reporting department's report, over their own branches (ObservationScope).
+            $departments = Department::where('is_reporting', true)->orderBy('name')->get(['id', 'slug', 'name']);
+        }
+
+        $departmentId = $request->query('department_id');
+        $department = is_scalar($departmentId) && ctype_digit((string) $departmentId) ? $departments->firstWhere('id', (int) $departmentId) : null;
+        abort_if($departmentId !== null && $departmentId !== '' && $department === null, 403);
+        $department ??= $departments->first();
+
+        $date = $request->query('date');
+        try {
+            $day = is_string($date) && $date !== '' ? Carbon::parse($date) : Carbon::now();
+        } catch (\Throwable) {
+            $day = Carbon::now();
+        }
+        [$from] = ObservationWeeklyReport::weekOf($day);
+
+        return view('dashboard.observations.weekly', [
+            'departments' => $departments,
+            'department' => $department,
+            'date' => $from->toDateString(),
+            'report' => $department ? ObservationWeeklyReport::build($user, Department::findOrFail($department->id), $day) : null,
+            'prevDate' => $from->copy()->subWeek()->toDateString(),
+            'nextDate' => $from->copy()->addWeek()->toDateString(),
         ]);
     }
 

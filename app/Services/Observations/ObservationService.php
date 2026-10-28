@@ -455,11 +455,31 @@ class ObservationService
             };
         }
 
+        foreach (['employee_name', 'penalty'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $attributes[$field] = self::text($data[$field]);
+            }
+        }
+        if (array_key_exists('follow_up_at', $data)) {
+            $attributes['follow_up_at'] = ! empty($data['follow_up_at']) ? $data['follow_up_at'] : null;
+        }
+
         if ($attributes !== []) {
             $o->update($attributes);
         }
 
         return $o->fresh();
+    }
+
+    /** Trimmed string or null when empty / not a scalar. */
+    private static function text(mixed $value): ?string
+    {
+        if (! is_scalar($value)) {
+            return null;
+        }
+        $value = trim((string) $value);
+
+        return $value === '' ? null : $value;
     }
 
     /** @return Collection<int, Observation> the visit's rows with the item relations, ordered by id */
@@ -1069,6 +1089,10 @@ class ObservationService
             'product_or_area' => $item['product_or_area'] ?? null,
             'extra_values' => $item['extra_values'] ?? null,
             'rating' => $item['rating'] ?? null,
+            // The employee a point is about: its own field, else the catalog item's `employee` extra value (CCTV).
+            'employee_name' => self::text($item['employee_name'] ?? null) ?? self::text(($item['extra_values'] ?? [])['employee'] ?? null),
+            'penalty' => self::text($item['penalty'] ?? null),
+            'follow_up_at' => ! empty($item['follow_up_at']) ? $item['follow_up_at'] : null,
             'event_date' => $v->visit_date,
             'classification_status' => $this->classificationStatus($item, $catalog, $existing),
             'status' => match ($resolved['kind']) {

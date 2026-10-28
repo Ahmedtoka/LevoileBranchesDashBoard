@@ -174,6 +174,7 @@
     'responsible' => dt('الإدارة المسؤولة', 'Responsible department'),
     'description' => dt('الوصف', 'Description'),
     'product_or_area' => dt('المنتج / المكان (اختياري)', 'Product / area (optional)'),
+    'employee' => dt('الموظف المعني (اختياري)', 'Employee concerned (optional)'),
     'rating' => dt('التقييم', 'Rating'),
     'override_reason' => dt('سبب تغيير الخطورة', 'Reason for changing the risk'),
     'override_hint' => dt('الخطورة الافتراضية:', 'Default risk:'),

@@ -120,6 +120,10 @@
             </select>
         </div>
         <div class="col-md-2 col-6">
+            <label class="form-label small mb-1">{{ dt('الموظف', 'Employee') }}</label>
+            <input name="employee" value="{{ $filters->get('employee') }}" class="form-control form-control-sm" placeholder="{{ dt('اسم الموظف', 'Employee name') }}" dir="auto">
+        </div>
+        <div class="col-md-2 col-6">
             <div class="form-check mb-1">
                 <input class="form-check-input" type="checkbox" name="outside_catalog" value="1" id="outsideCatalog" @checked($filters->get('outside_catalog'))>
                 <label class="form-check-label small" for="outsideCatalog">{{ dt('خارج الكتالوج', 'Outside catalog') }}</label>
@@ -142,6 +146,7 @@
             <th>{{ t('common.department', 'الإدارة') }}</th>
             <th>{{ dt('الفئة / البند', 'Category / item') }}</th>
             <th>{{ dt('الملاحظة', 'Observation') }}</th>
+            <th>{{ dt('الموظف', 'Employee') }}</th>
             <th>{{ dt('الريسك', 'Risk') }}</th>
             <th>{{ dt('المسؤولة', 'Responsible') }}</th>
             <th>{{ t('tk.status', 'الحالة') }}</th>
@@ -174,6 +179,7 @@
                     @endif
                 </td>
                 <td>{{ \Illuminate\Support\Str::limit($o->title, 50) }}</td>
+                <td dir="auto">{{ $o->employee_name ?: '—' }}</td>
                 <td>@include('dashboard.observations.partials.risk-badge', ['risk' => $o->riskLevel])</td>
                 <td>{{ $o->responsibleDepartment?->name ?? '—' }}</td>
                 <td>@include('dashboard.observations.partials.status-pill', ['status' => $o->status])</td>
@@ -187,7 +193,7 @@
                 <td>@if($o->ticket?->isOverdue())<span class="badge text-bg-danger">{{ dt('متأخر', 'Overdue') }}</span>@endif</td>
             </tr>
         @empty
-            <tr><td colspan="11" class="text-muted small p-3">{{ dt('لا توجد ملاحظات في الفترة.', 'No observations in this period.') }}</td></tr>
+            <tr><td colspan="12" class="text-muted small p-3">{{ dt('لا توجد ملاحظات في الفترة.', 'No observations in this period.') }}</td></tr>
         @endforelse
         </tbody>
     </table>

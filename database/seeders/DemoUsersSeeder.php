@@ -22,31 +22,89 @@ class DemoUsersSeeder extends Seeder
 {
     public const PASSWORD = 'password';
 
-    /** The single source of truth shared by the seeder, the web login and the API. */
+    /** Login-page sections, in display order: key => Arabic label. */
+    public const GROUPS = [
+        'management' => 'الإدارة العليا',
+        'branches' => 'المناطق والفروع',
+        'managers' => 'مديرو الإدارات (يفحصون ويعتمدون الزيارات)',
+        'employees' => 'موظفو الإدارات (يسجلون الزيارات وينفذون التيكتات)',
+    ];
+
+    /** Reporting departments that get a demo manager and a demo employee: slug => [email prefix, Arabic department name]. */
+    private const DEPARTMENTS = [
+        'cctv' => ['cctv', 'الكاميرات'],
+        'stock_control' => ['stock', 'مراقبة المخزون'],
+        'operation' => ['operation', 'التشغيل'],
+        'maintenance' => ['maintenance', 'الصيانة'],
+        'merchandise' => ['merch', 'المرشندايز'],
+        'finance' => ['finance', 'المالية'],
+        'lp' => ['lp', 'منع الخسائر'],
+        'it' => ['it', 'IT'],
+        'hr' => ['hr', 'الموارد البشرية'],
+        'vm' => ['vm', 'العرض المرئي VM'],
+    ];
+
+    /** The single source of truth shared by the seeder, the web login and the API. Every row has a `group` (see GROUPS). */
     public static function users(): array
     {
-        return [
-            ['email' => 'admin@levoile.test', 'name' => 'المدير العام', 'role' => 'super_admin', 'department' => null,
-                'hint' => 'شاهد لوحة التحكم الكاملة وولّد أو امسح البيانات التجريبية'],
-            ['email' => 'ops@levoile.test', 'name' => 'مدير العمليات', 'role' => 'ops_manager', 'department' => null,
-                'hint' => 'راجع الملاحظات والمخاطر على كل الفروع'],
-            ['email' => 'area.cairo@levoile.test', 'name' => 'مدير منطقة القاهرة', 'role' => 'area_manager', 'department' => null,
-                'hint' => 'تابع ملاحظات فرعي زايد وسيتي ستارز'],
-            ['email' => 'store.zayed@levoile.test', 'name' => 'مدير فرع زايد', 'role' => 'store_manager', 'department' => null,
-                'hint' => 'أكّد إصلاح الملاحظات المنتظرة في فرعك'],
-            ['email' => 'cctv.manager@levoile.test', 'name' => 'مدير إدارة الكاميرات', 'role' => 'department_manager', 'department' => 'cctv',
-                'hint' => 'راجع زيارات فريق الكاميرات وتصنيفات الذكاء الاصطناعي'],
-            ['email' => 'cctv.emp@levoile.test', 'name' => 'موظف كاميرات', 'role' => 'department_employee', 'department' => 'cctv',
-                'hint' => 'سجّل زيارة CCTV على فرع زايد'],
-            ['email' => 'stock.emp@levoile.test', 'name' => 'موظف مراقبة مخزون', 'role' => 'department_employee', 'department' => 'stock_control',
-                'hint' => 'سجّل زيارة مراقبة مخزون وقيّم الوضع'],
-            ['email' => 'operation.manager@levoile.test', 'name' => 'مدير التشغيل (المسؤول عن الحل)', 'role' => 'department_manager', 'department' => 'operation',
-                'hint' => 'وزّع التيكتات الناتجة عن الملاحظات على فريقك'],
-            ['email' => 'operation.emp@levoile.test', 'name' => 'موظف تشغيل (ينفذ التيكت)', 'role' => 'department_employee', 'department' => 'operation',
-                'hint' => 'نفّذ التيكت وارفع صورة ما بعد الإصلاح'],
-            ['email' => 'maintenance.tech@levoile.test', 'name' => 'فني صيانة', 'role' => 'department_employee', 'department' => 'maintenance',
-                'hint' => 'نفّذ تيكتات الصيانة على فرعي زايد وسيتي ستارز'],
+        $rows = [
+            ['email' => 'admin@levoile.test', 'name' => 'المدير العام', 'role' => 'super_admin', 'department' => null, 'group' => 'management',
+                'hint' => 'كل الشاشات: الداشبورد، تقرير الأسبوع، تقرير الموظفين، الإعدادات، وزرارا مسح/توليد البيانات التجريبية'],
+            ['email' => 'ops@levoile.test', 'name' => 'مدير العمليات', 'role' => 'ops_manager', 'department' => null, 'group' => 'management',
+                'hint' => 'يرى ملاحظات كل الإدارات على كل الفروع، يعيد التوجيه ويرفع درجة الخطورة'],
+            ['email' => 'area.cairo@levoile.test', 'name' => 'مدير منطقة القاهرة', 'role' => 'area_manager', 'department' => null, 'group' => 'branches',
+                'hint' => 'ملاحظات فرعي زايد وسيتي ستارز + التحقق الميداني من الحل (موبايل)'],
+            ['email' => 'store.zayed@levoile.test', 'name' => 'مدير فرع زايد', 'role' => 'store_manager', 'department' => null, 'group' => 'branches',
+                'hint' => 'ملاحظات فرعه فقط + اعتماد الحل (إقفال التيكت)'],
         ];
+
+        $managerHints = [
+            'cctv' => 'افتح "اعتماد الزيارات" → فحص → اعتماد الزيارة فتتحول النقاط لتيكتات',
+            'stock_control' => 'اعتمد زيارات مراقبة المخزون وشاهد تقرير الأسبوع لإدارتك',
+            'operation' => 'إدارتك تستلم أغلب التيكتات: تابع لوحة التيكتات ووزّعها على الفريق',
+            'maintenance' => 'تيكتات الصيانة الناتجة عن الملاحظات + اعتماد زيارات الصيانة',
+        ];
+        $employeeHints = [
+            'cctv' => 'سجّل زيارة مكتبية أو ميدانية: كتالوج مخالفات الكاميرات + كتابة حرة',
+            'stock_control' => 'سجّل زيارة تقييم المخزون (7 نقاط بتقييم جيد/متوسط/ضعيف)',
+            'operation' => 'ينفذ التيكت: "جاري العمل عليها" ثم "تم الحل" مع صورة',
+            'maintenance' => 'نفّذ تيكتات الصيانة على فرعي زايد وسيتي ستارز',
+            'merchandise' => 'سجّل ملاحظات العرض والجودة والتوافر على الفرع',
+            'finance' => 'سجّل مراجعة مالية مكتبية: مرتجعات بدون فواتير، عجز، تجميدات',
+            'lp' => 'سجّل تدريب موظفي الفرع ومخالفات منع الخسائر',
+            'it' => 'سجّل زيارة أجهزة الفرع (POS، كاميرات، إنترنت)',
+            'hr' => 'سجّل ملاحظات الحضور والبصمة ودور مدير الفرع',
+            'vm' => 'سجّل ملاحظات العرض المرئي والفاترينة',
+        ];
+
+        foreach (self::DEPARTMENTS as $slug => [$prefix, $arabic]) {
+            $rows[] = [
+                'email' => "{$prefix}.manager@levoile.test", 'name' => "مدير إدارة {$arabic}", 'role' => 'department_manager',
+                'department' => $slug, 'group' => 'managers',
+                'hint' => $managerHints[$slug] ?? "اعتمد زيارات إدارة {$arabic} وتابع تيكتاتها وتقرير أسبوعها",
+            ];
+        }
+        foreach (self::DEPARTMENTS as $slug => [$prefix, $arabic]) {
+            $rows[] = [
+                'email' => $slug === 'maintenance' ? 'maintenance.tech@levoile.test' : "{$prefix}.emp@levoile.test",
+                'name' => $slug === 'maintenance' ? 'فني صيانة' : "موظف {$arabic}", 'role' => 'department_employee',
+                'department' => $slug, 'group' => 'employees',
+                'hint' => $employeeHints[$slug],
+            ];
+        }
+
+        return $rows;
+    }
+
+    /** users() grouped for the login page: group label => rows. */
+    public static function grouped(): array
+    {
+        $out = [];
+        foreach (self::GROUPS as $key => $label) {
+            $out[$label] = array_values(array_filter(self::users(), fn (array $u) => $u['group'] === $key));
+        }
+
+        return $out;
     }
 
     public function run(): void
@@ -108,13 +166,25 @@ class DemoUsersSeeder extends Seeder
     private function department(string $slug): Department
     {
         $defs = [
-            'cctv' => ['name' => 'CCTV', 'ticket_prefix' => 'CCT', 'color' => '#64748b', 'is_reporting' => true],
-            'stock_control' => ['name' => 'Stock Control', 'ticket_prefix' => 'STK', 'color' => '#f59e0b', 'is_reporting' => true],
+            'cctv' => ['name' => 'CCTV', 'ticket_prefix' => 'CCT', 'color' => '#64748b'],
+            'stock_control' => ['name' => 'Stock Control', 'ticket_prefix' => 'STK', 'color' => '#f59e0b'],
             'operation' => ['name' => 'Operation', 'ticket_prefix' => 'OPR', 'color' => '#10b981'],
             'maintenance' => ['name' => 'Maintenance', 'ticket_prefix' => 'MTN', 'color' => '#ef4444'],
+            'merchandise' => ['name' => 'Merchandise', 'ticket_prefix' => 'MRC', 'color' => '#8b5cf6'],
+            'finance' => ['name' => 'Finance', 'ticket_prefix' => 'FIN', 'color' => '#0ea5e9'],
+            'lp' => ['name' => 'Loss Prevention', 'ticket_prefix' => 'LSP', 'color' => '#dc2626'],
+            'it' => ['name' => 'IT', 'ticket_prefix' => 'ITD', 'color' => '#2563eb'],
+            'hr' => ['name' => 'HR', 'ticket_prefix' => 'HRD', 'color' => '#db2777'],
+            'vm' => ['name' => 'VM', 'ticket_prefix' => 'VMR', 'color' => '#ca8a04'],
         ];
 
-        return Department::firstOrCreate(['slug' => $slug], $defs[$slug]);
+        $department = Department::firstOrCreate(['slug' => $slug], $defs[$slug] + ['is_reporting' => true]);
+        if (! $department->is_reporting) {
+            // Every demo department reports observations (the live rows may predate the flag).
+            $department->update(['is_reporting' => true]);
+        }
+
+        return $department;
     }
 
     private function branch(string $fullName, string $like, string $area, string $city): Branch
