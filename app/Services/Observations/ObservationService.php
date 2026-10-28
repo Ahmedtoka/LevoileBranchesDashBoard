@@ -1179,10 +1179,30 @@ class ObservationService
 
         $reason = trim((string) ($item['risk_override_reason'] ?? ''));
         if ($reason === '') {
+            // The agent's own suggestion (2026-10-29): when the point carries the classification that proposed
+            // exactly this level, its reason is the override reason; the employee changed nothing by hand.
+            $reason = $this->agentReasonFor($item, $chosen->slug) ?? '';
+        }
+        if ($reason === '') {
             throw ValidationException::withMessages(["{$key}.risk_override_reason" => dt('سبب تغيير درجة الخطورة مطلوب.', 'A reason is required to change the risk level.')]);
         }
 
         return [$chosen->id, $reason];
+    }
+
+    /** "اقتراح الإيجينت: …" when ai_classification_id points at a suggestion whose risk is $slug; else null. */
+    private function agentReasonFor(array $item, string $slug): ?string
+    {
+        if (empty($item['ai_classification_id'])) {
+            return null;
+        }
+        $suggested = (array) (AiClassification::whereKey($item['ai_classification_id'])->value('suggested') ?? []);
+        if (($suggested['risk_level'] ?? null) !== $slug) {
+            return null;
+        }
+        $why = trim((string) ($suggested['reason'] ?? ''));
+
+        return dt('اقتراح الإيجينت', 'Agent suggestion').($why !== '' ? ': '.$why : '');
     }
 
     private function title(array $item, ?ObservationCatalogItem $catalog, string $description): string
