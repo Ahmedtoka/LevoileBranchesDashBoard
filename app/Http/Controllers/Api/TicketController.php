@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Exceptions\TicketTransitionDenied;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tickets\ReplyTicketRequest;
+use App\Models\Branch;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Services\TicketService;
@@ -78,6 +79,28 @@ class TicketController extends Controller
 
         $tickets = Ticket::with(['branch', 'department', 'assignee'])
             ->where('department_id', $deptId)
+            ->latest()
+            ->get();
+
+        return response()->json(['data' => $tickets->map(fn ($t) => $this->item($t))]);
+    }
+
+    /**
+     * GET /api/branch/tickets[?status=open|waiting_approval|closed|all] — every ticket of the branches the
+     * caller manages (own branch_id + branches.manager_id), newest first. The store manager's Tickets tab
+     * in the simplified app (2026-10-29): observation tickets of the branch wait for their approval here.
+     */
+    public function myBranch(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $ids = Branch::where('manager_id', $user->id)->pluck('id')->push($user->branch_id)->filter()->unique()->values();
+        $status = (string) $request->query('status', 'all');
+
+        $tickets = Ticket::with(['branch', 'department', 'assignee'])
+            ->whereIn('branch_id', $ids)
+            ->when($status === 'waiting_approval', fn ($q) => $q->where('status', 'waiting_approval'))
+            ->when($status === 'closed', fn ($q) => $q->where('status', 'closed'))
+            ->when($status === 'open', fn ($q) => $q->whereNotIn('status', ['closed', 'waiting_approval']))
             ->latest()
             ->get();
 
