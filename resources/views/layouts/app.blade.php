@@ -17,13 +17,18 @@
         .text-primary { color:#9c1e6e !important; }
         .bg-primary, .text-bg-primary { background-color:#9c1e6e !important; }
         a { color: #9c1e6e; }
-        .sidebar { width: 250px; min-height: 100vh; background: var(--lv); color: #e7d6e2; position: fixed; left: 0; top: 0; }
+        .sidebar { width: 250px; height: 100vh; overflow-y: auto; overscroll-behavior: contain; background: var(--lv); color: #e7d6e2; position: fixed; left: 0; top: 0; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.25) transparent; }
         html[dir=rtl] .sidebar { left: auto; right: 0; }
         html[dir=rtl] .content { margin-left: 0 !important; margin-right: 250px; }
         .sidebar .brand { color: #fff; font-weight: 700; letter-spacing: .5px; }
-        .sidebar a { color: #cbd5e1; text-decoration: none; display: block; padding: .55rem .9rem; border-radius: .4rem; font-size: .9rem; }
+        .sidebar a { color: #cbd5e1; text-decoration: none; display: block; padding: .38rem .8rem; border-radius: .4rem; font-size: .86rem; line-height: 1.3; }
         .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,.08); color: #fff; }
-        .sidebar .nav-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: #64748b; padding: .9rem .9rem .3rem; }
+        .sidebar .nav-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: #8b7a86; padding: .7rem .8rem .2rem; }
+        .sidebar details.nav-group summary { list-style: none; cursor: pointer; }
+        .sidebar details.nav-group summary::-webkit-details-marker { display: none; }
+        .sidebar details.nav-group summary .nav-label { display: flex; align-items: center; justify-content: space-between; }
+        .sidebar details.nav-group summary .nav-label::after { content: 'BE'; font-size: .8rem; opacity: .7; }
+        .sidebar details.nav-group[open] summary .nav-label::after { content: 'B4'; }
         .content { margin-left: 250px; }
         .stat-card { border: none; border-radius: .8rem; }
         .stat-card .value { font-size: 1.7rem; font-weight: 700; }
@@ -47,6 +52,9 @@
     <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="bi bi-grid me-2"></i>{{ t('nav.overview','نظرة عامة') }}</a>
     <a href="{{ route('tickets.index') }}" class="{{ request()->routeIs('tickets.index') ? 'active' : '' }}"><i class="bi bi-ticket-detailed me-2"></i>{{ t('nav.tickets','التذاكر') }}</a>
 
+    @include('dashboard.observations.partials.nav')
+    @include('dashboard.observations.partials.admin-nav')
+
     @if($dm)
         {{-- Department manager: scoped view of their own department only --}}
         <a href="{{ route('departments.board', auth()->user()->department_id) }}" class="{{ request()->routeIs('departments.board') ? 'active' : '' }}"><i class="bi bi-kanban me-2"></i>{{ dt('لوحة إدارتي','My department board') }}</a>
@@ -57,7 +65,8 @@
         <a href="{{ route('visits.index') }}" class="{{ request()->routeIs('visits.index') || request()->routeIs('visits.show') ? 'active' : '' }}"><i class="bi bi-clipboard-check me-2"></i>{{ t('nav.visits','الزيارات') }}</a>
         <a href="{{ route('visits.schedule') }}" class="{{ request()->routeIs('visits.schedule') ? 'active' : '' }}"><i class="bi bi-calendar-plus me-2"></i>{{ t('nav.schedule','جدولة زيارة') }}</a>
 
-        <div class="nav-label">{{ t('nav.management','الإدارة') }}</div>
+        <details class="nav-group" {{ request()->routeIs('departments.*','users.*','roles.*','branches.*','coverage.*','templates.*','types.*','maintenance.*','translations.*') ? 'open' : '' }}>
+        <summary><div class="nav-label">{{ t('nav.management','الإدارة') }}</div></summary>
         <a href="{{ route('departments.index') }}" class="{{ request()->routeIs('departments.*') ? 'active' : '' }}"><i class="bi bi-diagram-3 me-2"></i>{{ t('nav.departments','الإدارات') }}</a>
         <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="bi bi-people me-2"></i>{{ t('nav.users','المستخدمون') }}</a>
         <a href="{{ route('roles.index') }}" class="{{ request()->routeIs('roles.*') ? 'active' : '' }}"><i class="bi bi-person-badge me-2"></i>{{ t('nav.roles','الأدوار') }}</a>
@@ -66,13 +75,13 @@
         <a href="{{ route('templates.index') }}" class="{{ request()->routeIs('templates.*') || request()->routeIs('types.*') ? 'active' : '' }}"><i class="bi bi-ui-checks me-2"></i>{{ t('nav.builder','محرّر الشيك ليست') }}</a>
         <a href="{{ route('maintenance.index') }}" class="{{ request()->routeIs('maintenance.*') ? 'active' : '' }}"><i class="bi bi-tools me-2"></i>{{ t('nav.maintenance','مركز الصيانة') }}</a>
         <a href="{{ route('translations.index') }}" class="{{ request()->routeIs('translations.*') ? 'active' : '' }}"><i class="bi bi-translate me-2"></i>{{ t('nav.strings','النصوص') }}</a>
-
-        <div class="nav-label">{{ t('nav.reports','التقارير') }}</div>
         <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="bi bi-bar-chart me-2"></i>{{ t('nav.reports','التقارير') }}</a>
+        </details>
     @endif
 
     @if($canKpi)
-        <div class="nav-label">{{ dt('مؤشرات الأداء KPIs','KPIs') }}</div>
+        <details class="nav-group" {{ request()->routeIs('kpis.*') ? 'open' : '' }}>
+        <summary><div class="nav-label">{{ dt('مؤشرات الأداء KPIs','KPIs') }}</div></summary>
         <a href="{{ route('kpis.index') }}" class="{{ request()->routeIs('kpis.index') ? 'active' : '' }}"><i class="bi bi-speedometer2 me-2"></i>{{ dt('لوحة المؤشرات','KPI overview') }}</a>
         <a href="{{ route('kpis.tickets') }}" class="{{ request()->routeIs('kpis.tickets') ? 'active' : '' }}"><i class="bi bi-hourglass-split me-2"></i>{{ dt('دورة حياة التذاكر / SLA','Ticket lifecycle / SLA') }}</a>
         @if($kpiOps)
@@ -80,17 +89,17 @@
             <a href="{{ route('kpis.integrity') }}" class="{{ request()->routeIs('kpis.integrity') ? 'active' : '' }}"><i class="bi bi-shield-check me-2"></i>{{ dt('نزاهة الشيك ليست','Checklist integrity') }}</a>
             <a href="{{ route('kpis.compliance') }}" class="{{ request()->routeIs('kpis.compliance') ? 'active' : '' }}"><i class="bi bi-calendar-check me-2"></i>{{ dt('التزام مديري الفروع','Daily compliance') }}</a>
         @endif
+        </details>
     @endif
 
-    @include('dashboard.observations.partials.nav')
-    @include('dashboard.observations.partials.admin-nav')
-
-    <div class="nav-label">{{ dt('المشتريات','Purchasing') }}</div>
+    <details class="nav-group" {{ request()->routeIs('purchasing.*','vendors.*') ? 'open' : '' }}>
+    <summary><div class="nav-label">{{ dt('المشتريات','Purchasing') }}</div></summary>
     <a href="{{ route('purchasing.index') }}" class="{{ request()->routeIs('purchasing.index') || request()->routeIs('purchasing.show') ? 'active' : '' }}"><i class="bi bi-cart3 me-2"></i>{{ dt('طلبات الشراء','Purchase requests') }}</a>
     @if($purcAdmin)
         <a href="{{ route('vendors.index') }}" class="{{ request()->routeIs('vendors.*') ? 'active' : '' }}"><i class="bi bi-truck me-2"></i>{{ dt('الموردين','Vendors') }}</a>
         <a href="{{ route('purchasing.kpis') }}" class="{{ request()->routeIs('purchasing.kpis') ? 'active' : '' }}"><i class="bi bi-graph-up-arrow me-2"></i>{{ dt('مؤشرات المشتريات','Purchasing KPIs') }}</a>
     @endif
+    </details>
 
     <hr class="text-secondary">
     <div class="small text-secondary px-2">
