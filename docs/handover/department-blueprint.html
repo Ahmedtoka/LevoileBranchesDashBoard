@@ -5,183 +5,326 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>هيكل الإدارات</title>
 <meta name="description" content="التصور الكامل لكل إدارة في LeVoile: السياسات والـ SOP والشيك ليست والتاسكات، مع تمييز المعيار العالمي عن ما هو موجود في ملفاتكم وعن المقترح.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f7f4f6; --surface:#ffffff; --ink:#1f1a1d; --muted:#6b5f66; --line:#e8dfe4;
-  --brand:#9c1e6e; --brand-soft:#f6e6ef;
-  --std:#1d4ed8; --std-soft:#e6eefc;
-  --mine:#047857; --mine-soft:#e3f5ee;
-  --warn:#b45309; --warn-soft:#fdf1e0;
-  --radius:14px;
+  --bg:#f6f3f5; --surface:#ffffff; --surface-2:#faf7f9; --ink:#231c20; --muted:#726571; --line:#e9e0e6; --line-2:#f1eaef;
+  --brand:#9c1e6e; --brand-ink:#7a1656; --brand-soft:#f7e7f0;
+  --std:#1f4fd1; --std-soft:#e8eefc;
+  --mine:#0f7b5a; --mine-soft:#e2f4ec;
+  --warn:#b45309; --warn-soft:#fdf0dd;
+  --shadow:0 1px 2px rgba(35,28,32,.06), 0 8px 24px -16px rgba(35,28,32,.25);
+  --radius:16px; --radius-sm:10px;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#15121a; --surface:#1f1a24; --ink:#f3eef1; --muted:#b3a6ad; --line:#3a3040;
-    --brand:#e06cb4; --brand-soft:#3a1f31; --std:#8fb0ff; --std-soft:#1f2a46; --mine:#5fd3a6; --mine-soft:#163227; --warn:#f0b35b; --warn-soft:#3b2a12;
+    --bg:#141015; --surface:#1d171c; --surface-2:#231b21; --ink:#f4eef2; --muted:#b2a3ad; --line:#372c34; --line-2:#2c232a;
+    --brand:#e478bf; --brand-ink:#f3a6d9; --brand-soft:#3a1f31; --std:#8fb0ff; --std-soft:#1d2946; --mine:#5fd3a6; --mine-soft:#163227; --warn:#f0b35b; --warn-soft:#3b2a12;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.8);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#15121a; --surface:#1f1a24; --ink:#f3eef1; --muted:#b3a6ad; --line:#3a3040;
-  --brand:#e06cb4; --brand-soft:#3a1f31; --std:#8fb0ff; --std-soft:#1f2a46; --mine:#5fd3a6; --mine-soft:#163227; --warn:#f0b35b; --warn-soft:#3b2a12;
+  --bg:#141015; --surface:#1d171c; --surface-2:#231b21; --ink:#f4eef2; --muted:#b2a3ad; --line:#372c34; --line-2:#2c232a;
+  --brand:#e478bf; --brand-ink:#f3a6d9; --brand-soft:#3a1f31; --std:#8fb0ff; --std-soft:#1d2946; --mine:#5fd3a6; --mine-soft:#163227; --warn:#f0b35b; --warn-soft:#3b2a12;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.8);
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6;font-size:15px}
-.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
-header.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 20px;margin-bottom:14px}
-header.top h1{margin:0;font-size:1.55rem;color:var(--brand)}
-header.top p{margin:0;color:var(--muted);max-width:720px}
-.legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 18px}
-.tag{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:600;border:1px solid transparent;white-space:nowrap}
-.tag.std{background:var(--std-soft);color:var(--std);border-color:color-mix(in srgb,var(--std) 35%,transparent)}
-.tag.yours{background:var(--brand-soft);color:var(--brand);border-color:color-mix(in srgb,var(--brand) 35%,transparent)}
-.tag.mine{background:var(--mine-soft);color:var(--mine);border-color:color-mix(in srgb,var(--mine) 35%,transparent)}
-.tag.gap{background:var(--warn-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
-.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
-.filters label{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.85rem;cursor:pointer}
-.filters input{accent-color:var(--brand)}
-nav.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
-nav.tabs button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 14px;font:inherit;font-size:.88rem;cursor:pointer}
-nav.tabs button.active{background:var(--brand);border-color:var(--brand);color:#fff}
-nav.tabs button .n{opacity:.7;font-size:.75rem;margin-inline-start:4px}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6;font-size:15px;-webkit-font-smoothing:antialiased}
+a{color:var(--std)}
+button{font:inherit}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100vh}
+aside.side{position:sticky;top:0;height:100vh;overflow:auto;background:var(--surface);border-inline-start:1px solid var(--line);padding:18px 14px 24px;display:flex;flex-direction:column;gap:14px}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 6px}
+.brand .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#c84b9a);color:#fff;display:grid;place-items:center;font-weight:700;font-size:1.05rem;letter-spacing:.5px}
+.brand b{display:block;font-size:1rem;line-height:1.2}
+.brand span{display:block;color:var(--muted);font-size:.74rem}
+.side .section-label{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 8px;margin-top:4px}
+nav.depts{display:flex;flex-direction:column;gap:2px}
+nav.depts button{display:flex;align-items:center;gap:10px;width:100%;text-align:right;border:0;background:transparent;color:var(--ink);padding:9px 10px;border-radius:10px;cursor:pointer;transition:background .15s}
+nav.depts button:hover{background:var(--surface-2)}
+nav.depts button.active{background:var(--brand-soft);color:var(--brand-ink);font-weight:600}
+nav.depts button .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--surface-2);font-size:.95rem;flex:none;border:1px solid var(--line-2)}
+nav.depts button.active .ic{background:var(--brand);color:#fff;border-color:var(--brand)}
+nav.depts button .lbl{flex:1;min-width:0}
+nav.depts button .lbl small{display:block;color:var(--muted);font-size:.7rem;font-weight:400}
+nav.depts button .cnt{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+nav.depts button[data-i="overview"]{margin-bottom:6px}
+.side .legend{display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid var(--line-2);border-radius:12px;background:var(--surface-2);font-size:.8rem}
+.side .legend .row{display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:3px;flex:none}
+.dot.std{background:var(--std)} .dot.yours{background:var(--brand)} .dot.mine{background:var(--mine)}
+.side .legend p{margin:4px 0 0;color:var(--muted);font-size:.72rem;line-height:1.5}
+.side .tools{display:flex;flex-direction:column;gap:8px;margin-top:auto}
+.side .tools label,.side .tools button{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:7px 10px;font-size:.84rem;cursor:pointer}
+.side .tools input{accent-color:var(--brand)}
+
+main{padding:22px 26px 60px;min-width:0}
+.topbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:16px}
+.topbar h1{margin:0;font-size:1.35rem;flex:1;min-width:220px}
+.topbar h1 small{display:block;font-weight:400;color:var(--muted);font-size:.82rem;margin-top:2px}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:7px 12px;min-width:260px;flex:1;max-width:420px}
+.search input{border:0;background:transparent;color:var(--ink);font:inherit;outline:0;flex:1;min-width:0}
+.search svg{width:16px;height:16px;color:var(--muted);flex:none}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:3px;gap:2px}
+.seg button{border:0;background:transparent;color:var(--muted);padding:5px 11px;border-radius:9px;cursor:pointer;font-size:.82rem;display:flex;align-items:center;gap:6px}
+.seg button.on{background:var(--surface-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.seg button .dot{opacity:.35}
+.seg button.on .dot{opacity:1}
+
+/* ---------- overview ---------- */
+.hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.kpi .v{font-size:1.6rem;font-weight:700;line-height:1.1}
+.kpi .l{color:var(--muted);font-size:.8rem;margin-top:4px}
+.kpi.std .v{color:var(--std)} .kpi.yours .v{color:var(--brand)} .kpi.mine .v{color:var(--mine)}
+.matrix{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.matrix .hd{padding:14px 18px 6px}
+.matrix .hd h2{margin:0;font-size:1.05rem}
+.matrix .hd p{margin:2px 0 0;color:var(--muted);font-size:.82rem}
+.matrix table{border-collapse:collapse;width:100%;font-size:.86rem}
+.matrix th{color:var(--muted);font-weight:600;font-size:.74rem;text-align:right;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.matrix td{padding:10px 14px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+.matrix tr:last-child td{border-bottom:0}
+.matrix tr.row{cursor:pointer}
+.matrix tr.row:hover td{background:var(--surface-2)}
+.matrix td.name b{display:block}
+.matrix td.name small{color:var(--muted);font-size:.72rem}
+.bar{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--line-2);min-width:120px}
+.bar i{display:block;height:100%}
+.bar i.yours{background:var(--brand)} .bar i.std{background:var(--std)} .bar i.mine{background:var(--mine)}
+.nums{display:flex;gap:6px;margin-top:5px;font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.nums b{font-weight:600}
+.nums .y{color:var(--brand)} .nums .s{color:var(--std)} .nums .m{color:var(--mine)}
+.matrix td.gap{color:var(--muted);font-size:.78rem;max-width:300px;white-space:normal}
+
+/* ---------- department ---------- */
 section.dept{display:none}
 section.dept.active{display:block}
-.dept-head{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:14px}
-.dept-head h2{margin:0 0 6px;font-size:1.3rem}
-.dept-head p{margin:0;color:var(--muted)}
-.dept-head .facts{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:.85rem;color:var(--muted)}
-.dept-head .facts b{color:var(--ink)}
-.pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
-.pillar{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
-.pillar h3{margin:0 0 4px;font-size:1.05rem;display:flex;align-items:center;gap:8px}
-.pillar h3 .ic{width:28px;height:28px;border-radius:8px;display:inline-grid;place-items:center;background:var(--brand-soft);color:var(--brand);font-size:.95rem}
-.pillar .def{margin:0 0 10px;color:var(--muted);font-size:.82rem}
-.pillar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.pillar li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;padding:7px 9px;border-radius:10px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 92%,var(--bg))}
-.pillar li.std{border-inline-start:4px solid var(--std)}
-.pillar li.yours{border-inline-start:4px solid var(--brand)}
-.pillar li.mine{border-inline-start:4px solid var(--mine)}
-.pillar li .t{font-size:.92rem}
-.pillar li .t small{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
-.pillar li .t small.meta{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:5px}
-.pillar li .t small.meta span{background:color-mix(in srgb,var(--bg) 70%,var(--surface));border:1px solid var(--line);border-radius:6px;padding:1px 7px;line-height:1.5}
-.pillar li .t small.meta b{color:var(--ink);font-weight:600}
-.pillar li .t .src{color:var(--muted);font-size:.74rem}
-.pillar li .t .src a{color:inherit}
-.pillar li.hidden{display:none}
-.gapbox{margin-top:12px;background:var(--warn-soft);border:1px dashed color-mix(in srgb,var(--warn) 45%,transparent);border-radius:10px;padding:8px 12px;font-size:.85rem}
-.gapbox b{color:var(--warn)}
-.summary{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;overflow:auto}
-.summary table{border-collapse:collapse;width:100%;font-size:.86rem}
-.summary th,.summary td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:right;white-space:nowrap}
-.summary th{color:var(--muted);font-weight:600;font-size:.78rem}
-.summary td .tag{font-size:.72rem}
-.sources{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px;font-size:.82rem}
+.dept-head{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px;margin-bottom:16px}
+.dept-head .title{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dept-head .title .ic{width:44px;height:44px;border-radius:13px;background:var(--brand-soft);color:var(--brand-ink);display:grid;place-items:center;font-size:1.2rem}
+.dept-head h2{margin:0;font-size:1.3rem}
+.dept-head h2 small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+.dept-head .about{margin:12px 0 0;color:var(--ink);font-size:.92rem;max-width:900px}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.facts span{background:var(--surface-2);border:1px solid var(--line-2);border-radius:999px;padding:4px 11px;font-size:.78rem;color:var(--ink)}
+.gapbox{margin-top:12px;display:flex;gap:10px;align-items:flex-start;background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);border-radius:12px;padding:10px 12px;font-size:.86rem}
+.gapbox b{color:var(--warn);white-space:nowrap}
+.pillar-nav{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;position:sticky;top:0;z-index:4;background:var(--bg);padding:8px 0}
+.pillar-nav a{text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.82rem;display:inline-flex;gap:6px;align-items:center}
+.pillar-nav a .n{color:var(--muted);font-size:.74rem}
+.pillar{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;margin-bottom:16px;scroll-margin-top:70px}
+.pillar>header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.pillar>header .ic{width:36px;height:36px;border-radius:11px;background:var(--brand-soft);color:var(--brand-ink);display:grid;place-items:center;font-size:1rem;flex:none}
+.pillar>header h3{margin:0;font-size:1.05rem}
+.pillar>header p{margin:0;color:var(--muted);font-size:.8rem}
+.pillar>header .counts{margin-inline-start:auto;display:flex;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:.72rem;font-weight:600;border:1px solid transparent;white-space:nowrap}
+.pill.std{background:var(--std-soft);color:var(--std);border-color:color-mix(in srgb,var(--std) 30%,transparent)}
+.pill.yours{background:var(--brand-soft);color:var(--brand-ink);border-color:color-mix(in srgb,var(--brand) 30%,transparent)}
+.pill.mine{background:var(--mine-soft);color:var(--mine);border-color:color-mix(in srgb,var(--mine) 30%,transparent)}
+.group-label{display:flex;align-items:center;gap:8px;margin:14px 0 8px;color:var(--muted);font-size:.78rem;font-weight:600}
+.group-label::after{content:"";flex:1;height:1px;background:var(--line-2)}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:10px}
+.item{position:relative;background:var(--surface-2);border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:12px 14px 12px 14px;border-inline-start-width:4px}
+.item.std{border-inline-start-color:var(--std)} .item.yours{border-inline-start-color:var(--brand)} .item.mine{border-inline-start-color:var(--mine)}
+.item .head{display:flex;gap:8px;align-items:flex-start}
+.item .num{flex:none;width:22px;height:22px;border-radius:7px;background:var(--surface);border:1px solid var(--line);font-size:.7rem;display:grid;place-items:center;color:var(--muted);font-variant-numeric:tabular-nums}
+.item .text{font-size:.92rem;line-height:1.55;flex:1}
+.item .meta{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 10px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
+.item .meta div{font-size:.76rem;line-height:1.45;color:var(--ink)}
+.item .meta div b{display:block;color:var(--muted);font-weight:600;font-size:.68rem;letter-spacing:.02em}
+.item .meta div.wide{grid-column:1/-1}
+.item .src{margin-top:8px;font-size:.72rem;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.item .src .verdict{font-weight:700}
+.item.hidden{display:none}
+.item .note{margin-top:8px;font-size:.78rem;color:var(--muted);line-height:1.5}
+.empty{color:var(--muted);font-size:.84rem;padding:8px 2px}
+.sources{margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 18px;font-size:.82rem}
 .sources summary{cursor:pointer;font-weight:600}
-.sources ol{margin:8px 0 0;padding-inline-start:20px}
+.sources ol{margin:8px 0 0;padding-inline-start:20px;columns:2;column-gap:28px}
+.sources li{break-inside:avoid;margin-bottom:4px}
 .sources a{color:var(--std);word-break:break-all}
-footer{margin-top:24px;color:var(--muted);font-size:.8rem}
-@media print{
-  body{background:#fff;color:#000;font-size:12px}
-  nav.tabs,.filters,.legend .hint{display:none}
-  section.dept{display:block!important;break-before:page}
-  section.dept:first-of-type{break-before:auto}
-  .pillars{grid-template-columns:1fr 1fr}
-  .pillar li{break-inside:avoid}
+footer{margin-top:24px;color:var(--muted);font-size:.78rem}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  aside.side{position:static;height:auto;border-inline-start:0;border-bottom:1px solid var(--line)}
+  nav.depts{flex-direction:row;flex-wrap:wrap}
+  nav.depts button{width:auto}
+  .side .tools{flex-direction:row;flex-wrap:wrap}
+  main{padding:16px}
+  .items{grid-template-columns:1fr}
+  .sources ol{columns:1}
 }
-@media (max-width:640px){
-  .pillars{grid-template-columns:1fr}
-  header.top h1{font-size:1.3rem}
+@media print{
+  body{background:#fff;color:#000;font-size:11.5px}
+  aside.side,.topbar .search,.seg,.pillar-nav{display:none!important}
+  .shell{display:block}
+  main{padding:0}
+  section.dept{display:block!important;break-before:page}
+  .pillar,.item,.kpi,.dept-head{box-shadow:none;break-inside:avoid}
+  .items{grid-template-columns:1fr 1fr}
+  .item.hidden{display:none!important}
 }
 </style>
 </head>
 <body>
-<div class="wrap">
-<header class="top">
-  <div>
-    <h1>هيكل الإدارات: السياسات · الـ SOP · الشيك ليست · التاسكات</h1>
-    <p>لكل إدارة إيه المعيار المتعارف عليه في سلاسل الريتيل، إيه الموجود فعلاً في ملفاتكم (الثلاث أسابيع)، وإيه اللي بقترحه. اختار إدارة من التابات، وفلتر بالمصدر.</p>
+<div class="shell">
+<aside class="side">
+  <div class="brand"><div class="logo">LV</div><div><b>هيكل الإدارات</b><span>LeVoile · السياسات · SOP · الشيك ليست · التاسكات</span></div></div>
+  <div class="section-label">الإدارات</div>
+  <nav class="depts" id="depts-nav"></nav>
+  <div class="legend">
+    <div class="row"><i class="dot std"></i> معيار عالمي <small style="color:var(--muted)">مصدره اتفتح واتحقق</small></div>
+    <div class="row"><i class="dot yours"></i> موجود في ملفاتكم <small style="color:var(--muted)">اقتباس بالاسم</small></div>
+    <div class="row"><i class="dot mine"></i> مقترح مني <small style="color:var(--muted)">يسدّ الفجوة</small></div>
+    <p>علامة التحقق على المعايير: [✔] مدعوم بالمصدر · [~] المبدأ مدعوم والرقم اتخفف · ممارسة شائعة بلا مصدر واحد.</p>
   </div>
-</header>
+  <div class="tools">
+    <label><input type="checkbox" id="themeToggle"> وضع داكن</label>
+    <button type="button" id="printBtn">طباعة / PDF</button>
+  </div>
+</aside>
 
-<div class="legend">
-  <span class="tag std">معيار عالمي</span>
-  <span class="tag yours">موجود في ملفاتكم</span>
-  <span class="tag mine">مقترح مني</span>
-  <span class="tag gap">فجوة</span>
-  <span class="hint" style="color:var(--muted);font-size:.8rem">· الأزرق من مصادر الريتيل العالمية (الروابط في آخر كل إدارة)، البنفسجي اقتباس من ملفاتكم، الأخضر اقتراحي من دراسة الاتنين.</span>
-</div>
+<main>
+  <div class="topbar">
+    <h1 id="pageTitle">نظرة عامة<small>لكل إدارة: إيه المعيار، إيه الموجود عندكم، إيه المقترح، وكل سياسة بتتقاس</small></h1>
+    <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="ابحث في البنود (مثلاً: الخزنة، البصمة، الديفوهات)…"></div>
+    <div class="seg" id="srcSeg">
+      <button data-src="yours" class="on"><i class="dot yours"></i> ملفاتكم</button>
+      <button data-src="std" class="on"><i class="dot std"></i> المعيار</button>
+      <button data-src="mine" class="on"><i class="dot mine"></i> المقترح</button>
+    </div>
+  </div>
 
-<div class="filters" id="filters">
-  <label><input type="checkbox" data-src="std" checked> معيار عالمي</label>
-  <label><input type="checkbox" data-src="yours" checked> من ملفاتكم</label>
-  <label><input type="checkbox" data-src="mine" checked> مقترح مني</label>
-  <span style="flex:1"></span>
-  <label><input type="checkbox" id="themeToggle"> وضع داكن</label>
-  <button onclick="window.print()" style="border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 14px;font:inherit;font-size:.85rem;cursor:pointer">طباعة / PDF</button>
-</div>
-
-<div class="summary" id="summary"></div>
-<nav class="tabs" id="tabs"></nav>
-<main id="depts"></main>
-<footer>LeVoile · إعداد 2026-10-30 · المصادر العالمية مذكورة لكل إدارة؛ بنود "ملفاتكم" مأخوذة من تقارير الأسابيع الثلاثة (أكتوبر 2026).</footer>
+  <section class="dept active" id="dept-overview">
+    <div class="hero" id="hero"></div>
+    <div class="matrix" id="matrix"></div>
+  </section>
+  <div id="depts"></div>
+  <footer>LeVoile · إعداد 2026-10-30 · البنود العالمية من مصادر اتفتحت وتحقق منها بند بند؛ بنود "ملفاتكم" من تقارير الأسابيع الثلاثة (أكتوبر 2026). الجزاءات كلها "حسب لائحة الجزاءات المعتمدة".</footer>
+</main>
 </div>
 
 <script src="department-blueprint-data.js"></script>
 <script>
-/* DATA is filled from the research + the three-week files. Each item: {s:'std'|'yours'|'mine', t:'text', n:'note', src:'file or url label'} */
 const DATA = window.__DEPT_DATA__ || [];
 const PILLARS = [
-  {k:'policies', title:'السياسات', ic:'§', def:'قواعد ملزمة للفرع، المخالفة ليها جزاء.'},
+  {k:'policies', title:'السياسات', ic:'§', def:'قواعد ملزمة للفرع، المخالفة ليها جزاء وإدارة مسؤولة عن الرد.'},
   {k:'sops', title:'الـ SOP', ic:'≡', def:'خطوات تنفيذ الشغل، وبيتدرّب عليها الموظف.'},
   {k:'checklist', title:'الشيك ليست مع الفروع', ic:'✓', def:'البنود اللي الإدارة بتراجعها في الفرع بشكل دوري.'},
   {k:'tasks', title:'التاسكات والمؤشرات', ic:'⚑', def:'شغل بيتفتح وبيتقفل مع الفروع أو مع إدارات تانية، والأرقام اللي بتتقاس.'},
 ];
-const SRC_LABEL = {std:'معيار عالمي', yours:'من ملفاتكم', mine:'مقترح مني'};
-function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function noteHtml(n){
+const SRC = {yours:'من ملفاتكم', std:'معيار عالمي', mine:'مقترح مني'};
+const ICON = {operation:'🏬', lp:'🛡', cctv:'🎥', finance:'💵', hr:'👥', it:'🖥', maintenance:'🔧', stock_control:'📦', merchandise:'👗', vm:'🪟'};
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const count = (d,k,s) => (d[k]||[]).filter(x=>x.s===s).length;
+const total = d => PILLARS.reduce((a,p)=>a+(d[p.k]||[]).length,0);
+
+function meta(n){
   if(!n) return '';
   const parts = String(n).split(' · ').map(x=>x.trim()).filter(Boolean);
-  if(parts.length < 2) return `<small>${esc(n)}</small>`;
-  return `<small class="meta">${parts.map(p=>{const i=p.indexOf(':'); return i>0 ? `<span><b>${esc(p.slice(0,i))}:</b> ${esc(p.slice(i+1).trim())}</span>` : `<span>${esc(p)}</span>`;}).join('')}</small>`;
+  if(parts.length < 2) return `<div class="note">${esc(n)}</div>`;
+  return `<div class="meta">${parts.map(p=>{
+    const i = p.indexOf(':');
+    if(i<=0) return `<div class="wide">${esc(p)}</div>`;
+    const k = p.slice(0,i).trim(), v = p.slice(i+1).trim();
+    const wide = v.length > 70 || /الجزاء|المؤشر|الصيغة|يتقفل/.test(k);
+    return `<div class="${wide?'wide':''}"><b>${esc(k)}</b>${esc(v)}</div>`;
+  }).join('')}</div>`;
 }
-function item(it){
-  const note = noteHtml(it.n);
-  const src = it.src ? `<span class="src">${esc(it.src)}</span>` : '';
-  return `<li class="${it.s}" data-src="${it.s}"><span class="tag ${it.s}">${SRC_LABEL[it.s]}</span><span class="t">${esc(it.t)}${note}${src}</span></li>`;
+function srcLine(it){
+  if(!it.src) return it.s==='mine' ? `<div class="src">اقتراح مبني على الفجوة بين ملفاتكم والمعيار</div>` : '';
+  const m = String(it.src).match(/^(.*?)\s*\[(✔|~)\]\s*$/);
+  if(m) return `<div class="src"><span>المصدر: ${esc(m[1])}</span><span class="verdict">[${m[2]}] ${m[2]==='✔'?'مدعوم':'مدعوم جزئياً'}</span></div>`;
+  return `<div class="src">${it.s==='yours'?'الملف: ':'المصدر: '}${esc(it.src)}</div>`;
+}
+function item(it, n){
+  return `<article class="item ${it.s}" data-src="${it.s}" data-text="${esc((it.t+' '+(it.n||'')).toLowerCase())}">
+    <div class="head"><span class="num">${n}</span><div class="text">${esc(it.t)}</div></div>
+    ${meta(it.n)}${srcLine(it)}
+  </article>`;
+}
+function pillarHtml(d, p, idx){
+  const list = d[p.k] || [];
+  const groups = ['yours','std','mine'].map(s=>({s, items:list.filter(x=>x.s===s)})).filter(g=>g.items.length);
+  let n = 0;
+  return `<section class="pillar" id="p-${idx}-${p.k}">
+    <header><span class="ic">${p.ic}</span><div><h3>${p.title}</h3><p>${p.def}</p></div>
+      <div class="counts">${['yours','std','mine'].map(s=>`<span class="pill ${s}">${count(d,p.k,s)}</span>`).join('')}</div></header>
+    ${groups.length ? groups.map(g=>`<div class="group-label" data-src="${g.s}"><span class="pill ${g.s}">${SRC[g.s]}</span></div><div class="items">${g.items.map(it=>item(it,++n)).join('')}</div>`).join('') : `<div class="empty">لا توجد بنود.</div>`}
+  </section>`;
+}
+function deptHtml(d, i){
+  return `<section class="dept" id="dept-${i}">
+    <div class="dept-head">
+      <div class="title"><span class="ic">${ICON[d.key]||'▣'}</span><h2>${esc(d.name)}<small>${esc(d.en||'')} · ${total(d)} بند</small></h2></div>
+      ${d.about?`<p class="about">${esc(d.about)}</p>`:''}
+      ${d.facts&&d.facts.length?`<div class="facts">${d.facts.map(f=>`<span>${esc(f)}</span>`).join('')}</div>`:''}
+      ${d.gap?`<div class="gapbox"><b>أكبر فجوة</b><span>${esc(d.gap)}</span></div>`:''}
+    </div>
+    <div class="pillar-nav">${PILLARS.map(p=>`<a href="#p-${i}-${p.k}">${p.ic} ${p.title}<span class="n">${(d[p.k]||[]).length}</span></a>`).join('')}</div>
+    ${PILLARS.map(p=>pillarHtml(d,p,i)).join('')}
+    ${d.sources&&d.sources.length?`<details class="sources"><summary>المصادر العالمية اللي اتفتحت لهذه الإدارة (${d.sources.length})</summary><ol>${d.sources.map(s=>`<li>${esc(s.t)} — <a href="${esc(s.u)}" target="_blank" rel="noopener">${esc(s.u)}</a></li>`).join('')}</ol></details>`:''}
+  </section>`;
+}
+function overview(){
+  const sum = s => DATA.reduce((a,d)=>a+PILLARS.reduce((b,p)=>b+count(d,p.k,s),0),0);
+  const all = DATA.reduce((a,d)=>a+total(d),0);
+  document.getElementById('hero').innerHTML = [
+    ['', all, 'إجمالي البنود في 10 إدارات'],
+    ['std', sum('std'), 'معيار عالمي اتحقق منه'],
+    ['yours', sum('yours'), 'موجود في ملفاتكم'],
+    ['mine', sum('mine'), 'مقترح لسدّ الفجوات'],
+    ['', DATA.reduce((a,d)=>a+(d.policies||[]).length,0), 'سياسة قابلة للقياس (6 عناصر لكل واحدة)'],
+  ].map(([c,v,l])=>`<div class="kpi ${c}"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+  const bar = (d,k)=>{const y=count(d,k,'yours'),s=count(d,k,'std'),m=count(d,k,'mine'),t=y+s+m||1;
+    return `<div class="bar"><i class="yours" style="width:${y/t*100}%"></i><i class="std" style="width:${s/t*100}%"></i><i class="mine" style="width:${m/t*100}%"></i></div><div class="nums"><b class="y">${y}</b><b class="s">${s}</b><b class="m">${m}</b></div>`;};
+  document.getElementById('matrix').innerHTML = `<div class="hd"><h2>الإدارات في نظرة واحدة</h2><p>الشريط = نسبة البنود بالمصدر (بنفسجي ملفاتكم، أزرق المعيار، أخضر المقترح). اضغط على الإدارة لفتحها.</p></div>
+  <div style="overflow:auto"><table><thead><tr><th>الإدارة</th>${PILLARS.map(p=>`<th>${p.title}</th>`).join('')}<th>أكبر فجوة</th></tr></thead><tbody>${
+    DATA.map((d,i)=>`<tr class="row" data-i="${i}"><td class="name"><b>${ICON[d.key]||''} ${esc(d.name)}</b><small>${esc(d.en||'')} · ${total(d)} بند</small></td>${PILLARS.map(p=>`<td>${bar(d,p.k)}</td>`).join('')}<td class="gap">${esc(d.gap||'')}</td></tr>`).join('')
+  }</tbody></table></div>`;
+}
+function show(i){
+  document.querySelectorAll('#depts-nav button').forEach(b=>b.classList.toggle('active', b.dataset.i===String(i)));
+  document.querySelectorAll('section.dept').forEach(s=>s.classList.toggle('active', s.id===(i==='overview'?'dept-overview':`dept-${i}`)));
+  const d = i==='overview' ? null : DATA[i];
+  document.getElementById('pageTitle').innerHTML = d ? `${esc(d.name)}<small>${esc(d.en||'')} · ${total(d)} بند · ${(d.policies||[]).length} سياسة</small>` : 'نظرة عامة<small>لكل إدارة: إيه المعيار، إيه الموجود عندكم، إيه المقترح، وكل سياسة بتتقاس</small>';
+  window.scrollTo({top:0,behavior:'smooth'});
+  applyFilters();
+}
+function applyFilters(){
+  const on = {}; document.querySelectorAll('#srcSeg button').forEach(b=>on[b.dataset.src]=b.classList.contains('on'));
+  const q = (document.getElementById('q').value||'').trim().toLowerCase();
+  document.querySelectorAll('.item').forEach(el=>{
+    const hide = !on[el.dataset.src] || (q && !el.dataset.text.includes(q));
+    el.classList.toggle('hidden', hide);
+  });
+  document.querySelectorAll('.group-label').forEach(g=>g.style.display = on[g.dataset.src] ? '' : 'none');
 }
 function render(){
-  const tabs = document.getElementById('tabs'), main = document.getElementById('depts');
-  tabs.innerHTML = DATA.map((d,i)=>`<button data-i="${i}" class="${i===0?'active':''}">${esc(d.name)}<span class="n">${d.en||''}</span></button>`).join('');
-  main.innerHTML = DATA.map((d,i)=>`
-    <section class="dept ${i===0?'active':''}" id="dept-${i}">
-      <div class="dept-head">
-        <h2>${esc(d.name)} <span style="color:var(--muted);font-weight:400;font-size:.95rem">${esc(d.en||'')}</span></h2>
-        <p>${esc(d.about||'')}</p>
-        <div class="facts">${(d.facts||[]).map(f=>`<span>${f}</span>`).join('')}</div>
-        ${d.gap?`<div class="gapbox"><b>أكبر فجوة:</b> ${esc(d.gap)}</div>`:''}
-      </div>
-      <div class="pillars">
-        ${PILLARS.map(p=>`<div class="pillar"><h3><span class="ic">${p.ic}</span>${p.title}</h3><p class="def">${p.def}</p><ul>${(d[p.k]||[]).map(item).join('')}</ul></div>`).join('')}
-      </div>
-      ${d.sources&&d.sources.length?`<details class="sources"><summary>المصادر العالمية (${d.sources.length})</summary><ol>${d.sources.map(s=>`<li>${esc(s.t)} — <a href="${esc(s.u)}" target="_blank" rel="noopener">${esc(s.u)}</a></li>`).join('')}</ol></details>`:''}
-    </section>`).join('');
-  tabs.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
-    tabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));
-    main.querySelectorAll('section.dept').forEach((s,i)=>s.classList.toggle('active',String(i)===b.dataset.i));
-    window.scrollTo({top:0,behavior:'smooth'});});
-  // summary table
-  const cnt=(d,k,s)=>(d[k]||[]).filter(x=>x.s===s).length;
-  document.getElementById('summary').innerHTML = `<table><thead><tr><th>الإدارة</th>${PILLARS.map(p=>`<th>${p.title}</th>`).join('')}<th>أكبر فجوة</th></tr></thead><tbody>${
-    DATA.map((d,i)=>`<tr style="cursor:pointer" onclick="document.querySelector('#tabs button[data-i=\\'${i}\\']').click()"><td><b>${esc(d.name)}</b></td>${PILLARS.map(p=>`<td><span class="tag std">${cnt(d,p.k,'std')}</span> <span class="tag yours">${cnt(d,p.k,'yours')}</span> <span class="tag mine">${cnt(d,p.k,'mine')}</span></td>`).join('')}<td style="white-space:normal;max-width:260px;font-size:.8rem;color:var(--muted)">${esc(d.gap||'')}</td></tr>`).join('')
-  }</tbody></table><p style="margin:8px 0 0;color:var(--muted);font-size:.78rem">الأرقام = عدد البنود لكل مصدر. اضغط على الإدارة لفتحها.</p>`;
+  document.getElementById('depts-nav').innerHTML = `<button data-i="overview" class="active"><span class="ic">▦</span><span class="lbl">نظرة عامة<small>كل الإدارات</small></span></button>` +
+    DATA.map((d,i)=>`<button data-i="${i}"><span class="ic">${ICON[d.key]||'▣'}</span><span class="lbl">${esc(d.name)}<small>${esc(d.en||'')}</small></span><span class="cnt">${total(d)}</span></button>`).join('');
+  document.getElementById('depts').innerHTML = DATA.map(deptHtml).join('');
+  overview();
+  document.getElementById('depts-nav').addEventListener('click', e=>{const b=e.target.closest('button'); if(b) show(b.dataset.i==='overview'?'overview':Number(b.dataset.i));});
+  document.getElementById('matrix').addEventListener('click', e=>{const r=e.target.closest('tr.row'); if(r) show(Number(r.dataset.i));});
+  document.getElementById('srcSeg').addEventListener('click', e=>{const b=e.target.closest('button'); if(!b) return; b.classList.toggle('on'); applyFilters();});
+  document.getElementById('q').addEventListener('input', applyFilters);
+  document.getElementById('themeToggle').addEventListener('change', e=>{document.documentElement.dataset.theme = e.target.checked ? 'dark' : 'light';});
+  document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+  // search across departments: jump to the first department with a hit when on overview
+  document.getElementById('q').addEventListener('change', ()=>{
+    const q=(document.getElementById('q').value||'').trim().toLowerCase(); if(!q) return;
+    const active=document.querySelector('section.dept.active');
+    if(active && active.id==='dept-overview'){ const i=DATA.findIndex(d=>PILLARS.some(p=>(d[p.k]||[]).some(it=>(it.t+' '+(it.n||'')).toLowerCase().includes(q)))); if(i>=0) show(i); }
+  });
 }
-document.getElementById('filters').addEventListener('change',e=>{
-  if(e.target.id==='themeToggle'){document.documentElement.dataset.theme=e.target.checked?'dark':'light';return;}
-  const on={};document.querySelectorAll('#filters input[data-src]').forEach(c=>on[c.dataset.src]=c.checked);
-  document.querySelectorAll('.pillar li').forEach(li=>li.classList.toggle('hidden',!on[li.dataset.src]));
-});
 render();
 </script>
 </body>

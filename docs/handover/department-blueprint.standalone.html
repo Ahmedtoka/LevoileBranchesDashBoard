@@ -1,0 +1,1141 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>هيكل الإدارات</title>
+<meta name="description" content="التصور الكامل لكل إدارة في LeVoile: السياسات والـ SOP والشيك ليست والتاسكات، مع تمييز المعيار العالمي عن ما هو موجود في ملفاتكم وعن المقترح.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3f5; --surface:#ffffff; --surface-2:#faf7f9; --ink:#231c20; --muted:#726571; --line:#e9e0e6; --line-2:#f1eaef;
+  --brand:#9c1e6e; --brand-ink:#7a1656; --brand-soft:#f7e7f0;
+  --std:#1f4fd1; --std-soft:#e8eefc;
+  --mine:#0f7b5a; --mine-soft:#e2f4ec;
+  --warn:#b45309; --warn-soft:#fdf0dd;
+  --shadow:0 1px 2px rgba(35,28,32,.06), 0 8px 24px -16px rgba(35,28,32,.25);
+  --radius:16px; --radius-sm:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141015; --surface:#1d171c; --surface-2:#231b21; --ink:#f4eef2; --muted:#b2a3ad; --line:#372c34; --line-2:#2c232a;
+    --brand:#e478bf; --brand-ink:#f3a6d9; --brand-soft:#3a1f31; --std:#8fb0ff; --std-soft:#1d2946; --mine:#5fd3a6; --mine-soft:#163227; --warn:#f0b35b; --warn-soft:#3b2a12;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141015; --surface:#1d171c; --surface-2:#231b21; --ink:#f4eef2; --muted:#b2a3ad; --line:#372c34; --line-2:#2c232a;
+  --brand:#e478bf; --brand-ink:#f3a6d9; --brand-soft:#3a1f31; --std:#8fb0ff; --std-soft:#1d2946; --mine:#5fd3a6; --mine-soft:#163227; --warn:#f0b35b; --warn-soft:#3b2a12;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6;font-size:15px;-webkit-font-smoothing:antialiased}
+a{color:var(--std)}
+button{font:inherit}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:100vh}
+aside.side{position:sticky;top:0;height:100vh;overflow:auto;background:var(--surface);border-inline-start:1px solid var(--line);padding:18px 14px 24px;display:flex;flex-direction:column;gap:14px}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 6px}
+.brand .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#c84b9a);color:#fff;display:grid;place-items:center;font-weight:700;font-size:1.05rem;letter-spacing:.5px}
+.brand b{display:block;font-size:1rem;line-height:1.2}
+.brand span{display:block;color:var(--muted);font-size:.74rem}
+.side .section-label{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 8px;margin-top:4px}
+nav.depts{display:flex;flex-direction:column;gap:2px}
+nav.depts button{display:flex;align-items:center;gap:10px;width:100%;text-align:right;border:0;background:transparent;color:var(--ink);padding:9px 10px;border-radius:10px;cursor:pointer;transition:background .15s}
+nav.depts button:hover{background:var(--surface-2)}
+nav.depts button.active{background:var(--brand-soft);color:var(--brand-ink);font-weight:600}
+nav.depts button .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--surface-2);font-size:.95rem;flex:none;border:1px solid var(--line-2)}
+nav.depts button.active .ic{background:var(--brand);color:#fff;border-color:var(--brand)}
+nav.depts button .lbl{flex:1;min-width:0}
+nav.depts button .lbl small{display:block;color:var(--muted);font-size:.7rem;font-weight:400}
+nav.depts button .cnt{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+nav.depts button[data-i="overview"]{margin-bottom:6px}
+.side .legend{display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid var(--line-2);border-radius:12px;background:var(--surface-2);font-size:.8rem}
+.side .legend .row{display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:3px;flex:none}
+.dot.std{background:var(--std)} .dot.yours{background:var(--brand)} .dot.mine{background:var(--mine)}
+.side .legend p{margin:4px 0 0;color:var(--muted);font-size:.72rem;line-height:1.5}
+.side .tools{display:flex;flex-direction:column;gap:8px;margin-top:auto}
+.side .tools label,.side .tools button{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:7px 10px;font-size:.84rem;cursor:pointer}
+.side .tools input{accent-color:var(--brand)}
+
+main{padding:22px 26px 60px;min-width:0}
+.topbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:16px}
+.topbar h1{margin:0;font-size:1.35rem;flex:1;min-width:220px}
+.topbar h1 small{display:block;font-weight:400;color:var(--muted);font-size:.82rem;margin-top:2px}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:7px 12px;min-width:260px;flex:1;max-width:420px}
+.search input{border:0;background:transparent;color:var(--ink);font:inherit;outline:0;flex:1;min-width:0}
+.search svg{width:16px;height:16px;color:var(--muted);flex:none}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:3px;gap:2px}
+.seg button{border:0;background:transparent;color:var(--muted);padding:5px 11px;border-radius:9px;cursor:pointer;font-size:.82rem;display:flex;align-items:center;gap:6px}
+.seg button.on{background:var(--surface-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.seg button .dot{opacity:.35}
+.seg button.on .dot{opacity:1}
+
+/* ---------- overview ---------- */
+.hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.kpi .v{font-size:1.6rem;font-weight:700;line-height:1.1}
+.kpi .l{color:var(--muted);font-size:.8rem;margin-top:4px}
+.kpi.std .v{color:var(--std)} .kpi.yours .v{color:var(--brand)} .kpi.mine .v{color:var(--mine)}
+.matrix{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.matrix .hd{padding:14px 18px 6px}
+.matrix .hd h2{margin:0;font-size:1.05rem}
+.matrix .hd p{margin:2px 0 0;color:var(--muted);font-size:.82rem}
+.matrix table{border-collapse:collapse;width:100%;font-size:.86rem}
+.matrix th{color:var(--muted);font-weight:600;font-size:.74rem;text-align:right;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.matrix td{padding:10px 14px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+.matrix tr:last-child td{border-bottom:0}
+.matrix tr.row{cursor:pointer}
+.matrix tr.row:hover td{background:var(--surface-2)}
+.matrix td.name b{display:block}
+.matrix td.name small{color:var(--muted);font-size:.72rem}
+.bar{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--line-2);min-width:120px}
+.bar i{display:block;height:100%}
+.bar i.yours{background:var(--brand)} .bar i.std{background:var(--std)} .bar i.mine{background:var(--mine)}
+.nums{display:flex;gap:6px;margin-top:5px;font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.nums b{font-weight:600}
+.nums .y{color:var(--brand)} .nums .s{color:var(--std)} .nums .m{color:var(--mine)}
+.matrix td.gap{color:var(--muted);font-size:.78rem;max-width:300px;white-space:normal}
+
+/* ---------- department ---------- */
+section.dept{display:none}
+section.dept.active{display:block}
+.dept-head{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px;margin-bottom:16px}
+.dept-head .title{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dept-head .title .ic{width:44px;height:44px;border-radius:13px;background:var(--brand-soft);color:var(--brand-ink);display:grid;place-items:center;font-size:1.2rem}
+.dept-head h2{margin:0;font-size:1.3rem}
+.dept-head h2 small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+.dept-head .about{margin:12px 0 0;color:var(--ink);font-size:.92rem;max-width:900px}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.facts span{background:var(--surface-2);border:1px solid var(--line-2);border-radius:999px;padding:4px 11px;font-size:.78rem;color:var(--ink)}
+.gapbox{margin-top:12px;display:flex;gap:10px;align-items:flex-start;background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);border-radius:12px;padding:10px 12px;font-size:.86rem}
+.gapbox b{color:var(--warn);white-space:nowrap}
+.pillar-nav{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;position:sticky;top:0;z-index:4;background:var(--bg);padding:8px 0}
+.pillar-nav a{text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.82rem;display:inline-flex;gap:6px;align-items:center}
+.pillar-nav a .n{color:var(--muted);font-size:.74rem}
+.pillar{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;margin-bottom:16px;scroll-margin-top:70px}
+.pillar>header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.pillar>header .ic{width:36px;height:36px;border-radius:11px;background:var(--brand-soft);color:var(--brand-ink);display:grid;place-items:center;font-size:1rem;flex:none}
+.pillar>header h3{margin:0;font-size:1.05rem}
+.pillar>header p{margin:0;color:var(--muted);font-size:.8rem}
+.pillar>header .counts{margin-inline-start:auto;display:flex;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:.72rem;font-weight:600;border:1px solid transparent;white-space:nowrap}
+.pill.std{background:var(--std-soft);color:var(--std);border-color:color-mix(in srgb,var(--std) 30%,transparent)}
+.pill.yours{background:var(--brand-soft);color:var(--brand-ink);border-color:color-mix(in srgb,var(--brand) 30%,transparent)}
+.pill.mine{background:var(--mine-soft);color:var(--mine);border-color:color-mix(in srgb,var(--mine) 30%,transparent)}
+.group-label{display:flex;align-items:center;gap:8px;margin:14px 0 8px;color:var(--muted);font-size:.78rem;font-weight:600}
+.group-label::after{content:"";flex:1;height:1px;background:var(--line-2)}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:10px}
+.item{position:relative;background:var(--surface-2);border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:12px 14px 12px 14px;border-inline-start-width:4px}
+.item.std{border-inline-start-color:var(--std)} .item.yours{border-inline-start-color:var(--brand)} .item.mine{border-inline-start-color:var(--mine)}
+.item .head{display:flex;gap:8px;align-items:flex-start}
+.item .num{flex:none;width:22px;height:22px;border-radius:7px;background:var(--surface);border:1px solid var(--line);font-size:.7rem;display:grid;place-items:center;color:var(--muted);font-variant-numeric:tabular-nums}
+.item .text{font-size:.92rem;line-height:1.55;flex:1}
+.item .meta{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 10px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
+.item .meta div{font-size:.76rem;line-height:1.45;color:var(--ink)}
+.item .meta div b{display:block;color:var(--muted);font-weight:600;font-size:.68rem;letter-spacing:.02em}
+.item .meta div.wide{grid-column:1/-1}
+.item .src{margin-top:8px;font-size:.72rem;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.item .src .verdict{font-weight:700}
+.item.hidden{display:none}
+.item .note{margin-top:8px;font-size:.78rem;color:var(--muted);line-height:1.5}
+.empty{color:var(--muted);font-size:.84rem;padding:8px 2px}
+.sources{margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 18px;font-size:.82rem}
+.sources summary{cursor:pointer;font-weight:600}
+.sources ol{margin:8px 0 0;padding-inline-start:20px;columns:2;column-gap:28px}
+.sources li{break-inside:avoid;margin-bottom:4px}
+.sources a{color:var(--std);word-break:break-all}
+footer{margin-top:24px;color:var(--muted);font-size:.78rem}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  aside.side{position:static;height:auto;border-inline-start:0;border-bottom:1px solid var(--line)}
+  nav.depts{flex-direction:row;flex-wrap:wrap}
+  nav.depts button{width:auto}
+  .side .tools{flex-direction:row;flex-wrap:wrap}
+  main{padding:16px}
+  .items{grid-template-columns:1fr}
+  .sources ol{columns:1}
+}
+@media print{
+  body{background:#fff;color:#000;font-size:11.5px}
+  aside.side,.topbar .search,.seg,.pillar-nav{display:none!important}
+  .shell{display:block}
+  main{padding:0}
+  section.dept{display:block!important;break-before:page}
+  .pillar,.item,.kpi,.dept-head{box-shadow:none;break-inside:avoid}
+  .items{grid-template-columns:1fr 1fr}
+  .item.hidden{display:none!important}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="side">
+  <div class="brand"><div class="logo">LV</div><div><b>هيكل الإدارات</b><span>LeVoile · السياسات · SOP · الشيك ليست · التاسكات</span></div></div>
+  <div class="section-label">الإدارات</div>
+  <nav class="depts" id="depts-nav"></nav>
+  <div class="legend">
+    <div class="row"><i class="dot std"></i> معيار عالمي <small style="color:var(--muted)">مصدره اتفتح واتحقق</small></div>
+    <div class="row"><i class="dot yours"></i> موجود في ملفاتكم <small style="color:var(--muted)">اقتباس بالاسم</small></div>
+    <div class="row"><i class="dot mine"></i> مقترح مني <small style="color:var(--muted)">يسدّ الفجوة</small></div>
+    <p>علامة التحقق على المعايير: [✔] مدعوم بالمصدر · [~] المبدأ مدعوم والرقم اتخفف · ممارسة شائعة بلا مصدر واحد.</p>
+  </div>
+  <div class="tools">
+    <label><input type="checkbox" id="themeToggle"> وضع داكن</label>
+    <button type="button" id="printBtn">طباعة / PDF</button>
+  </div>
+</aside>
+
+<main>
+  <div class="topbar">
+    <h1 id="pageTitle">نظرة عامة<small>لكل إدارة: إيه المعيار، إيه الموجود عندكم، إيه المقترح، وكل سياسة بتتقاس</small></h1>
+    <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="ابحث في البنود (مثلاً: الخزنة، البصمة، الديفوهات)…"></div>
+    <div class="seg" id="srcSeg">
+      <button data-src="yours" class="on"><i class="dot yours"></i> ملفاتكم</button>
+      <button data-src="std" class="on"><i class="dot std"></i> المعيار</button>
+      <button data-src="mine" class="on"><i class="dot mine"></i> المقترح</button>
+    </div>
+  </div>
+
+  <section class="dept active" id="dept-overview">
+    <div class="hero" id="hero"></div>
+    <div class="matrix" id="matrix"></div>
+  </section>
+  <div id="depts"></div>
+  <footer>LeVoile · إعداد 2026-10-30 · البنود العالمية من مصادر اتفتحت وتحقق منها بند بند؛ بنود "ملفاتكم" من تقارير الأسابيع الثلاثة (أكتوبر 2026). الجزاءات كلها "حسب لائحة الجزاءات المعتمدة".</footer>
+</main>
+</div>
+
+<script>
+/* department-blueprint-data.js — بيانات صفحة هيكل الإدارات (LeVoile)
+   المصادر: yours = ملفات الثلاث أسابيع (OldData)؛ std = *-validated.md (البنود [✔] / [~] / [ممارسة] فقط)؛ mine = مقترح المحلل.
+   كل سياسة تحمل الستة عناصر: يُكتشف · الدليل · على · المسؤول عن الرد · الجزاء · المؤشر. */
+window.__DEPT_DATA__ = (function(){
+  // سلّم الجزاء الافتراضي للمعايير العالمية (المصدر لم يحدد)
+  var LAD = 'حسب لائحة الجزاءات المعتمدة (تنبيه → إنذار شفهي → إنذار كتابي → خصم)';
+  // جزاء بنود CCTV عندهم: العمود فاضي في الثلاث أسابيع
+  var EMPTY = 'عمود «الجزاء» فاضي في الملف — يُحدَّد من اللائحة: تنبيه → إنذار شفهي → إنذار كتابي → خصم';
+  // جزاء بنود LP عندهم: الـ SOP يقول «يتم تطبيق لائحة الجزاءات» بلا سلّم
+  var SOPLAD = 'SOP.docx: «يتم تطبيق لائحة الجزاءات» بلا سلّم — المقترح: تنبيه → إنذار شفهي → إنذار كتابي → خصم';
+  function P(detect, evidence, on, resp, penalty, kpi){
+    return 'يُكتشف: ' + detect + ' · الدليل: ' + evidence + ' · على: ' + on + ' · المسؤول عن الرد: ' + resp + ' · الجزاء: ' + penalty + ' · المؤشر: ' + kpi;
+  }
+  function C(measure, freq, route){ return 'المقياس: ' + measure + ' · التكرار: ' + freq + ' · لو فشل يروح لـ: ' + route; }
+  function T(open, exec, close, sla){ return 'يفتحه: ' + open + ' · ينفذه: ' + exec + ' · يتقفل بـ: ' + close + ' · SLA: ' + sla; }
+  var CCTVSRC = 'Action Plan_ CCTV.XLSX / Action Plan - Second Week.XLSX / Action Plan - Third Week.XLSX';
+
+  return [
+  /* ============================ 1. التشغيل ============================ */
+  {
+    key: 'operation', name: 'التشغيل', en: 'Store Operations',
+    about: 'عندكم: التشغيل ما بعتش أي تقرير في الثلاث أسابيع، لكنه المستلم الفعلي لأغلب تيكتات الإدارات التانية (CCTV، المالية، الصيانة) وعنده الشيك ليست اليومي القديم لمدير الفرع في السيستم. المعيار بيشوف التشغيل صاحب يوم الفرع: فتح وإغلاق بشخصين، اجتماع يومي (huddle)، ترحيب خلال 30 ثانية، جرد دوري، وسجل تسليم (handover) يومي.',
+    facts: ['0 تقارير في 3 أسابيع (ملف «الإدارات التي لم ترسل تقارير»)', 'مستلم مخالفات CCTV: 60 / 64 / 54 مخالفة أسبوعياً على 20 فرع', 'الرد الفعلي: أ/ أيمن (الاريا مانجر) و أ/ محمد يوسف في عمود «ملاحظات»', 'الشيك ليست اليومي القديم لمدير الفرع موجود في السيستم بلا تكرار ولا توقيع'],
+    gap: 'التشغيل هو المسؤول عن تنفيذ أغلب مخالفات الإدارات التانية لكن ما عندوش سياسة مكتوبة واحدة ولا شيك ليست زيارة لمدير المنطقة ولا SLA للرد.',
+    policies: [
+      {s:'yours', t:'مدير الفرع مسؤول عن «التأكد من تنفيذ التعليمات يومياً»، ومدير المنطقة عن «الموافقة على الاستثناءات».', n:P('مراجعة قائمة التحقق اليومية للمدير + مخالفات CCTV على الفرع','قائمة التحقق الموقعة + سجل المخالفات','مدير الفرع','التشغيل (مدير المنطقة)',SOPLAD,'عدد المخالفات على الفرع/الأسبوع'), src:'SOP.docx (المسؤوليات)'},
+      {s:'yours', t:'مدير الفرع مسؤول عن «توعية الموظفين ومتابعة الحضور والتعامل مع المشكلات قبل التصعيد»، ومدير عمليات الفروع عن «متابعة التزام المناطق ورفع تقارير دورية».', n:P('زيارة HR + تقرير الحضور من HR System','تقرير التأخير/الغياب بالفرع','مدير الفرع','التشغيل (مدير المنطقة)','تنبيه → إنذار شفهي → إنذار كتابي (من اللائحة)','نسبة الفروع التي رفع مدير العمليات عنها تقريراً دورياً'), src:'HR.docx (أسبوع 2)'},
+      {s:'yours', t:'مواعيد الصيانة في فروع القاهرة والديفوهات تُراجَع وتُجدول «بالتنسيق مع التشغيل».', n:P('سجل الصيانة (تاريخ الزيارة) + شيت مراقبة المخزون','تاريخ الزيارة المعتمد + الإجراء التصحيحي','مدير المنطقة','التشغيل (مدير المنطقة)','تنبيه → إنذار كتابي عند تعطيل زيارة فنية أو إخراج ديفوهات','زيارات أُجِّلت لعدم تنسيق التشغيل/الشهر'), src:'الصيانة.docx + متابعة_زيارات_الفروع.xlsx'},
+      {s:'std', t:'لا يُفتح ولا يُغلق الفرع إلا بموظفين اثنين على الأقل أحدهما مدير/حامل مفتاح.', n:P('مراجعة كاميرا المدخل وقت الفتح/الإغلاق + سجل تفعيل الإنذار','لقطة بوقت تُظهر عدد الحاضرين','مدير الفرع','التشغيل (مدير المنطقة)',LAD,'مرات الفتح/الإغلاق بشخص واحد/الفرع/الشهر (الهدف 0)'), src:'Shopify + Lightspeed + Solink [✔]'},
+      {s:'std', t:'يُقفل الباب خلف كل من يدخل قبل الموعد، ولا يُفتح للجمهور إلا في موعد الفتح المعلن.', n:P('كاميرا المدخل (وقت أول فتح للباب) + وقت أول معاملة بالسيستم','لقطة بوقت','مدير الفرع','التشغيل (مدير المنطقة)',LAD,'مرات فتح الباب للجمهور قبل الموعد أو تركه مفتوحاً/الفرع/الشهر'), src:'Shopify + Lightspeed [~]'},
+      {s:'std', t:'الالتزام بساعات العمل المعلنة؛ الإغلاق المبكر أو الفتح خارج الموعد مخالفة تُكتشف من الكاميرات.', n:P('مراجعة الكاميرا عن بُعد','لقطة بوقت لفتح/إغلاق الباب مقارنة بالموعد المعلن','مدير الفرع','التشغيل (مدير المنطقة)',LAD,'مخالفات المواعيد/الفرع/الأسبوع'), src:'BOS Security [~]'},
+      {s:'std', t:'اجتماع فريق يومي (huddle) قبل الفتح: الأهداف، نتائج أمس، العروض، توزيع المهام.', n:P('تسجيل الاجتماع بالسيستم + كاميرا الصالة قبل الفتح','إدخال بتوقيت ومحضر مختصر','مدير الفرع','التشغيل (مدير المنطقة)',LAD,'نسبة أيام انعقاد الـ huddle/الفرع/الشهر'), src:'Shopify + Lightspeed [✔]'},
+      {s:'std', t:'كل عميلة تُحيَّا خلال 30 ثانية من الدخول.', n:P('متسوق خفي + عينة من كاميرا المدخل','تقرير المتسوق الخفي أو مقطع بوقت الدخول ووقت الترحيب','الموظف','التشغيل (مدير المنطقة)',LAD,'نسبة الترحيب ≤30 ثانية في زيارات المتسوق الخفي/الفرع/الشهر'), src:'Fieldpie + GoAudits [✔]'},
+      {s:'std', t:'الموظفة الجديدة تُلحق بموظفة خبيرة طوال أسبوعها الأول (Buddy).', n:P('السيستم (تعيين المرافقة في ملف التعيين) + مطابقة جدول الورديات','اسم المرافقة ووردياتها المشتركة','مدير الفرع','التشغيل (مدير المنطقة)',LAD,'نسبة الموظفات الجدد بمرافقة موثقة طوال الأسبوع الأول'), src:'Shopify [✔]'},
+      {s:'std', t:'سجل يومي للحوادث والملاحظات + سجل تسليم (handover) للوردية/الصباح التالي.', n:P('السيستم','إدخال يومي موقَّع إلكترونياً قبل الإغلاق','مدير الفرع/مسؤول الوردية','التشغيل (مدير المنطقة)',LAD,'نسبة الأيام ذات سجل موقَّع/الفرع/الشهر'), src:'Shopify + Lightspeed [✔]'},
+      {s:'mine', t:'كل مخالفة ترصدها إدارة أخرى على الفرع (CCTV، المالية، مراقبة المخزون) تُقفل برد مكتوب من مدير المنطقة في السيستم خلال 48 ساعة، لا بنص حر في عمود «ملاحظات» («هنبه عليهم تاني هم بس بينسو»).', n:P('السيستم (مخالفة مفتوحة بلا رد > 48 ساعة)','سجل الرد بالتاريخ والإجراء المختار','مدير المنطقة','التشغيل (مدير العمليات)','تنبيه لمدير المنطقة → إنذار كتابي عند 5 مخالفات بلا رد في الشهر','نسبة المخالفات المردود عليها خلال 48 ساعة/مدير منطقة (الهدف ≥ 95%)')},
+      {s:'mine', t:'قاعدة التكرار: نفس المخالفة لنفس الموظف 3 مرات في 30 يوماً = تصعيد تلقائي لـ HR بجزاء من اللائحة، بدل التنبيه المتكرر («حاله مكرره لنفس الموظفه»، «رغم التنبيه عدة مرات»).', n:P('السيستم (عدّاد المخالفات بالموظف والنوع)','سجل المخالفات الثلاث بتاريخها','الموظف','HR (للجزاء) بعد تصعيد التشغيل','إنذار كتابي عند الثالثة → خصم عند الرابعة (من اللائحة)','عدد الموظفين بمخالفة مكررة ≥3/الشهر (الهدف 0)')},
+      {s:'mine', t:'الحد الأدنى للتواجد على الفلور: لا يقل عدد الموظفين على الصالة عن نصف قوة الوردية في أي وقت، والاستوك لشخص واحد ولمدة لا تتجاوز 30 دقيقة متصلة (الملفات: «3 موظفين من إجمالي 5 داخل الاستوك»، «أكثر من 4 ساعات»).', n:P('مراجعة كاميرا الاستوك والصالة','لقطة بوقت تُظهر العدد في كل منطقة','مدير الفرع','التشغيل (مدير المنطقة)','تنبيه → إنذار شفهي → إنذار كتابي (من اللائحة)','مرات انخفاض الفلور عن النصف/الفرع/الأسبوع')}
+    ],
+    sops: [
+      {s:'yours', t:'الروتين اليومي لمدير الفرع = الشيك ليست اليومي القديم في السيستم (بلا توقيت ولا توقيع ولا تكرار محدد).', n:'الإجراء الوحيد الموثّق للتشغيل؛ موجود في السيستم القديم، لم يُرسَل عنه تقرير في الثلاث أسابيع.', src:'السيستم القديم (الشيك ليست اليومي)'},
+      {s:'yours', t:'الرد على مخالفة CCTV: استلام شيت الأسبوع → «تم التنبيه علي الموظف» أو «تم أخذ الاجراء المناسب ووضع جزاء» → كتابته في عمود «ملاحظات».', n:'إجراء ضمني بلا مهلة ولا توثيق للجزاء؛ الرد نصي من أ/ أيمن أو مدير المنطقة.', src:'Action Plan - Second Week.XLSX'},
+      {s:'std', t:'الافتتاح: فحص خارجي → دخول وإقفال الباب → إيقاف الإنذار → أنوار وفحص داخلي → تشغيل POS والتأكد من عمل الكاميرات → عدّ عهدة الدرج أمام شخصين → تجهيز الواجهة والرفوف → huddle → فتح الباب في الموعد.', n:'يُدرَّب عليه كل حامل مفتاح؛ يُقاس من كاميرا المدخل ووقت أول معاملة.', src:'Shopify + Lightspeed [✔]'},
+      {s:'std', t:'الإغلاق: إعلان قبل 10–15 دقيقة → فحص غرف القياس والحمامات والمخزن → إقفال الباب وتمركز موظفة عنده → إعادة البضاعة → تنظيف → عدّ الكاش بعيداً عن الباب → تسوية باتش الكارت → جولة نهائية → تفعيل الإنذار → التأكد من الباب.', n:'يغطي مخالفاتكم: النور، الكمبيوتر، التقفيل خارج الخزنة، الشنطة قبل غلق النور.', src:'Shopify + Lightspeed [✔]'},
+      {s:'std', t:'خدمة العميلة: ترحيب ≤30 ثانية → سؤال عن الاحتياج → عرض المساعدة/المنتجات → الرد على الأسئلة → وداع وشكر عند الخروج.', n:'يُقاس بالمتسوق الخفي؛ يسدّ «ترك موظفه جديده لفتح الفرع وعدم معرفة طريقه البيع».', src:'GoAudits + Fieldpie [~]'},
+      {s:'std', t:'الجرد الدوري: عدّ دوري صغير يومياً (cycle count)؛ الأصناف عالية المخاطر شهرياً على الأقل؛ جرد كامل كل 6 أشهر.', n:'مسؤولية تنفيذ على الفرع، ومراجعة من مراقبة المخزون.', src:'Shopify + preventloss.org [~]'},
+      {s:'std', t:'التنظيف اليومي: الأرضيات، المرايا، الفكسترات، تفريغ غرف القياس من البضاعة، الزجاج والواجهة، الحمامات، ترتيب المخزن.', n:'يوزَّع على الفريق بجدول؛ يُراجَع من كاميرا الصالة وزيارة مدير المنطقة.', src:'Shopify + Lightspeed [✔]'},
+      {s:'mine', t:'SOP زيارة مدير المنطقة للفرع: قبل (مراجعة المخالفات المفتوحة على الفرع من كل الإدارات) → أثناء (شيك ليست الزيارة 12 بند + لقاء الفريق) → بعد (تاسك بمالك وموعد لكل بند فاشل، ورد على المخالفات المفتوحة).', n:'يسدّ غياب شيك ليست زيارة التشغيل؛ تكرار أسبوعي لكل فرع.'},
+      {s:'mine', t:'SOP الرد على تيكت إدارة أخرى: استلام في السيستم → تحقق مع مدير الفرع خلال 24 ساعة → اختيار الإجراء (تنبيه / إنذار / تحويل لـ HR / رفض بمبرر) → إقفال بدليل.', n:'يحوّل عمود «ملاحظات» إلى دورة تيكت موحدة لكل الإدارات.'}
+    ],
+    checklist: [
+      {s:'yours', t:'بنود الشيك ليست اليومي لمدير الفرع (كما هي في السيستم القديم).', n:C('✓/✗','يومي (لم يُرسَل عنه تقرير)','التشغيل (مدير المنطقة)'), src:'السيستم القديم'},
+      {s:'std', t:'الفتح/الإغلاق في الموعد (±5 دقائق).', n:C('✓/✗ + دقائق الفرق','يومي من الكاميرا','التشغيل (مدير المنطقة)'), src:'BOS Security [~]'},
+      {s:'std', t:'موظفان على الأقل عند الفتح والإغلاق.', n:C('✓/✗','يومي','التشغيل (مدير المنطقة)'), src:'Shopify + Lightspeed [✔]'},
+      {s:'std', t:'الواجهة: زجاج نظيف، لافتة سليمة وظاهرة، رصيف نظيف، مدخل غير مسدود.', n:C('✓/✗ لكل عنصر','أسبوعي (زيارة)','التشغيل → الصيانة للعطل'), src:'Shopify + Fieldpie [~]'},
+      {s:'std', t:'الأنوار والتكييف والموسيقى مشغَّلة وبالمستوى المعتمد.', n:C('✓/✗','يومي','التشغيل → الصيانة للعطل'), src:'Shopify [✔]'},
+      {s:'std', t:'غرف القياس نظيفة بلا بضاعة متروكة.', n:C('✓/✗','يومي','التشغيل (مدير الفرع)'), src:'Shopify + Fieldpie [✔]'},
+      {s:'std', t:'أسعار الرف = الكاشير؛ لافتات العروض سارية.', n:C('عينة 10 قطع: عدد المطابق/10','أسبوعي','المرشندايز'), src:'Fieldpie + Mitti + Shopify [✔]'},
+      {s:'std', t:'الـ huddle اليومي انعقد وسُجّل.', n:C('✓/✗','يومي','التشغيل (مدير المنطقة)'), src:'Shopify + Lightspeed [✔]'},
+      {s:'std', t:'وقت الترحيب ≤30 ثانية.', n:C('ثوانٍ (من المتسوق الخفي أو الكاميرا)','شهري','التشغيل (مدير المنطقة)'), src:'Fieldpie + GoAudits [✔]'},
+      {s:'std', t:'زمن الانتظار عند الكاشير (دقائق) وعدد الكاشيرات المفتوحة.', n:C('دقائق + عدد','أسبوعي (ساعة الذروة)','التشغيل (مدير المنطقة)'), src:'Fieldpie [✔]'},
+      {s:'std', t:'المخزن الخلفي مرتب ومخارج الطوارئ خالية.', n:C('✓/✗','أسبوعي','التشغيل → الصيانة للمخارج'), src:'Mitti + Shopify [✔]'},
+      {s:'std', t:'سجل الحوادث/الـ handover موقَّع.', n:C('✓/✗','يومي','التشغيل (مدير المنطقة)'), src:'Shopify + Lightspeed [✔]'},
+      {s:'std', t:'مهام/ملاحظات الزيارة السابقة مغلقة.', n:C('عدد المفتوح (الهدف 0)','كل زيارة','التشغيل (مدير المنطقة)'), src:'Taqtics + preventloss.org [✔]'},
+      {s:'mine', t:'عدد مخالفات CCTV والمالية المفتوحة على الفرع بلا رد > 48 ساعة.', n:C('رقم (الهدف 0)','أسبوعي','التشغيل (مدير العمليات)')},
+      {s:'mine', t:'الموظفة الجديدة (أقل من أسبوع) لها مرافقة ولا تفتح الفرع أو تقف على الكاشير بمفردها.', n:C('✓/✗','أسبوعي','التشغيل (مدير المنطقة)')}
+    ],
+    tasks: [
+      {s:'yours', t:'استلام مخالفات CCTV الأسبوعية والرد عليها في عمود «ملاحظات».', n:T('مراجع الكاميرات (شيت أسبوعي)','مدير المنطقة / أ/ أيمن (LP)','نص: «تم التنبيه علي الموظف»','غير محدد'), src:'Action Plan - Second Week.XLSX'},
+      {s:'yours', t:'التنسيق مع الصيانة على جدول صيانة فروع القاهرة وتصاريح المولات.', n:T('الصيانة','التشغيل (مدير المنطقة)','تثبيت تاريخ الزيارة في جدول الفنيين','غير محدد'), src:'الصيانة.docx'},
+      {s:'yours', t:'مراجعة الديفوهات والدراي كلين مع مسئول التشغيل واستكمال إجراءات الإخراج.', n:T('مراقبة المخزون (إجراء تصحيحي)','مسئول التشغيل + مدير الفرع','خروج البضاعة بالطريقة المتبعة','«الزيارة القادمة»'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'std', t:'تاسك: إجراء تصحيحي لكل بند فاشل في الزيارة بمالك وأولوية وموعد ودليل إغلاق؛ البنود الحرجة بأقصر مهلة.', n:T('مدير المنطقة بعد الزيارة','مدير الفرع','صورة/مستند إغلاق','تغذية راجعة خلال 48 ساعة، تحقق من الجاد خلال أسبوعين'), src:'Taqtics + preventloss.org [~]'},
+      {s:'std', t:'تاسك: تقرير نهاية يوم للمكتب الرئيسي (مبيعات + فروق كاش).', n:T('السيستم تلقائياً عند الإغلاق','مدير الفرع','إرسال التقرير','قبل 12 ليلاً'), src:'Sandooq + Lightspeed [~]'},
+      {s:'std', t:'مؤشر: معدل التحويل (مرجع تجزئة التخصص 15–30%)، ATV، UPT، المبيعات لكل ساعة عمل.', n:'الصيغة: فواتير ÷ زوار؛ مبيعات ÷ فواتير؛ قطع ÷ فواتير؛ مبيعات ÷ ساعات العمل · الهدف تحدده الشركة بالجنيه', src:'StoreForce [~]'},
+      {s:'std', t:'مؤشر: درجة تدقيق الفرع % ودرجة المتسوق الخفي.', n:'الصيغة: البنود المطابقة ÷ إجمالي البنود · الهدف ≥ 90%', src:'GoAudits + Fieldpie [✔]'},
+      {s:'std', t:'مؤشر: نسبة الفتح/الإغلاق في الموعد.', n:'الصيغة: أيام في الموعد ÷ أيام العمل · من الكاميرا/أول معاملة · الهدف 100%', src:'ممارسة شائعة'},
+      {s:'mine', t:'مؤشر: نسبة المخالفات (من كل الإدارات) المقفولة برد خلال 48 ساعة لكل مدير منطقة.', n:'الصيغة: المخالفات المردود عليها في الوقت ÷ إجمالي المخالفات على فروعه · الهدف ≥ 95% · يظهر في داشبورد التشغيل أسبوعياً'},
+      {s:'mine', t:'تاسك: زيارة مدير المنطقة الأسبوعية لكل فرع بالشيك ليست.', n:T('السيستم (جدول أسبوعي)','مدير المنطقة','شيك ليست مكتملة + تاسكات البنود الفاشلة','خلال الأسبوع؛ الفروع المتأخرة تظهر في الداشبورد')}
+    ],
+    sources: [
+      {t:'Shopify — Retail opening and closing procedures', u:'https://www.shopify.com/blog/retail-opening-closing-procedures'},
+      {t:'Lightspeed — Store opening and closing checklist', u:'https://www.lightspeedhq.com/blog/retail-store-opening-and-closing-procedure-checklist/'},
+      {t:'Fieldpie — Store mystery audit checklist', u:'https://www.fieldpie.com/blog/store-mystery-audit-checklist/'},
+      {t:'GoAudits — Mystery shopping checklist', u:'https://goaudits.com/templates/mystery-shopping-checklist/'},
+      {t:'Mitti — Store inspection', u:'https://mitti.com/library/retail/store-inspection-SQKlf'},
+      {t:'Mitti — Retail audits (وجهة تحويل SafetyCulture)', u:'https://mitti.com/checklists/retail-audits'},
+      {t:'Deloitte — Retail labor optimization', u:'https://www.deloitte.com/us/en/industries/consumer/articles/retail-labor-optimization-workforce-management.html'},
+      {t:'StoreForce — Retail conversion rate', u:'https://storeforce.com/blog/retail-conversion-rate'},
+      {t:'BOS Security — Remote video auditing for retail', u:'https://www.bossecurity.com/2023/07/25/remote-video-auditing-for-retail-establishments/'},
+      {t:'Taqtics — Loss prevention audit checklist', u:'https://taqtics.co/checklists/retail/loss-prevention-audit-checklist/'},
+      {t:'preventloss.org — Loss prevention audit', u:'https://preventloss.org/articles/loss-prevention-audit.html'},
+      {t:'Sandooq — Cash management in retail stores', u:'https://sandooq.app/blog/cash-management-retail-store'}
+    ]
+  },
+
+  /* ============================ 2. منع الخسائر ============================ */
+  {
+    key: 'lp', name: 'منع الخسائر', en: 'Loss Prevention',
+    about: 'عندكم: الإدارة الوحيدة اللي عندها SOP مكتوب (SOP.docx) وبوربوينت تقفيل يومي وسجل تدريب 41 موظف في 18 فرع؛ بتستقبل مشاكل المالية «على الجروب» وبترد على مخالفات CCTV. المعيار بيشوفها صاحبة الرقابة المالية والمخزنية: فصل المهام، مراجعة الاستثناءات يومياً، تدقيق دوري غير معلن، وتحقيق مكتوب قبل أي جزاء.',
+    facts: ['SOP.docx: 18 قسم + قائمة تحقق يومية للمدير 8 بنود', 'بوربوينت التقفيل: 7 شرائح، تقرير مبيعات يومي 16 بند، Z Report 14 بند', 'سجل التدريب: 33 → 41 موظف في 18 فرع، عمود التوقيع فاضي', 'الفيتنج روم 3–5 قطع · المرتجع 14 يوم بفاتورة أصلية · 3 مفاتيح و3 مسؤولين لكل محل', 'لا سجل مخالفات خاص بـ LP'],
+    gap: 'السياسات موجودة بس مدفونة جوه الـ SOP بلا جزاء لكل واحدة، وLP ما بيرصدش بنفسه ولا بيتابع تاسكات التحقيق اللي بتجيله من المالية.',
+    policies: [
+      {s:'yours', t:'المسؤوليات: «إدارة منع الخسائر: المتابعة والمراجعة واعتماد أي إجراءات خاصة» / «مدير المنطقة: الموافقة على الاستثناءات» / «مدير الفرع: التأكد من تنفيذ التعليمات يومياً» / «الكاشير: الالتزام بإجراءات الكاش والفواتير».', n:P('مراجعة LP للاستثناءات والقائمة اليومية','قائمة التحقق اليومية الموقعة + سجل الاستثناءات','مدير الفرع / الكاشير','منع الخسائر',SOPLAD,'عدد الاستثناءات بلا موافقة مدير المنطقة/الشهر'), src:'SOP.docx'},
+      {s:'yours', t:'المفاتيح والخزنة: «لكل محل 3 مفاتيح و3 مسؤولين» بإيميل بأسمائهم لـ LP ومدير المنطقة والكاميرات؛ «تغيير كلمة مرور الخزنة أول كل شهر وإرسالها إلى منع الخسائر فقط»؛ مفتاح الخزنة في درج النقود لا مع المدير، ومفتاح الدرج ومفاتيح الأبواب داخل الخزنة.', n:P('زيارة LP (موضع المفاتيح) + إيميل تغيير الباسورد الشهري','إيميل الأسماء + إيميل الباسورد بتاريخه + لقطة كاميرا الكاشير','مدير الفرع','منع الخسائر',SOPLAD,'فروع لم تغيّر الباسورد في الموعد/الشهر (الهدف 0)'), src:'SOP.docx (إدارة المفاتيح والخزنة)'},
+      {s:'yours', t:'المسؤولون عن المرتجعات «3 موظفين فقط» بقائمة مطبوعة بتوقيع الموظف ومدير الفرع ومدير المنطقة واعتماد LP؛ التغيير فقط عند إجازة > 3 أيام أو استقالة أو نقل.', n:P('السيستم (مرتجع بمستخدم غير القائمة)','القائمة المعتمدة مقابل مستخدم المعاملة','الموظف المنفّذ ومدير الفرع','منع الخسائر',SOPLAD,'مرتجعات بمستخدم خارج القائمة/الشهر (الهدف 0)'), src:'SOP.docx (قوائم الموظفين المسؤولين)'},
+      {s:'yours', t:'الفاتورة اليدوية: دفتر في الخزنة، 3 نسخ (عميل، حسابات مع اليومية، المحل)، إيميل بعدد الفواتير لـ LP والحسابات والكاميرات، لا تُستخدم إلا عند عطل السيستم/الإنترنت أو قطعة بلا رصيد أو انقطاع كهرباء، وبإبلاغ LP قبل الاستخدام.', n:P('مطابقة الدفتر بالإيميلات اليومية','تسلسل الدفتر + إيميل الإبلاغ المسبق','مدير الفرع','منع الخسائر',SOPLAD,'فواتير يدوية بلا إبلاغ مسبق/الشهر (الهدف 0)'), src:'SOP.docx (الفاتورة اليدوية)'},
+      {s:'yours', t:'العهدة وPetty Cash: عدّ صباحاً بحضور المدير وعند الفتح والإغلاق، فصلهما في الخزنة، وإيصالات المصاريف بإيميل نفس اليوم لـ (منع الخسائر – الحسابات – الكاميرات).', n:P('مراجعة الإيميلات اليومية + كاميرا الكاشير وقت العدّ','إيميل الإيصالات بتاريخه + لقطة العدّ','مدير الفرع','منع الخسائر',SOPLAD,'أيام بلا إيميل مصاريف أو بلا عدّ موثق/الفرع/الشهر'), src:'SOP.docx (العهدة وPetty Cash)'},
+      {s:'yours', t:'فصل المهام: «الشخص الذي يعد النقدية لا يعتمدها بمفرده»، «لا يُسمح للكاشير بمراجعة أو اعتماد عهده بنفسه»، «وجود مدير مسؤول إلزامي في أي عملية عد أو تسليم».', n:P('كاميرا الكاشير + شيت التسليم','لقطة بوقت تُظهر شخصين + توقيعان','الكاشير ومدير الفرع','منع الخسائر',SOPLAD,'مرات العدّ بشخص واحد/الفرع/الشهر (الهدف 0)'), src:'SOP.docx (فصل المهام)'},
+      {s:'yours', t:'الكاشير: «غير مسموح بالتواجد الدائم خلف الكاش إلا للكاشير المستلم»، تسليم وتسلم بشيت مرفق باليومية عند نهاية الشفت أو الخروج، و«يمنع فتح الكاش بواسطة موظف واحد فقط».', n:P('كاميرا الكاشير + شيت التسليم المرفق باليومية','لقطة + الشيت الموقّع','الكاشير','منع الخسائر',SOPLAD,'ورديات بلا شيت تسليم/الفرع/الشهر'), src:'SOP.docx (إجراءات الكاشير)'},
+      {s:'yours', t:'المرتجعات: فاتورة أصلية خلال 14 يوماً بنفس طريقة الدفع ونفس الكارت، بتوقيع الكاشير والمدير في نفس الشفت؛ بدون فاتورة أو بعد 14 يوماً: موافقة مسبقة من مدير المنطقة بإيميل للمالية وLP بتاريخه على الفاتورة؛ إيصال الهدية يُعاد بيعه بإيصال هدية جديد.', n:P('السيستم (مرتجع > 14 يوم أو بلا فاتورة أصلية) + إيميلات الموافقة','المعاملة + فاتورة الأصل + إيميل مدير المنطقة','الكاشير ومدير الفرع','منع الخسائر',SOPLAD,'مرتجعات بعد 14 يوماً بلا إيميل موافقة/الشهر (الهدف 0)'), src:'SOP.docx (المرتجعات والاستبدال)'},
+      {s:'yours', t:'التسعير والكود: التسعير قبل العرض، السعر بجانب الكود لا عليه، كل القطع بكود، والكود من مدير المحل فقط أو من Stock Control.', n:P('زيارة LP/مراقبة المخزون (عينة قطع)','صورة القطعة بلا كود/سعر','مدير الفرع','مراقبة المخزون',SOPLAD,'قطع معروضة بلا كود أو بسعر على الكود في العينة'), src:'SOP.docx (السعر والكود)'},
+      {s:'yours', t:'الحجز: كارت ببيانات العميل، يومان فقط، للجديد فقط، بتوقيع مدير الشفت، التمديد من مدير الفرع فقط، ولا حجز في التخفيضات أو العروض.', n:P('زيارة (كروت الحجز في الفرع)','الكارت بتاريخه وتوقيعه','مدير الشفت','منع الخسائر',SOPLAD,'حجوزات > يومين بلا تمديد موقّع/الزيارة'), src:'SOP.docx (حجز البضائع)'},
+      {s:'yours', t:'غرفة القياس: «3–5 قطع»، ممنوع الحقائب الكبيرة والأكل وعربات الأطفال، عدّ أمام العميل وبطاقة بعدد القطع، متابعة من الخارج، ممنوع أكثر من شخص، إبلاغ المدير عند الاشتباه، ولا مواجهة إلا بعد التأكد.', n:P('كاميرا مدخل الفيتنج روم (مخالفات CCTV: «أكثر من 5 قطع»، «الشنطه الغير شخصيه»)','لقطة بوقت','الموظفة المكلفة بالفيتنج','التشغيل (مدير المنطقة)',SOPLAD,'مخالفات الفيتنج روم/الفرع/الأسبوع (Pivot)'), src:'SOP.docx (Fitting Room SOP)'},
+      {s:'yours', t:'استلام البضاعة: Packing List مطبوع وإلا لا استلام، لا فتح أكياس بدون المدير، مطابقة موديل ولون ومقاس، لا استلام بدون شيت إكسل Stock Control، والاستلام تحت الكاميرا.', n:P('كاميرا الاستلام + شيت Stock Control','Packing List موقّع + لقطة الاستلام','مدير الفرع','مراقبة المخزون',SOPLAD,'استلامات بلا Packing List أو خارج الكاميرا/الشهر (الهدف 0)'), src:'SOP.docx (استلام البضاعة)'},
+      {s:'yours', t:'خروج التحويلات: طلب معتمد على السيستم، توقيع على IBT Report، تحت الكاميرا، لا خروج بدون شيت وإيميل، العدّ قبل إغلاق الأكياس، ونسخة بالفرع.', n:P('السيستم (IBT بلا طلب معتمد) + كاميرا الاستوك','IBT Report الموقّع + الإيميل','مدير الفرع','مراقبة المخزون',SOPLAD,'تحويلات خرجت بلا إيميل/شيت/الشهر (الهدف 0)'), src:'SOP.docx (خروج التحويلات)'},
+      {s:'yours', t:'عامة: فحص النفايات يومياً، لا إغلاق النظام قبل الموعد الرسمي، ولا إغلاق مفاتيح الكاميرات ولوحة الكهرباء.', n:P('مراجعة CCTV (وقت إغلاق السيستم، انقطاع الكاميرات) + القائمة اليومية','سجل الانقطاع بوقت + القائمة الموقّعة','مدير الفرع','منع الخسائر (الكاميرات → IT)',SOPLAD,'حالات إغلاق مبكر أو فصل كاميرات/الفرع/الشهر (الهدف 0)'), src:'SOP.docx (إجراءات عامة)'},
+      {s:'yours', t:'المساءلة: «أي مخالفة يتم تسجيلها ومراجعتها حسب تكرارها وتأثيرها» و«يتم تطبيق لائحة الجزاءات».', n:P('سجل المخالفات (CCTV/LP/المالية)','سجل المخالفة بالتكرار والأثر','الموظف','HR (للجزاء) بتوصية LP','لائحة الجزاءات — غير مرفقة بالملفات؛ السلّم المقترح: تنبيه → إنذار شفهي → إنذار كتابي → خصم','نسبة المخالفات التي أُقفلت بجزاء مسجَّل من اللائحة'), src:'SOP.docx (المتابعة والمساءلة)'},
+      {s:'yours', t:'التقفيل: الالتزام بسيريال اليومية وإيميل عند تخطيه لـ (الكاميرات، منع الخسائر، مدير المنطقة، مدير العمليات)، توقيع على أي كشط، توقيع الكاشير ومدير الشيفت، وطباعة التقرير النهائي قبل 12 ليلاً.', n:P('مراجعة المالية لتسلسل السيريال + وقت الطباعة','اليومية الموقّعة + إيميل تخطي السيريال','الكاشير ومدير الشيفت','المالية → منع الخسائر للتحقيق',SOPLAD,'يوميات بسيريال مُسقَط بلا إيميل/الشهر (الحالة: MOE 2)'), src:'تعليمات استخدام التقفيل اليومي.pptx'},
+      {s:'std', t:'درج كاش مخصص لكل كاشيرة وتسجيل دخول شخصي على POS؛ ممنوع مشاركة PIN أو الدرج.', n:P('السيستم (معاملات بحساب غير صاحب الوردية) + كاميرا الكاشير','تقرير المعاملات بالمستخدم مقابل جدول الوردية + لقطة','الموظف','منع الخسائر',LAD,'حالات مشاركة الحساب/الفرع/الشهر (الهدف 0)'), src:'preventloss.org + Umbrex + Lightspeed [✔]'},
+      {s:'std', t:'الخزنة لا تُفتح ولا يُعدّ كاشها إلا بحضور شخصين (Dual control).', n:P('كاميرا الخزنة + سجل فتح الخزنة','لقطة بوقت + توقيعان في السجل','مدير الفرع','منع الخسائر',LAD,'مرات فتح الخزنة بشخص واحد/الفرع/الشهر'), src:'Solink + Xenia [✔]'},
+      {s:'std', t:'المرتجعات والـ voids والخصومات اليدوية فوق حد محدد تحتاج اعتماد مدير بكود سبب؛ المرتجع بدون قطعة حاضرة/إيصال اعتماد خاص ويُتابَع منفصلاً.', n:P('السيستم (تقرير الاستثناءات اليومي)','المعاملة بكود السبب واسم المعتمِد','الموظف (التنفيذ) ومدير الفرع (الاعتماد)','منع الخسائر',LAD,'استثناءات بلا اعتماد/الفرع/الأسبوع'), src:'preventloss.org + Umbrex + Solink [✔]'},
+      {s:'std', t:'ممنوع أن تنفّذ الموظفة شراءها بنفسها أو تعتمد مرتجعها/إلغاءها بنفسها.', n:P('السيستم (مطابقة اسم العميل/بطاقة الموظف بالمستخدم) + كاميرا الكاشير','المعاملة + لقطة','الموظف','منع الخسائر',LAD,'حالات الشراء/الاعتماد الذاتي/الشهر (الهدف 0)'), src:'Umbrex + preventloss.org [✔]'},
+      {s:'std', t:'تفتيش حقائب الموظفات عند الانصراف يومياً، لكل المستويات، بدءاً بحقيبة المديرة؛ تفتيش الحقيبة فقط بحضور موظفة وبعيداً عن العميلات، وتوقّع الموظفة على علمها به في لائحة العمل.', n:P('كاميرا المدخل وقت الانصراف + سجل التفتيش (مخالفاتكم: «عدم فتح الشنطه أمام كاميرا الكاشير»)','لقطة بوقت + سجل يومي موقَّع','مدير الفرع','منع الخسائر',LAD,'أيام بلا تفتيش موثَّق/الفرع/الشهر'), src:'Solink + preventloss.org + ECR [✔]'},
+      {s:'std', t:'من يطلب البضاعة لا يستلمها ويوقّع عليها؛ كل شحنة تُعدّ أمام شخصين.', n:P('السيستم (اسم الطالب مقابل اسم المستلم) + كاميرا الاستلام','مستند الاستلام بتوقيعين + لقطة','مدير الفرع','مراقبة المخزون',LAD,'استلامات بتوقيع واحد أو بنفس الطالب/الشهر'), src:'preventloss.org + Solink [✔]'},
+      {s:'std', t:'توقيع كل موظفة على سياسة الكاش ومنع الفقد عند التعيين، وتدريب LP لكل الموظفات كل 12 شهراً.', n:P('مستند (ملف الموظفة)','نموذج موقَّع بتاريخ + سجل حضور التدريب','مدير الفرع / HR','منع الخسائر + HR',LAD,'نسبة الموظفات بتوقيع ساري وتدريب خلال 12 شهراً'), src:'Solink + preventloss.org [✔]'},
+      {s:'mine', t:'كل مشكلة تحوّلها المالية لـ LP («إرسال المشكلة على الجروب») تُفتح تاسكاً في السيستم بمهلة 5 أيام عمل وتُقفل بمحضر تحقيق مكتوب ونتيجة (مخالفة مثبتة / خطأ إجرائي / لا شيء).', n:P('السيستم (تاسك مالية → LP مفتوح > 5 أيام)','محضر التحقيق بتاريخه','منع الخسائر (الإقفال) / الموظف (النتيجة)','منع الخسائر','للموظف: من اللائحة بحسب النتيجة؛ لـ LP: تنبيه عند تجاوز المهلة','نسبة تاسكات المالية المقفولة بمحضر خلال 5 أيام (الهدف ≥ 90%)')},
+      {s:'mine', t:'سجل التدريب بلا توقيع = تدريب لم يحدث: التوقيع على الموبايل إلزامي لكل صف، والموظف غير الموقَّع لا يُسلَّم كاشير ولا مفتاح.', n:P('السيستم (موظف على الكاشير بلا توقيع تدريب) — 41 صفاً بلا توقيع حالياً','سجل التدريب الموقَّع إلكترونياً','مدير الفرع','منع الخسائر','تنبيه لمدير الفرع → إنذار كتابي عند تكرار تشغيل غير مدرَّب','نسبة الموظفين على الكاشير بتدريب موقَّع (الهدف 100%)')},
+      {s:'mine', t:'عمود «الجزاء» في أي سجل مخالفات لا يُترك فاضياً: كل مخالفة تُقفل بدرجة من اللائحة (تنبيه / إنذار شفهي / إنذار كتابي / خصم) أو بـ «لا جزاء» مع مبرر مكتوب.', n:P('السيستم (مخالفة مقفولة بجزاء فاضي)','حقل الجزاء والمبرر','مدير المنطقة / LP','HR','تنبيه للمقفِل → إنذار عند التكرار','نسبة المخالفات المقفولة بجزاء محدد (الفعلي 0% في 3 أسابيع، الهدف 100%)')}
+    ],
+    sops: [
+      {s:'yours', t:'Loss Prevention SOP (SOP.docx): الهدف، النطاق، المسؤوليات، التعريفات، المفاتيح والخزنة، قوائم المسؤولين، الفاتورة اليدوية، العهدة وPetty Cash، فصل المهام، إجراءات الكاشير، المرتجعات، السعر والكود، الحجز، Fitting Room، استلام البضاعة وخروج التحويلات، التحويلات الواردة، إجراءات عامة، المتابعة والمساءلة، قائمة تحقق يومية.', n:'الـ SOP الوحيد المكتوب في الشركة؛ يُرفع في السيستم كمستند بإصدار وتاريخ ويُربط بسجل التدريب.', src:'SOP.docx'},
+      {s:'yours', t:'تعليمات التقفيل اليومي (7 شرائح): تعليمات التقفيل، تقرير المبيعات اليومية (16 بند)، Z Report (14 بند)، Settlement، الكوبونات والخصومات، ورقة التجميد، Manual Receipt.', n:'الإجراء المالي اليومي للفرع؛ مرجع المالية في مراجعتها المكتبية.', src:'تعليمات استخدام التقفيل اليومي.pptx'},
+      {s:'yours', t:'محاور التدريب الأربعة: SOP / Cashier / Open & Close Operation / Shipment & IBT.', n:'يُسجَّل بالتاريخ والوقت والفرع والموظف؛ التوقيع فاضي في كل الصفوف.', src:'Store Traning 2.xlsx'},
+      {s:'std', t:'استلام البضاعة: مطابقة بالـ PO/التحويل قبل القبول → فحص العبث/الأختام والتلف → عدّ أمام شخصين → تسجيل أي فرق فوراً بدليل مصوَّر → إدخال السيستم.', n:'يكمّل قسم «استلام البضاعة» عندكم بخطوة الفرق المصوَّر.', src:'Taqtics + preventloss.org + Solink [~]'},
+      {s:'std', t:'المرتجع/الاستبدال: إثبات شراء مقبول → كود سبب → اعتماد فوق الحد → رد بحسب قواعد وسيلة الدفع → عزل المرتجع عن البضاعة الصالحة للبيع حتى الفحص والتصرف.', n:'يضيف لقسم المرتجعات عندكم: كود السبب وعزل المرتجع.', src:'Umbrex [~]'},
+      {s:'std', t:'المراجعة اليومية للاستثناءات: مرتجعات، voids، خصومات، تجاوز سعر، فروق كاش، مشتريات موظفين، مخزون سالب، فروق استلام مفتوحة.', n:'تقرير يومي من السيستم يراجعه LP؛ يغذّي مراجعة CCTV للمعاملات المشتبهة.', src:'Umbrex [✔]'},
+      {s:'std', t:'تدقيق الفرع: مراجعة مستندات + تقارير السيستم + ملاحظة ميدانية + مقابلات + اختبار عينات معاملات → ترتيب النتائج بالأثر المالي/الخطورة/التكرار → مالك وموعد ومتابعة ودليل إغلاق.', n:'تدقيق كامل كل 6 أسابيع لكل فرع (انظر التاسكات).', src:'Umbrex + preventloss.org [✔]'},
+      {s:'std', t:'التحقيق الداخلي: تسجيل الواقعة بموضوعية → إخطار HR/LP → تأمين الأدلة بسجل حيازة → مراجعة السجلات → عدم مواجهة الموظف قبل موافقة HR → مقابلة خاصة بأسئلة محايدة بحضور شاهد ثانٍ → توثيق النتيجة والإغلاق/التصعيد.', n:'شرط عملي لصحة أي جزاء في مصر: تحقيق كتابي يُواجَه فيه الموظف بالدليل ويُدوَّن دفاعه.', src:'MangoApps [~]'},
+      {s:'mine', t:'SOP زيارة LP الميدانية للفرع: المفاتيح (3 × 3) → الخزنة والباسورد الشهري → دفتر الفواتير اليدوية وتسلسله → الكوبونات والتجميدات → قائمة مسؤولي المرتجعات → تفتيش الحقائب → تقرير بتاسكات.', n:'LP اليوم لا يزور ولا يرصد؛ الزيارة نصف شهرية لكل فرع، 50% منها غير معلن.'}
+    ],
+    checklist: [
+      {s:'yours', t:'عد العهدة عند الفتح.', n:C('✔','يومي (قائمة تحقق المدير)','منع الخسائر'), src:'SOP.docx (قائمة تحقق يومية)'},
+      {s:'yours', t:'فصل العهدة عن Petty Cash.', n:C('✔','يومي','منع الخسائر'), src:'SOP.docx (قائمة تحقق يومية)'},
+      {s:'yours', t:'المفاتيح في الخزنة.', n:C('✔','يومي','منع الخسائر'), src:'SOP.docx (قائمة تحقق يومية)'},
+      {s:'yours', t:'الفواتير اليدوية في الخزنة.', n:C('✔','يومي','منع الخسائر'), src:'SOP.docx (قائمة تحقق يومية)'},
+      {s:'yours', t:'مراجعة المرتجعات من مسؤول الشيفت.', n:C('✔','يومي','منع الخسائر'), src:'SOP.docx (قائمة تحقق يومية)'},
+      {s:'yours', t:'فحص النفايات.', n:C('✔','يومي','منع الخسائر'), src:'SOP.docx (قائمة تحقق يومية)'},
+      {s:'yours', t:'عد العهدة عند الإغلاق.', n:C('✔','يومي','منع الخسائر'), src:'SOP.docx (قائمة تحقق يومية)'},
+      {s:'yours', t:'التشييك على غرفة القياس قبل المغادرة.', n:C('✔','يومي','التشغيل (مدير الفرع)'), src:'SOP.docx (قائمة تحقق يومية)'},
+      {s:'yours', t:'Daily Sales Report (16 بند): الفرع، التاريخ، إجمالي المبيعات، صافي المبيعات، النقدي الفعلي، إجمالي الفيزا، فئات النقدية، كل بنك (QNB, Fawry, Valu + refunds)، عدد فواتير المرتجعات، الكوبونات، الفواتير المانوال، توقيع الكاشير، توقيع المدير، كومنتات، خانتان للحسابات.', n:C('أرقام + توقيعان','يومي','المالية → منع الخسائر للفرق'), src:'تعليمات استخدام التقفيل اليومي.pptx'},
+      {s:'yours', t:'Z Report (14 بند) + ورقة التجميد (الفرع، التاريخ، الفئات، الإجمالي، اسم الموظف، تدبيس مع التقفيل).', n:C('مطابقة الإجمالي','يومي','المالية'), src:'تعليمات استخدام التقفيل اليومي.pptx'},
+      {s:'yours', t:'شيت التدريب: Date | TIME | Store | Employee | SOP | Cashier | Open & Close | Shipment/IBT | Employee Signature.', n:C('✓ لكل محور (التوقيع فاضي)','لكل جلسة تدريب','منع الخسائر'), src:'Store Traning.xlsx'},
+      {s:'std', t:'سجل فروق الكاش محدَّث؛ تقرير أسبوعي لكل كاشيرة لكشف النمط.', n:C('جنيه لكل كاشيرة/الأسبوع','أسبوعي','منع الخسائر'), src:'Sandooq + Xenia [~]'},
+      {s:'std', t:'الخزنة مقفلة، رقمها غُيِّر في الموعد، وسجل من فتحها ومتى متاح.', n:C('✓/✗ + تاريخ آخر تغيير','كل زيارة','منع الخسائر'), src:'preventloss.org + BOS [✔]'},
+      {s:'std', t:'سجل المفاتيح والأكواد مطابق للموظفين الحاليين.', n:C('✓/✗ + عدد غير المطابق','شهري','منع الخسائر'), src:'Taqtics + Umbrex [✔]'},
+      {s:'std', t:'عينة مرتجعات/voids/تجاوزات بها اعتماد (بند حرج).', n:C('عدد المعتمد ÷ العينة (10)','أسبوعي','منع الخسائر'), src:'Taqtics + preventloss.org [✔]'},
+      {s:'std', t:'معدل المرتجعات/الإلغاءات لكل كاشيرة مقارن بمتوسط الفريق.', n:C('% لكل كاشيرة مقابل المتوسط','شهري','منع الخسائر'), src:'preventloss.org + ECR + Solink [~]'},
+      {s:'std', t:'التحويلات موقعة من الطرفين؛ لا تحويلات مفتوحة >14 يوماً.', n:C('عدد المفتوح (الهدف 0)','أسبوعي من السيستم','مراقبة المخزون'), src:'preventloss.org [✔]'},
+      {s:'std', t:'تفتيش الحقائب منفَّذ وموثّق.', n:C('✓/✗ (سجل يومي)','يومي / يُراجَع بالزيارة','منع الخسائر'), src:'Solink + preventloss.org [✔]'},
+      {s:'std', t:'بنود التدقيق السابق مغلقة.', n:C('عدد المفتوح (الهدف 0)','كل تدقيق','منع الخسائر'), src:'Taqtics + preventloss.org [~]'},
+      {s:'mine', t:'دفتر الفواتير اليدوية: التسلسل مكتمل بلا فجوة والعدد مطابق لإيميلات LP للشهر.', n:C('✓/✗ + عدد الفجوات','شهري (زيارة LP)','منع الخسائر')},
+      {s:'mine', t:'سجل التدريب للفرع: كل موظف على الكاشير له توقيع على المحاور الأربعة.', n:C('عدد الموقَّع ÷ عدد الموظفين (الهدف 100%)','شهري','منع الخسائر')}
+    ],
+    tasks: [
+      {s:'yours', t:'سجل التدريب: 33 → 41 موظف في 18 فرع على 4 محاور.', n:T('منع الخسائر (جدول زيارات)','مدرّب LP','صف في الشيت (بلا توقيع)','غير محدد'), src:'Store Traning 2.xlsx'},
+      {s:'yours', t:'الرد على مخالفات CCTV («تم الرد أ/أيمن lp تم التنبيه علي الموظف»).', n:T('مراجع الكاميرات','أ/ أيمن (LP)','نص في عمود «ملاحظات»','غير محدد'), src:'Action Plan - Second Week.XLSX'},
+      {s:'yours', t:'استقبال مشاكل المالية: «تم ارسال المشكله علي الجروب لقسم منع الخسائر لمراجعة المشكلة».', n:T('المالية (التقرير الأسبوعي)','منع الخسائر','غير محدد (لا تتبع ولا إقفال)','غير محدد'), src:'تقرير الادارة المالية.docx'},
+      {s:'std', t:'تاسك: تدقيق كامل لكل فرع كل 6 أسابيع + spot checks كل أسبوعين، 50% منها غير معلن كحد أدنى.', n:T('جدول LP السنوي','مدقق LP','تقرير التدقيق بدرجة وتاسكات','التغذية الراجعة للفرع خلال 48 ساعة'), src:'preventloss.org [✔]'},
+      {s:'std', t:'تاسك: إغلاق/تحقق النتائج الجادة خلال أسبوعين.', n:T('مدقق LP','مدير الفرع','دليل إغلاق + تحقق LP','14 يوماً'), src:'preventloss.org [✔]'},
+      {s:'std', t:'تاسك: تحقيق في كل فرق كاش فوق الحد خلال 24 ساعة.', n:T('السيستم (فرق فوق الحد) أو المالية','منع الخسائر','محضر مكتوب بالسبب والإجراء','24 ساعة'), src:'Sandooq [✔]'},
+      {s:'std', t:'مؤشر: نسبة الفقد % شهرياً (مرجع NRF 2022: 1.6%؛ السرقة الداخلية والخارجية معاً ≈65% من الفقد).', n:'الصيغة: (مخزون دفتري − فعلي) ÷ المبيعات بالتكلفة · الهدف تحدده الشركة (مرجع ≤ 1.5%)', src:'NRF [~]'},
+      {s:'std', t:'مؤشر: معدل المرتجعات/voids لكل كاشيرة؛ درجة تدقيق LP %؛ التحويلات المفتوحة >14 يوماً؛ نسبة إغلاق الإجراءات في موعدها.', n:'الصيغة: لكل كاشيرة شهرياً؛ درجة التدقيق ≥ 90%؛ المفتوح = 0؛ الإغلاق في الموعد ≥ 90%', src:'preventloss.org + Taqtics + Sandooq [✔]'},
+      {s:'mine', t:'تاسك بين إدارتين: المالية → LP (تحقيق في مخالفة مالية) بفرع اختياري، بمهلة ونتيجة في السيستم.', n:T('المالية من سطر جدول المشكلات','منع الخسائر','محضر تحقيق + توصية جزاء لـ HR','5 أيام عمل؛ المتأخر يظهر عند مدير العمليات')},
+      {s:'mine', t:'مؤشر: نسبة سجلات التدريب الموقَّعة من الموظف.', n:'الصيغة: صفوف بتوقيع ÷ إجمالي الصفوف · الفعلي 0/41 · الهدف 100% خلال 30 يوماً'}
+    ],
+    sources: [
+      {t:'Taqtics — Loss prevention audit checklist', u:'https://taqtics.co/checklists/retail/loss-prevention-audit-checklist/'},
+      {t:'preventloss.org — Loss prevention audit', u:'https://preventloss.org/articles/loss-prevention-audit.html'},
+      {t:'Umbrex — Store controls and operating procedures', u:'https://umbrex.com/resources/retail-industry-playbooks/shrink-loss-prevention-playbook/store-controls-and-operating-procedures/'},
+      {t:'Solink — Loss prevention tips', u:'https://solink.com/resources/loss-prevention-tips/'},
+      {t:'NRF — Shrink accounted for over $112B in 2022', u:'https://nrf.com/media-center/press-releases/shrink-accounted-over-112-billion-industry-losses-2022-according-nrf'},
+      {t:'MangoApps — Employee theft investigation SOP', u:'https://www.mangoapps.com/templates/sop/employee-theft-investigation-procedure-sop'},
+      {t:'ECR — Reduce employee theft in retail', u:'https://ecrloss.com/research-paper/reduce-employee-theft-in-retail/'},
+      {t:'Sandooq — Cash management in retail stores', u:'https://sandooq.app/blog/cash-management-retail-store'},
+      {t:'Xenia — Cash handling procedures', u:'https://www.xenia.team/articles/cash-handling-procedures-retail'},
+      {t:'Lightspeed — Retail cash handling', u:'https://www.lightspeedhq.com/blog/retail-cash-handling/'},
+      {t:'BOS Security — Remote video auditing', u:'https://www.bossecurity.com/2023/07/25/remote-video-auditing-for-retail-establishments/'}
+    ]
+  },
+
+  /* ============================ 3. الكاميرات ============================ */
+  {
+    key: 'cctv', name: 'الكاميرات', en: 'CCTV',
+    about: 'عندكم: أنشط إدارة رصد — مراجعة يومية للكاميرات وتسجيل المخالفة (اسم/فرع/تاريخ/نوع) في إكسل أسبوعي بـ Pivot على 6 مناطق، والرد من مدير المنطقة أو LP في عمود «ملاحظات». المعيار بيشوفها إدارة أدلة: سياسة مراقبة موقّعة، تغطية إلزامية، احتفاظ ≥30 يوماً، سجل حيازة للتصدير، وتدقيق مرئي غير معلن.',
+    facts: ['3 أسابيع: 60 / 64 / 54 مخالفة', '20 فرع · 35–39 موظف مخالف أسبوعياً', '6 مناطق في الـ Pivot: التأخير · الفلور · الكاشير · الاستوك · الفيتنج رووم · الكاميرات والديفي أر', 'عمود «الجزاء» وعمود «الكود» وعمود «AUDIT» فاضية في الثلاث أسابيع', 'المُجيب: أ/ أيمن (LP/الاريا مانجر)، أ/ محمد يوسف، علياء (Galleria)'],
+    gap: 'كل مخالفة ضمنية بلا نص سياسة رسمي ولا جزاء ولا مهلة رد، والكاميرات نفسها (الاحتفاظ، التغطية، سجل الحيازة) بلا أي قاعدة.',
+    policies: [
+      {s:'yours', t:'ميعاد فتح الفرع: «تأخير الموظفة (20 دقيقة) عن ميعاد فتح الفرع»، «تأخير الموظفة (ساعتين)».', n:P('كاميرا المدخل مقابل ميعاد الفتح','لقطة بوقت','الموظف','التشغيل (مدير المنطقة)',EMPTY,'مخالفات التأخير/الفرع/الأسبوع (عمود Pivot)'), src:CCTVSRC},
+      {s:'yours', t:'النيم تاج: «عدم ارتداء الموظفه النيم تاج».', n:P('كاميرا الفلور','لقطة بوقت','الموظف','التشغيل (مدير المنطقة)',EMPTY,'مخالفات الفلور/الفرع/الأسبوع'), src:CCTVSRC},
+      {s:'yours', t:'اليونيفورم والإسكارف: «عدم ارتداء الموظفه اسكارف اليونيفورم»، «تغير الموظفه لليونيفورم قبل انتهاء وقت العمل ب 45 دقيقه».', n:P('كاميرا الفلور (آخر 45 دقيقة)','لقطة بوقت','الموظف','التشغيل (مدير المنطقة)',EMPTY,'مخالفات الزي/الفرع/الأسبوع'), src:CCTVSRC},
+      {s:'yours', t:'الإكسسوار والحذاء: «ارتداء الموظف سلسلة اثناء وقت العمل»، «إرتداء الموظفة (كروكس) اثناء وقت العمل».', n:P('كاميرا الفلور','لقطة بوقت','الموظف','التشغيل (مدير المنطقة)',EMPTY,'مخالفات المظهر/الفرع/الأسبوع'), src:CCTVSRC},
+      {s:'yours', t:'البريك: «تاخير الموظف 22 دقيقه بعد وقت البريك».', n:P('كاميرا المدخل/الاستوك مقابل جدول البريك','لقطة خروج وعودة بوقت','الموظف','التشغيل (مدير المنطقة)',EMPTY,'دقائق تجاوز البريك/الموظف/الشهر'), src:CCTVSRC},
+      {s:'yours', t:'الموبايل: «كثرة استخدام الموظفه للموبايل الشخصي وعدم الاهتمام بالعملاء (حاله مكرره لنفس الموظفه)».', n:P('كاميرا الفلور','لقطة بوقت','الموظف','التشغيل (مدير المنطقة) → HR عند التكرار',EMPTY,'مخالفات الموبايل/الفرع/الأسبوع؛ الحالات المكررة لنفس الموظف'), src:CCTVSRC},
+      {s:'yours', t:'تيك توك/يوتيوب/الماتش: «قيام الموظفين بعمل تيك توك باليونيفورم داخل الفرع»، «تشغيل اليوتيوب علي لاب توب الفرع داخل الاستوك»، «مشاهده مسؤول الفرع للماتش اثناء وقت العمل».', n:P('كاميرا الفلور/الاستوك + سجل تصفح جهاز الفرع','لقطة بوقت + سجل IT','الموظف / مسؤول الفرع','التشغيل (مدير المنطقة)؛ جهاز الفرع → IT',EMPTY,'حالات الاستخدام الترفيهي/الفرع/الشهر (الهدف 0)'), src:CCTVSRC},
+      {s:'yours', t:'الشيلفات: «وقوف الموظفة علي منتصف الشيلفات مما قد يؤدي الي كسرها».', n:P('كاميرا الفلور','لقطة بوقت','الموظف','التشغيل (مدير المنطقة)؛ الفكسترة → الصيانة',EMPTY,'حوادث سلامة على الفكسترات/الشهر (الهدف 0)'), src:CCTVSRC},
+      {s:'yours', t:'هندلة الفرع قبل المغادرة: «عدم غلق نور الفرع اثناء الانصراف»، «عدم غلق جهاز الكمبيوتر اثناء مغادرة الفرع ... علي الرغم من التنبيه عدة مرات».', n:P('كاميرا الصالة والكاشير بعد الإغلاق','لقطة بوقت بعد المغادرة','مدير الفرع / مسؤول الإغلاق','التشغيل (مدير المنطقة)؛ الكمبيوتر → IT',EMPTY,'أيام الإغلاق بنور أو جهاز مفتوح/الفرع/الشهر'), src:CCTVSRC},
+      {s:'yours', t:'الفيتنج روم: «السماح للعميلة بدخول الفيتنج رووم باكثر من 5 قطع»، «بالشنطه الغير شخصيه».', n:P('كاميرا مدخل الفيتنج روم','لقطة بوقت تُظهر عدد القطع/الشنطة','الموظفة المكلفة بالفيتنج','التشغيل (مدير المنطقة)',EMPTY,'مخالفات الفيتنج روم/الفرع/الأسبوع'), src:CCTVSRC},
+      {s:'yours', t:'الاستوك: «جلوس أكثر من نصف قوة الفرع داخل الاستوك (3 موظفين من إجمالي 5)»، «جلوس الموظفين داخل الاستوك اكثر من 4 ساعات وترك موظفه بمفردها».', n:P('كاميرا الاستوك والفلور','لقطة بوقت + مدة','مدير الفرع','التشغيل (مدير المنطقة)',EMPTY,'مخالفات الاستوك/الفرع/الأسبوع'), src:CCTVSRC},
+      {s:'yours', t:'الأكل: «دخول الموظفة ماكولات داخل منطقة الكاش»، «دخول الموظفة كشري داخل الاستوك».', n:P('كاميرا الكاشير/الاستوك','لقطة بوقت','الموظف','التشغيل (مدير المنطقة)',EMPTY,'مخالفات الأكل/الفرع/الأسبوع'), src:CCTVSRC},
+      {s:'yours', t:'عد النقدية بشخصين: «قيام الموظف بعد النقدية بمفرده برغم من تواجد موظف اخر».', n:P('كاميرا الكاشير وقت العدّ','لقطة بوقت','الموظف ومدير الفرع','منع الخسائر',EMPTY,'مرات العدّ بشخص واحد/الفرع/الشهر (الهدف 0)'), src:CCTVSRC},
+      {s:'yours', t:'الشنطة أمام كاميرا الكاشير قبل غلق النور: «عدم فتح الموظفه للشنطه الشخصيه أمام كاميرا الكاشير اثناء مغادره الفرع»، «فتح الشنطه بعد غلق نور الفرع».', n:P('كاميرا الكاشير وقت الانصراف','لقطة بوقت (قبل غلق النور)','الموظف','منع الخسائر',EMPTY,'مغادرات بلا فتح الشنطة أمام الكاميرا/الفرع/الشهر'), src:CCTVSRC},
+      {s:'yours', t:'التقفيل والعهدة في الخزنة: «ترك الموظفين للتقفيل والتجميد خارج الخزينه علي الكاونتر لليوم التالي»، «ترك الموظف فلوس العهده في درج الكاش».', n:P('كاميرا الكاشير بعد الإغلاق','لقطة بوقت','مدير الفرع / الكاشير','منع الخسائر',EMPTY,'حالات كاش خارج الخزنة بعد الإغلاق/الفرع/الشهر (الهدف 0)'), src:CCTVSRC},
+      {s:'yours', t:'لا خروج فلوس بدون ورقة: «خروج الموظف فلوس من درج الكاش بدون كتابه ورقة».', n:P('كاميرا الكاشير مقابل سندات الصرف','لقطة بوقت + سجل paid-outs','الموظف','منع الخسائر',EMPTY,'سحب كاش بلا سند/الفرع/الشهر (الهدف 0)'), src:CCTVSRC},
+      {s:'yours', t:'بيانات العملاء: «عدم تسجيل بيانات العملاء علي السيستم بشكل صحيح»، «تكرار تسجيل نفس رقم الموبايل بعدة فواتير».', n:P('السيستم (تقرير الفواتير بنفس الرقم) + كاميرا الكاشير','تقرير التكرار بالكاشير','الكاشير','التشغيل (مدير المنطقة)؛ التدريب → IT',EMPTY,'نسبة الفواتير برقم مكرر/الفرع/الشهر'), src:CCTVSRC},
+      {s:'yours', t:'الكاميرات والـ DVR: «تم فصل الديفي ار عن طريق الموظف»، «تم فصل الكاميرات لليوم التالي لعدم مراجعة الموظفة علي شحن الكهرباء».', n:P('سجل انقطاع NVR + فحص الكهرباء','سجل الانقطاع بوقت + لقطة آخر إطار','مدير الفرع','IT (الجهاز) + منع الخسائر (الفصل المتعمد)',EMPTY,'ساعات انقطاع التسجيل/الفرع/الشهر (الهدف 0)'), src:CCTVSRC},
+      {s:'yours', t:'التعامل مع العميل: «الرد علي العميلة والتحدث باسلوب غير لائق»، «ترك موظفه جديده لفتح الفرع وعدم معرفة طريقه البيع مما ادي الي مغادرة العميله بدون شراء».', n:P('كاميرا الفلور/المدخل','مقطع بوقت','الموظف / مدير الفرع','التشغيل (مدير المنطقة)',EMPTY,'مخالفات التعامل مع العميل/الفرع/الشهر'), src:CCTVSRC},
+      {s:'yours', t:'ترك الفرع والهزار: «خروج الموظف 40 دقيقه واهدار وقت العمل خارج الفرع»، «هزار الموظفين بجوار باب الفرع».', n:P('كاميرا المدخل','لقطة خروج وعودة بوقت','الموظف','التشغيل (مدير المنطقة)',EMPTY,'دقائق الغياب عن الفرع/الموظف/الشهر'), src:CCTVSRC},
+      {s:'std', t:'سياسة مراقبة مكتوبة (الغرض لكل كاميرا، الأماكن، المصرّح لهم بالمشاهدة، مدة الاحتفاظ، عواقب إساءة الاستخدام) توقّع عليها كل موظفة عند التعيين.', n:P('مستند (ملف الموظفة)','إقرار موقَّع بتاريخ','HR / مدير الفرع','HR',LAD,'نسبة الموظفات بإقرار موقَّع (الهدف 100%)'), src:'Coram + SecureRedact [✔]'},
+      {s:'std', t:'ممنوع كاميرات داخل غرف القياس أو الحمامات أو غرف الصلاة/الاستراحة الخاصة؛ التغطية عند مدخل غرف القياس فقط.', n:P('زيارة فنية + مخطط الكاميرات','مخطط معتمد بمواقع الكاميرات','الفرع / الصيانة','IT',LAD,'كاميرات في مناطق خاصة (الهدف 0)'), src:'Coram + SecureRedact [✔]'},
+      {s:'std', t:'تغطية إلزامية: منطقة الكاشير (تُظهر الكاشيرة والعميلة والبضاعة)، مدخل المخزن، منطقة الاستلام، الأبواب الخلفية ومخارج الطوارئ، والصالة الرئيسية بلا نقاط عمياء.', n:P('زيارة فنية + مراجعة عن بُعد','مخطط التغطية + لقطة لكل زاوية إلزامية','الفرع / الصيانة','IT',LAD,'زوايا إلزامية غير مغطاة/الفرع (الهدف 0)'), src:'preventloss.org + Interface + Taqtics [~]'},
+      {s:'std', t:'الاحتفاظ بالتسجيلات 30 يوماً حداً أدنى، و90 يوماً موصى به لمناطق الكاشير والفروع عالية المخاطر.', n:P('فحص فني للـ NVR','أقدم تسجيل متاح بتاريخه','الصيانة / مسؤول النظام','IT',LAD,'فروع باحتفاظ فعلي <30 يوماً (الهدف 0)'), src:'preventloss.org + VDS + Fora Soft [~]'},
+      {s:'std', t:'أي حادث/بلاغ/نزاع يوقف المسح التلقائي فوراً للقنوات والفترة المعنية ويبدأ سجل الحيازة (Legal hold).', n:P('السيستم (تذكرة الحادث) مقابل سجل الحجز','تاريخ ووقت الحجز ومن نفّذه','مسؤول النظام / LP','الكاميرات',LAD,'حوادث بلا حجز أو بتسجيل مفقود (الهدف 0)'), src:'VDS + Fora Soft [✔]'},
+      {s:'std', t:'الوصول للتسجيلات بحسابات مصرّح بها فقط مع تسجيل آلي لكل مشاهدة وتصدير وتغيير إعدادات؛ ممنوع النسخ على USB/إيميل/سحابة شخصية خارج السجل.', n:P('مراجعة سجل الوصول بالـ VMS','السجل بالمستخدم والوقت','مسؤول النظام / المستخدم','IT',LAD,'عمليات تصدير بلا سجل حيازة (الهدف 0)'), src:'VDS + Coram [~]'},
+      {s:'std', t:'ممنوع على الفرع حجب أو تحريك أو فصل أي كاميرا؛ تُصنَّف مخالفة جسيمة (يُثبَّت وصفها وجزاؤها في اللائحة).', n:P('فحص صحة النظام + المراجعة عن بُعد','لقطة الكاميرا المحجوبة/سجل الانقطاع بوقت','مدير الفرع','منع الخسائر','حسب لائحة الجزاءات المعتمدة — مخالفة جسيمة: إنذار كتابي → خصم → تحقيق','حوادث حجب/فصل/الفرع/الشهر (الهدف 0)'), src:'BOS Security + Taqtics [✔]'},
+      {s:'std', t:'التسجيل المستخدم في إجراء تأديبي يُحفظ بسجل حيازة، ويُعرض على الموظفة أثناء التحقيق.', n:P('مستند (ملف التحقيق)','سجل حيازة + محضر تحقيق يذكر عرض المقطع','HR / LP','HR',LAD,'إجراءات تأديبية بفيديو بلا سجل حيازة (الهدف 0)'), src:'VDS + Coram [~]'},
+      {s:'mine', t:'تصنيف المخالفة بدرجة: كل نوع من مناطق الـ Pivot الست له درجة (أ: مالية/كاميرات — ب: فيتنج روم/تأخير — ج: مظهر/سلوك) وجزاء افتراضي من اللائحة؛ درجة أ تروح لـ LP فوراً لا لمدير المنطقة.', n:P('السيستم (المخالفة مصنّفة عند التسجيل)','سجل المخالفة بالدرجة والجزاء','الموظف','أ: منع الخسائر · ب/ج: التشغيل (مدير المنطقة)','أ: إنذار كتابي → خصم · ب: إنذار شفهي → كتابي · ج: تنبيه → إنذار شفهي','نسبة المخالفات المقفولة بجزاء مطابق لدرجتها')},
+      {s:'mine', t:'التكرار يرفع الدرجة: نفس المخالفة لنفس الموظفة مرتين في 30 يوماً ترفع الدرجة تلقائياً (الحالات المكررة في الملف: الموبايل، الكمبيوتر «رغم التنبيه عدة مرات»، النور).', n:P('السيستم (عدّاد بالموظف والنوع)','المخالفتان بتاريخهما','الموظف','HR (للجزاء) بعد التشغيل','الدرجة التالية في السلّم تلقائياً','عدد الموظفين بتكرار ≥2 في 30 يوماً (الهدف 0)')},
+      {s:'mine', t:'SLA الرد: مدير المنطقة يرد على كل مخالفة في السيستم خلال 48 ساعة بإجراء محدد؛ بلا رد = تصعيد تلقائي لمدير العمليات.', n:P('السيستم (مخالفة بلا رد > 48 ساعة)','سجل الرد بالتاريخ','مدير المنطقة','التشغيل (مدير العمليات)','تنبيه → إنذار كتابي لمدير المنطقة عند 5 متأخرات/الشهر','نسبة الردود خلال 48 ساعة (الهدف ≥ 95%)')}
+    ],
+    sops: [
+      {s:'yours', t:'الإجراء الضمني: مراجعة يومية للكاميرات → تسجيل (اسم/فرع/تاريخ/نوع) → إرسال لمدير المنطقة/LP → الرد في «ملاحظات» → Pivot أسبوعي.', n:'لا يوجد SOP مكتوب: مش محدد بتتراجع إمتى ولا كام ساعة ولا إزاي بيتبلغ الفرع.', src:'Action Plan - Second Week.XLSX'},
+      {s:'std', t:'التدقيق المرئي عن بُعد: اختيار فرع وفترة غير معلنين → الفتح/الإغلاق في الموعد ومن حضر ومتى فُتحت الخزنة → تمركز الموظفات → التعامل مع الكاش → الأبواب غير مسندة/الكاميرات غير محجوبة → النظافة والعرض → ملاحظة بوقت ولقطة → تقرير للمدير والمكتب الرئيسي.', n:'هو ما تفعلونه فعلاً، مكتوباً بخطوات؛ يُضاف الفتح/الإغلاق والخزنة لمناطق الـ Pivot.', src:'BOS Security [✔]'},
+      {s:'std', t:'مراجعة استثناءات الكاشير بالفيديو: voids / refunds / خصومات / تجاوز سعر / no-sale → مطابقة كل استثناء بالمقطع (الكاشيرة، العميلة، البضاعة) → تصنيف (سليم/خطأ إجرائي/مشتبه) → تصعيد لـ LP.', n:'يحوّل CCTV من رصد سلوك إلى رصد مالي؛ يحتاج تقرير استثناءات يومي من السيستم.', src:'Interface + Solink [~]'},
+      {s:'std', t:'تصدير الأدلة بسجل حيازة: متى حُدد المقطع، من صدّره، طريقة التصدير، أين حُفظ، من يملك الوصول، وأي تسليم لجهة خارجية؛ تصدير بالصيغة الأصلية.', n:'شرط لاستخدام المقطع في تحقيق أو جزاء.', src:'VDS [✔]'},
+      {s:'std', t:'الحجز القانوني فور الحادث (إيقاف المسح للقنوات والفترة المعنية).', n:'يُنفَّذ بتذكرة من LP أو المالية.', src:'VDS + Fora Soft [✔]'},
+      {s:'std', t:'الفحص الفني الدوري: كل الكاميرات تعمل وتسجل، الوقت متزامن (NTP)، لا حجب، التخزين/الاحتفاظ كافٍ.', n:'يومي كممارسة شائعة لأن أي يوم انقطاع = ثغرة أدلة (حالتكم: الكاميرات مفصولة ليوم كامل).', src:'Taqtics + VDS [~]'},
+      {s:'std', t:'التبليغ عن مخالفة سلوك من الفيديو: النوع/الوقت/المقطع → مدير الفرع ومدير المنطقة → تاسك بتاريخ رد → إغلاق بإجراء موثّق.', n:'نفس دورتكم مع إضافة التاسك وتاريخ الرد والإقفال الموثّق.', src:'BOS Security [~]'},
+      {s:'mine', t:'SOP مراجعة الكاميرات نفسها: جدول يومي (20 فرع × ساعات الذروة والفتح والإغلاق) → مراجع لكل مجموعة فروع → حد أدنى 3 فروع/يوم/مراجع → تسجيل المخالفة في السيستم فوراً لا في شيت أسبوعي → تنبيه الفرع خلال ساعة للمخالفات المالية.', n:'يسدّ السؤال المفتوح: بتتراجع إمتى، كام ساعة، وإزاي بيتبلغ الفرع.'}
+    ],
+    checklist: [
+      {s:'yours', t:'التأخير عن ميعاد فتح الفرع.', n:C('عدد لكل موظف/فرع + تلوين (أخضر 1، أصفر 2، برتقالي 3–4، أحمر ≥4)','يومي / Pivot أسبوعي','التشغيل (مدير المنطقة)'), src:'Action Plan - Third Week.XLSX (Pivot)'},
+      {s:'yours', t:'منطقة الفلور (نيم تاج، اسكارف، إكسسوار، موبايل، تيك توك، أكل، هزار).', n:C('عدد لكل موظف/فرع + تلوين','يومي / Pivot أسبوعي','التشغيل (مدير المنطقة)'), src:'Action Plan - Third Week.XLSX (Pivot)'},
+      {s:'yours', t:'منطقة الكاشير (الشنطة أمام الكاميرا، العهدة في الخزنة، العدّ بشخصين، فلوس بدون ورقة، بيانات العملاء).', n:C('عدد لكل موظف/فرع + تلوين','يومي / Pivot أسبوعي','منع الخسائر'), src:'Action Plan - Third Week.XLSX (Pivot)'},
+      {s:'yours', t:'منطقة الاستوك (العدد داخل الاستوك، اليوتيوب، الأكل).', n:C('عدد لكل موظف/فرع + تلوين','يومي / Pivot أسبوعي','التشغيل (مدير المنطقة)'), src:'Action Plan - Third Week.XLSX (Pivot)'},
+      {s:'yours', t:'منطقة الفيتنج رووم (أكثر من 5 قطع، الشنطة غير الشخصية).', n:C('عدد لكل موظف/فرع + تلوين','يومي / Pivot أسبوعي','التشغيل (مدير المنطقة)'), src:'Action Plan - Third Week.XLSX (Pivot)'},
+      {s:'yours', t:'الكاميرات والديفي أر (فصل الـ DVR، انقطاع الكهرباء).', n:C('عدد لكل فرع + تلوين','يومي / Pivot أسبوعي','IT'), src:'Action Plan - Third Week.XLSX (Pivot)'},
+      {s:'std', t:'كل الكاميرات تعمل وتسجل والطابع الزمني صحيح.', n:C('عدد الكاميرات العاملة ÷ الإجمالي','يومي','IT'), src:'Taqtics [✔]'},
+      {s:'std', t:'التغطية كاملة بلا فجوات في الزوايا الإلزامية.', n:C('✓/✗ لكل زاوية','شهري (زيارة فنية)','IT'), src:'preventloss.org [✔]'},
+      {s:'std', t:'لا كاميرا محجوبة/مُدارة/مفصولة.', n:C('✓/✗ + عدد','يومي','منع الخسائر'), src:'BOS + Taqtics [✔]'},
+      {s:'std', t:'الاحتفاظ الفعلي ≥30 يوماً.', n:C('أيام (أقدم تسجيل)','شهري','IT'), src:'preventloss.org [✔]'},
+      {s:'std', t:'سجل مستخدمي النظام مطابق للمصرّح لهم.', n:C('✓/✗ + عدد غير المطابق','شهري','IT'), src:'Taqtics [✔]'},
+      {s:'std', t:'الفتح/الإغلاق في الموعد ومن حضر (شخصان).', n:C('✓/✗ + دقائق الفرق','يومي','التشغيل (مدير المنطقة)'), src:'BOS + Shopify [✔]'},
+      {s:'std', t:'الخزنة فُتحت بشخصين.', n:C('✓/✗','يومي (عينة)','منع الخسائر'), src:'BOS + Solink [✔]'},
+      {s:'std', t:'خروج بحقيبة/بضاعة بعد الإغلاق بلا تفتيش.', n:C('✓/✗','يومي','منع الخسائر'), src:'BOS + Solink [✔]'},
+      {s:'std', t:'أبواب خلفية مسندة/مفتوحة.', n:C('✓/✗','يومي (عينة)','منع الخسائر'), src:'BOS [✔]'},
+      {s:'std', t:'مطابقة عينة من المرتجعات/الإلغاءات بالفيديو.', n:C('عدد المطابق ÷ العينة (5/فرع)','أسبوعي','منع الخسائر'), src:'Interface + Solink [✔]'},
+      {s:'mine', t:'تغطية المراجعة: عدد الفروع التي رُوجعت فعلياً اليوم من إجمالي 20.', n:C('رقم ÷ 20 (الهدف: كل فرع مرة كل 3 أيام على الأقل)','يومي','الكاميرات (مدير الإدارة)')}
+    ],
+    tasks: [
+      {s:'yours', t:'سجل المخالفات الأسبوعي: الكود | اسم الموظف | الفرع | تاريخ المخالفة | المخالفة | الجزاء | AUDIT | المخالفات | ملاحظات.', n:T('مراجع الكاميرات','مدير المنطقة أو أ/ أيمن (LP)','نص في «ملاحظات» («تم التنبيه»، «هنبه عليهم تاني»)','غير محدد؛ الكود والجزاء وAUDIT فاضية'), src:'Action Plan - Second Week.XLSX'},
+      {s:'yours', t:'مؤشر أسبوعي: Grand Total للمخالفات بالفرع والموظف (Pivot).', n:'الصيغة: عدد المخالفات/الأسبوع لكل فرع وموظف · الفعلي 60 / 64 / 54 · لا هدف محدد', src:'Action Plan - Third Week.XLSX (Pivot)'},
+      {s:'std', t:'تاسك: تدقيق مرئي لكل فرع أسبوعياً على الأقل بأوقات غير معلنة.', n:T('جدول الكاميرات','مراجع الكاميرات','تقرير بوقت ولقطات + مخالفات مسجَّلة','أسبوعي لكل فرع'), src:'BOS Security (ممارسة شائعة)'},
+      {s:'std', t:'تاسك: مراجعة استثناءات POS بالفيديو خلال 48 ساعة.', n:T('السيستم (تقرير الاستثناءات اليومي)','مراجع الكاميرات','تصنيف كل استثناء + تصعيد المشتبه لـ LP','48 ساعة'), src:'Interface (ممارسة شائعة)'},
+      {s:'std', t:'تاسك: Legal hold فوراً (داخلياً: خلال ساعة من البلاغ).', n:T('LP / المالية / HR (تذكرة حادث)','مسؤول النظام','سجل حجز بالقنوات والفترة','ساعة'), src:'VDS [~]'},
+      {s:'std', t:'تاسك: فحص صحة النظام يومياً وتذكرة لكل كاميرا معطلة.', n:T('مراجع الكاميرات (الفحص اليومي)','IT / الصيانة','الكاميرا تعمل وتسجل','حسب درجة التيكت (P2 للفرع بلا تسجيل)'), src:'Taqtics [~]'},
+      {s:'std', t:'مؤشر: Camera uptime ≥98%؛ المخالفات لكل فرع/شهر بالنوع؛ تغطية مراجعة الاستثناءات %؛ زمن إغلاق المخالفة؛ سلامة الأدلة (تصدير بسجل حيازة) 100%.', n:'الصيغة: ساعات التسجيل ÷ ساعات العمل؛ عدد/فرع/شهر بالنوع؛ استثناءات رُوجعت ÷ الإجمالي؛ أيام من التسجيل للإقفال؛ تصديرات بسجل ÷ الإجمالي', src:'BOS + Interface + VDS [✔] (uptime: ممارسة)'},
+      {s:'mine', t:'مؤشر: زمن الرد على المخالفة (من التسجيل حتى رد مدير المنطقة).', n:'الصيغة: متوسط الساعات بين تاريخ المخالفة وتاريخ الرد لكل مدير منطقة · الهدف ≤ 48 ساعة · اليوم غير قابل للحساب (الرد نصي بلا تاريخ)'},
+      {s:'mine', t:'تاسك بين إدارتين: LP → الكاميرات (طلب تسجيل/مقطع لتحقيق).', n:T('منع الخسائر (من تاسك تحقيق أو مخالفة مالية)','مراجع الكاميرات','مقطع مصدَّر بالصيغة الأصلية + سجل حيازة','24 ساعة؛ الحجز فوري')}
+    ],
+    sources: [
+      {t:'BOS Security — Remote video auditing for retail', u:'https://www.bossecurity.com/2023/07/25/remote-video-auditing-for-retail-establishments/'},
+      {t:'Taqtics — Loss prevention audit checklist', u:'https://taqtics.co/checklists/retail/loss-prevention-audit-checklist/'},
+      {t:'preventloss.org — Loss prevention audit', u:'https://preventloss.org/articles/loss-prevention-audit.html'},
+      {t:'Interface — POS exception reporting', u:'https://interfacesystems.com/video-intelligence/pos-exception-reporting/'},
+      {t:'Solink — Loss prevention tips', u:'https://solink.com/resources/loss-prevention-tips/'},
+      {t:'Vision Detection Systems — Security camera footage as evidence', u:'https://visiondetectionsystems.com/blog/security-camera-footage-evidence'},
+      {t:'SecureRedact — CCTV rules and regulations at work', u:'https://www.secureredact.ai/articles/cctv-rules-and-regulations-at-work-a-practical-guide-for-uk-and-us-employers'},
+      {t:'Coram — Cameras in the workplace', u:'https://www.coram.ai/post/cameras-in-the-workplace'},
+      {t:'PCI DSS Guide — Requirement 9', u:'https://pcidssguide.com/pci-dss-requirement-9/'},
+      {t:'Fora Soft — Video retention policy', u:'https://www.forasoft.com/learn/video-surveillance/articles-vms/retention-policy-how-long-to-keep-footage'},
+      {t:'ECR — Reduce employee theft in retail', u:'https://ecrloss.com/research-paper/reduce-employee-theft-in-retail/'}
+    ]
+  },
+
+
+  /* ============================ 4. المالية ============================ */
+  {
+    key: 'finance', name: 'المالية', en: 'Finance',
+    about: 'عندكم: تقرير أسبوعي (3 إصدارات) موجه لأ. مصطفى عبدالنعيم – المدير العام، بمراجعة مكتبية على 8 أعمدة لكل فرع ونسبة التزام 54% / 58% / 53%، وأغلب الإجراء «إرسال المشكلة على الجروب لقسم منع الخسائر». المعيار بيشوفها إدارة الكاش اليومي: عهدة ثابتة، عدّ أعمى، تسوية يومية مع البنك، حدود تحمّل مكتوبة للفروق، ونثريات بنظام العهدة الثابتة.',
+    facts: ['نسبة الالتزام: 54% → 58% → 53%', 'المشكلات الأسبوعية: 2 / 14 / 13', '8 أعمدة مراجعة ثابتة في الثلاث أسابيع', 'أمثلة: عجز 480ج (City Stars)، إسقاط سيريال يومية (MOE 2)، سداد مبلغ شخصي على مصروف (Mall of Arabia)', 'مشروع 90 يوم: 1–30 / 31–60 / 61–90'],
+    gap: 'الـ 8 أعمدة سياسات ضمنية بلا نص ولا حد تحمّل بالجنيه ولا جزاء، وكل مشكلة بتتحوّل لـ LP «على الجروب» من غير تاسك يتقفل.',
+    policies: [
+      {s:'yours', t:'لا مرتجع بدون فاتورة وبدون ميل: «عمل مرتجع بعد 14 يوم بدون موافقه او ميل».', n:P('المراجعة المكتبية الأسبوعية لتقارير المرتجعات + الإيميلات','تقرير المرتجعات مقابل إيميلات الموافقة','الكاشير ومدير الفرع','منع الخسائر (تحقيق)','تنبيه → إنذار كتابي (اللائحة)؛ العجز الناتج يُحقَّق','عمود «مرتجعات بدون فواتير وميل» ✓ لكل فرع/الأسبوع'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'إرفاق فاوتشر الإكسكلوزيف مع اليومية.', n:P('المراجعة المكتبية (اليومية بلا فاوتشر)','الفاوتشر المرفق','الكاشير','المالية','تنبيه → إنذار شفهي (اللائحة)','يوميات بلا فاوتشر/الفرع/الأسبوع'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'تقفيل اليومية وإرسالها منظمة بمستنداتها («اهمال تقفيل اليوميات والمستندات»).', n:P('المراجعة المكتبية اليومية','اليومية الموقّعة بمرفقاتها','مدير الفرع','المالية → التشغيل عند التكرار','تنبيه → إنذار كتابي (اللائحة)','نسبة اليوميات المكتملة في الموعد/الفرع'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'لا عجز ولا زيادة في اليومية («عجز باليومية بقيمة 480ج» – City Stars).', n:P('مطابقة اليومية بالنقدي الفعلي','سجل الفرق بالقيمة','الكاشير','منع الخسائر (تحقيق)','تحقيق مكتوب قبل أي تحميل؛ من اللائحة بحسب النتيجة','قيمة العجز/الزيادة بالجنيه لكل فرع/الأسبوع'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'التجميد يطابق إيصال التجميد («مشاكل التجميدات»).', n:P('مطابقة ورقة التجميد بالإيصال والخزنة','إيصال التجميد + ورقة التجميد','الكاشير ومدير الفرع','المالية → منع الخسائر للفرق','تنبيه → إنذار كتابي (اللائحة)','فروق التجميد/الفرع/الأسبوع (الهدف 0)'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'عدم إسقاط سيريال اليومية («اسقاط سريال يوميه والانتقال الي سريال اخر» – MOE 2).', n:P('مراجعة تسلسل السيريال','اليوميات المتتالية + إيميل تخطي السيريال','الكاشير','منع الخسائر (تحقيق)','إنذار كتابي (اللائحة) + تحقيق','سيريالات مُسقَطة بلا إيميل/الشهر (الهدف 0)'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'تقفيل Z report وماكينة الفيزا يومياً.', n:P('المراجعة المكتبية (Z report + Settlement)','Z Report + إيصال Settlement','الكاشير','المالية','تنبيه → إنذار شفهي (اللائحة)','أيام بلا Z report أو Settlement/الفرع'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'تنفيذ توجيهات المصاريف («سداد مبلغ شخصى من الموظف على مصروف للفرع» – Mall of Arabia).', n:P('مراجعة إيصالات المصاريف وطريقة السداد','الإيصال + سند الصرف','مدير الفرع','منع الخسائر (تحقيق)','إنذار كتابي (اللائحة) + تحقيق','مصاريف خارج التوجيهات/الفرع/الأسبوع'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'اكتمال المستندات اليومية وإيصالات المصاريف («مستندات يوميه / ايصالات مصاريف ناقصة»).', n:P('المراجعة المكتبية','قائمة المرفقات مقابل المطلوب','مدير الفرع','المالية','تنبيه → إنذار شفهي (اللائحة)','عدد المستندات الناقصة/الفرع/الأسبوع'), src:'تقرير الادارة المالية.docx'},
+      {s:'std', t:'عهدة ثابتة لكل درج (حد تحدده الشركة بالجنيه) تُعدّ أمام شاهد ويوقّع الطرفان.', n:P('السيستم (فتح الوردية) + كاميرا الكاشير','سجل العدّ بتوقيعين + لقطة','الكاشيرة ومدير الفرع','المالية',LAD,'ورديات فُتحت بلا عدّ موقَّع من اثنين/الفرع/الشهر'), src:'Sandooq + Xenia [✔]'},
+      {s:'std', t:'العدّ الأعمى عند الإغلاق (الكاشيرة تعدّ دون رؤية المتوقع في السيستم).', n:P('السيستم (إعداد إخفاء المتوقع) + كاميرا الكاشير','إعداد النظام + شاشة الإغلاق','مدير الفرع','المالية + IT (الإعداد)',LAD,'إغلاقات بعدّ غير أعمى/الشهر (الهدف 0)'), src:'Lightspeed + Sandooq [✔]'},
+      {s:'std', t:'تسوية الكاش يومية، ومطابقة الإيداع مع تأكيد البنك في اليوم التالي.', n:P('السيستم (تقرير التسوية اليومي)','تسوية مغلقة بتاريخ + تأكيد البنك','مدير الفرع','المالية',LAD,'نسبة الأيام المُسوّاة في موعدها/الفرع'), src:'Sandooq + Lightspeed [✔]'},
+      {s:'std', t:'حد تحمّل مكتوب للفروق بمستويات: صغير يُسجَّل ويُراقَب، متوسط تُراجَع ورديته، كبير يُحقَّق فوراً؛ الزيادة تُحقَّق كالعجز؛ النمط المتكرر يُصعَّد لـ LP/HR. لا خصم تلقائي: تحميل العجز يحتاج نصاً في اللائحة وتحقيقاً مكتوباً.', n:P('السيستم (فرق الوردية)','سجل الفرق بالتصنيف والإجراء','الكاشيرة (الفرق) ومدير الفرع (الإجراء)','منع الخسائر',LAD + ' — بعد تحقيق مكتوب','فروق فوق الحد بلا تحقيق خلال 24 ساعة (الهدف 0)'), src:'Xenia + Sandooq [✔]'},
+      {s:'std', t:'الإيداع البنكي يومي، يُعدّ ويُختم بحضور شخصين (توقيعان) في كيس مختوم برقم مسجَّل.', n:P('مستند (سجل الإيداع) + كاميرا الخزنة','رقم الكيس + توقيعان + قسيمة البنك','مدير الفرع','المالية',LAD,'إيداعات متأخرة >يوم عمل أو بتوقيع واحد/الشهر'), src:'Xenia + Lightspeed + Sandooq [✔]'},
+      {s:'std', t:'النثريات صندوق منفصل بنظام العهدة الثابتة (imprest)، أمين واحد مسؤول، لا صرف بدون إيصال وتفويض مكتوب، سقف للمعاملة، تعويض شهري على الأقل.', n:P('مستند (دفتر النثريات) + جرد مفاجئ','كاش + سندات = العهدة؛ كل سند بإيصال','أمين النثريات','المالية',LAD,'سندات بلا إيصال أو فوق السقف/الشهر'), src:'NC Treasurer + Bizzi + Taqtics [✔]'},
+      {s:'std', t:'ممنوع دفع أي مورّد/خدمة من كاش الفرع؛ كل المدفوعات عبر الحسابات.', n:P('السيستم (paid-outs) + دفتر النثريات','سند الصرف','مدير الفرع','المالية',LAD,'مدفوعات موردين من كاش الفرع (الهدف 0)'), src:'preventloss.org + Bizzi [✔]'},
+      {s:'mine', t:'حد التحمّل بالجنيه مكتوب بثلاث درجات (مثلاً: ≤20ج يُسجَّل، 21–200ج تُراجَع الوردية، >200ج تحقيق LP خلال 24 ساعة؛ الأرقام تعتمدها الشركة)؛ الملف يسجّل «عجز 480ج» بلا تصنيف ولا مهلة.', n:P('السيستم (فرق الوردية مصنّف تلقائياً بالدرجة)','سجل الفرق بالدرجة والإجراء','الكاشيرة','درجة 1–2: المالية · درجة 3: منع الخسائر','درجة 1: تسجيل · درجة 2: تنبيه → إنذار شفهي · درجة 3: بحسب نتيجة التحقيق (اللائحة)','عدد الفروق درجة 3/الشهر؛ نسبة المحقَّق فيها خلال 24 ساعة')},
+      {s:'mine', t:'تحويل المشكلة لـ LP = تاسك بمهلة لا رسالة على الجروب: كل سطر في جدول المشكلات يُفتح تاسكاً على LP بمهلة 5 أيام عمل، والمالية تتابع الإقفال وتعرض المتأخر في التقرير الأسبوعي.', n:P('السيستم (تاسك مالية → LP بلا إقفال > 5 أيام)','التاسك بتاريخ الفتح والإقفال','منع الخسائر (الإقفال)','المالية (المتابعة) → مدير العمليات للمتأخر','تنبيه لـ LP → تصعيد لمدير العمليات','نسبة تاسكات LP المقفولة في المهلة (الهدف ≥ 90%)؛ عدد المفتوح > 5 أيام')},
+      {s:'mine', t:'الإيميل اليومي الموحّد: تقفيل اليومية + ورقة التجميد + فواتير المرتجعات + إيصالات المصاريف في إيميل واحد قبل 12 ليلاً للحسابات وLP والكاميرات؛ الإيميل الناقص = «مستندات ناقصة» تلقائياً.', n:P('السيستم/البريد (إيميل اليوم غائب أو ناقص بعد 12 ليلاً)','الإيميل بطابع الوقت ومرفقاته','مدير الفرع','المالية','تنبيه → إنذار شفهي → إنذار كتابي عند 3 مرات/الشهر','نسبة الأيام بإيميل مكتمل في الموعد/الفرع (الهدف ≥ 95%)')}
+    ],
+    sops: [
+      {s:'yours', t:'التقرير الأسبوعي: ملخص تنفيذي → متابعة الفروع (8 أعمدة) → المشكلات والإجراءات → المشاكل المتكررة؛ رأس التقرير: الأسبوع، الفترة، مرحلة المشروع (1–30/31–60/61–90)، إعداد، موجه إلى، تاريخ الإرسال.', n:'الإجراء الوحيد الموثّق للمالية؛ مراجعة مكتبية لا زيارة.', src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'إجراء التقفيل اليومي للفرع موجود عند LP: تقرير المبيعات اليومية 16 بند، Z Report، Settlement، ورقة التجميد، Manual Receipt.', n:'مرجع المالية في المراجعة؛ يُعاد نشره كمستند مشترك بين المالية وLP.', src:'تعليمات استخدام التقفيل اليومي.pptx'},
+      {s:'std', t:'فتح الكاش: عدّ العهدة → تسجيل (المبلغ/التاريخ/الوقت/الاسم) → توقيع ثانٍ → مطابقة رصيد الخزنة مع إغلاق أمس → الإبلاغ عن أي فرق قبل أول معاملة.', n:'يُدرَّب عليه الكاشير ومدير الفرع.', src:'Xenia [✔]'},
+      {s:'std', t:'تبديل الوردية: عدّ الخارجة كاملاً → عدّ الداخلة مستقلاً → مقارنة وتوقيع على أي فرق قبل مغادرة الخارجة → اعتماد المدير.', n:'يسدّ «تسليم وتسلم بشيت» في SOP منع الخسائر بخطوات.', src:'Xenia [✔]'},
+      {s:'std', t:'الإغلاق المالي اليومي: إغلاق المبيعات → عدّ أعمى بالفئات في مكان آمن → تقرير نهاية اليوم من POS بوسيلة الدفع → المتوقع مقابل الفعلي → تسجيل الفرق مهما صغر → مطابقة الـ drops مع سجل الخزنة → تسوية الكارت → تجهيز الإيداع → عهدة الغد → توقيع المدير.', n:'نسخة المعيار من بوربوينت التقفيل عندكم بإضافة العدّ الأعمى وتسجيل الفرق مهما صغر.', src:'Xenia + Sandooq + Shopify [~]'},
+      {s:'std', t:'الإيداع البنكي: قسيمة إيداع → عدّ وختم بحضور شاهد → كيس مختوم برقم مسجَّل → تسليم → مطابقة تأكيد البنك في اليوم التالي والتحقيق الفوري في أي اختلاف.', n:'يُقاس بـ Deposit match rate.', src:'Xenia + Sandooq [✔]'},
+      {s:'std', t:'النثريات: طلب → اعتماد المدير ضمن الحدود → صرف بإيصال أصلي → سند مرقَّم مسبقاً بتوقيع المستلم → عدّ يومي (الافتتاحي − السندات = النقد) → تعويض عند النزول تحت الحد أو شهرياً على الأقل.', n:'يسدّ «سداد مبلغ شخصي من الموظف على مصروف للفرع».', src:'Taqtics + NC Treasurer [~]'},
+      {s:'std', t:'التحقيق في الفروق: مراجعة معاملات الوردية → إعادة عدّ بموظفة أخرى → مراجعة الفيديو للمعاملات المشتبهة → توثيق خلال 24 ساعة → تصعيد لـ LP/HR عند التكرار.', n:'تاسك مشترك مالية → LP → CCTV.', src:'Sandooq + Shopify + Solink [✔]'},
+      {s:'mine', t:'SOP المالية اليومي للفرع: إيه اللي يتبعت (اليومية، التجميد، المرتجعات، المصاريف)، لمين (الحسابات، LP، الكاميرات)، إمتى (قبل 12 ليلاً)، وشكل الإيميل (عنوان موحّد: الفرع – التاريخ – «تقفيل»)؛ وSOP المراجعة المكتبية: 8 أعمدة × كل فرع × يومياً لا أسبوعياً.', n:'يحوّل المراجعة من أسبوعية إلى يومية ويجعل عمود «الإيميلات المرسلة/المطلوبة» قابلاً للحساب تلقائياً.'}
+    ],
+    checklist: [
+      {s:'yours', t:'مرتجعات بدون فواتير وميل / اكسكلوزيف.', n:C('✓ + عدد المشاكل','أسبوعي (مراجعة مكتبية)','منع الخسائر'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'تسويه العهده.', n:C('✓ + عدد المشاكل','أسبوعي','المالية'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'عجز / زيادة.', n:C('✓ + القيمة بالجنيه','أسبوعي','منع الخسائر'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'مشاكل التجميدات.', n:C('✓ + عدد المشاكل','أسبوعي','المالية'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'اهمال تقفيل اليوميات والمستندات.', n:C('✓ + عدد المشاكل','أسبوعي','التشغيل (مدير المنطقة)'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'عدم تنفيذ التوجيهات للمصاريف.', n:C('✓ + عدد المشاكل','أسبوعي','منع الخسائر'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'الإيميلات المرسلة / المطلوبة.', n:C('عدد المرسل ÷ المطلوب','أسبوعي','التشغيل (مدير المنطقة)'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'مستندات يوميه / ايصالات مصاريف ناقصة.', n:C('✓ + عدد الناقص','أسبوعي','المالية'), src:'تقرير الادارة المالية.docx'},
+      {s:'std', t:'الكاش الفعلي = المتوقع ± الحد؛ كل الفروق موثَّقة.', n:C('جنيه (الفرق) + ✓ التوثيق','يومي','منع الخسائر فوق الحد'), src:'Xenia [✔]'},
+      {s:'std', t:'عدّ العهدة الصباحي موقَّع من شخصين.', n:C('✓/✗','يومي','المالية'), src:'Xenia + preventloss.org [✔]'},
+      {s:'std', t:'الإيداع اليومي مطابق لتأكيد البنك؛ لا تأخير >يوم عمل.', n:C('✓/✗ + أيام التأخير','يومي','المالية'), src:'Sandooq [✔]'},
+      {s:'std', t:'باتش الكارت مُغلق يومياً ومطابق لسجل المعاملات.', n:C('✓/✗','يومي','المالية'), src:'Brookside + SensePass [✔]'},
+      {s:'std', t:'فحص مفاجئ لعدّ الدرج أثناء الوردية.', n:C('جنيه (الفرق)','شهري لكل فرع','منع الخسائر'), src:'Lightspeed [✔]'},
+      {s:'std', t:'تقرير no-sale وpaid-outs مُراجَع ومُعلَّل.', n:C('عدد غير المعلَّل (الهدف 0)','أسبوعي','منع الخسائر'), src:'Taqtics [✔]'},
+      {s:'std', t:'النثريات: النقد = العهدة − السندات؛ كل سند بإيصال.', n:C('✓/✗ + الفرق بالجنيه','أسبوعي','المالية'), src:'Taqtics [✔]'},
+      {s:'mine', t:'تسلسل سيريال اليومية بلا فجوة للشهر (الحالة: MOE 2 أسقط سيريالاً).', n:C('عدد الفجوات (الهدف 0)','أسبوعي','منع الخسائر')}
+    ],
+    tasks: [
+      {s:'yours', t:'جدول المشكلات: م | الفرع | المشكلة / المخالفة | الإجراء التصحيحي (2 / 14 / 13 صف).', n:T('المالية (المراجعة الأسبوعية)','غالباً منع الخسائر','غير محدد — الإجراء نص: «تم ارسال المشكله علي الجروب»','غير محدد'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'تاسك لـ LP: «إيميل لمنع الخسائر للتحقيق» (مثال Mall of Arabia).', n:T('المالية','منع الخسائر','غير محدد (لا نتيجة في التقرير التالي)','غير محدد'), src:'تقرير الادارة المالية.docx'},
+      {s:'yours', t:'مؤشر: نسبة الالتزام (54% / 58% / 53%) وتصنيف الفروع: مستقرة 🟢 / تحتاج متابعة 🟡 / حرجة 🔴.', n:'الصيغة: أعمدة ✓ ÷ (8 × عدد الفروع) · لا هدف محدد في التقرير', src:'تقرير الادارة المالية.docx'},
+      {s:'std', t:'تاسك: تسوية يومية لكل فرع خلال 24 ساعة ومطابقة البنك في اليوم التالي.', n:T('السيستم عند الإغلاق','مدير الفرع ثم المالية','تسوية مغلقة + تأكيد البنك','24 ساعة + يوم عمل للبنك'), src:'Sandooq [✔]'},
+      {s:'std', t:'تاسك: تقرير فروق أسبوعي لكل كاشيرة.', n:T('المالية','المالية → LP للنمط المتكرر','تقرير مرسل لمدير المنطقة وLP','أسبوعي'), src:'Sandooq [✔]'},
+      {s:'std', t:'تاسك: تعويض النثريات شهرياً على الأقل + جرد مفاجئ دوري؛ فحص مفاجئ لدرج/خزنة في كل فرع شهرياً.', n:T('المالية (جدول)','المالية / LP','سند التعويض + تقرير الجرد','شهري'), src:'NC Treasurer + Taqtics + Lightspeed [~]'},
+      {s:'std', t:'مؤشر: Cash over/short % من المبيعات النقدية <0.1%.', n:'الصيغة: مجموع |الفروق| ÷ المبيعات النقدية · الهدف < 0.1%', src:'Sandooq [✔]'},
+      {s:'std', t:'مؤشر: نسبة الأيام المُسوّاة في موعدها؛ Deposit match rate؛ نسبة المرتجعات النقدية الموثقة؛ نسبة الباتشات في موعدها؛ استثناءات النثريات.', n:'الصيغة: لكل منها (المطابق ÷ الإجمالي) شهرياً · الهدف ≥ 98% للتسوية والإيداع والباتش؛ 100% للمرتجعات', src:'Sandooq + Xenia + SensePass + Taqtics [✔]'},
+      {s:'mine', t:'تاسك بين إدارتين: المالية → LP (تحقيق) بتتبع وإقفال ونتيجة تعود للمالية.', n:T('المالية من سطر جدول المشكلات','منع الخسائر','محضر تحقيق + نتيجة في التقرير الأسبوعي التالي','5 أيام عمل')},
+      {s:'mine', t:'مؤشر: نسبة الالتزام بالفرع بهدف.', n:'الصيغة: نفس حسابكم (أعمدة ✓ ÷ 8) لكل فرع أسبوعياً · الفعلي 53–58% · الهدف ≥ 85% بعد 90 يوماً؛ الفرع < 60% ثلاثة أسابيع متتالية = زيارة مالية + LP'}
+    ],
+    sources: [
+      {t:'Xenia — Cash handling procedures for retail', u:'https://www.xenia.team/articles/cash-handling-procedures-retail'},
+      {t:'Sandooq — Cash management in retail stores', u:'https://sandooq.app/blog/cash-management-retail-store'},
+      {t:'Lightspeed — Retail cash handling', u:'https://www.lightspeedhq.com/blog/retail-cash-handling/'},
+      {t:'NC Treasurer — Internal controls and petty cash (PDF)', u:'https://www.nctreasurer.gov/documents/files/slgfd/internal-controls-and-petty-cash-exhibit-i/download?attachment='},
+      {t:'Taqtics — Daily petty cash checklist', u:'https://taqtics.co/retail-operations/daily-petty-cash-checklist/'},
+      {t:'Brookside — Batch settlement', u:'https://brooksidepayments.com/payment-processing-glossary/batch-settlement/'},
+      {t:'SensePass — Payment settlement guide for retailers', u:'https://sensepass.com/stepwise-payment-settlement-guide-for-retailers/'},
+      {t:'Bizzi — Petty cash for a chain of stores', u:'https://bizzi.vn/en/petty-cash-manages-the-operating-costs-of-a-chain-of-stores/'},
+      {t:'PCI DSS Guide — Requirement 9', u:'https://pcidssguide.com/pci-dss-requirement-9/'},
+      {t:'Solink — Loss prevention tips', u:'https://solink.com/resources/loss-prevention-tips/'},
+      {t:'Umbrex — Store controls and operating procedures', u:'https://umbrex.com/resources/retail-industry-playbooks/shrink-loss-prevention-playbook/store-controls-and-operating-procedures/'},
+      {t:'preventloss.org — Loss prevention audit', u:'https://preventloss.org/articles/loss-prevention-audit.html'},
+      {t:'Shopify — Retail opening and closing procedures', u:'https://www.shopify.com/blog/retail-opening-closing-procedures'}
+    ]
+  },
+
+  /* ============================ 5. الموارد البشرية ============================ */
+  {
+    key: 'hr', name: 'الموارد البشرية', en: 'HR',
+    about: 'عندكم: تقريران (أسبوع 2 و3) بزيارات مناطق وملاحظات عامة: إلزام HR System، تفعيل البصمة وManual Attendance للجدد، اعتراضات الخصومات، ودور مديري المناطق ومدير العمليات؛ التعليمات بتوصل بجروب الواتساب. المعيار بيشوفها صاحبة الحضور والجزاءات: البصمة مصدر الحقيقة، سلّم جزاءات معتمد ومعلن في الفرع، إقرارات موقّعة، وتدقيق ربع سنوي للحضور.',
+    facts: ['تقارير: أسبوع 2 و3 فقط (أسبوع 1 لم يُرسل — تقفيل الرواتب)', 'تحسن 15–20% في Manual Attendance (أسبوع 3)', '7 توصيات (أسبوع 2) و6 (أسبوع 3) بلا مالك ولا تاريخ', 'التعليمات عبر جروب الواتساب', 'مشكلات البصمة → IT بلا سجل'],
+    gap: 'لا لائحة جزاءات معلنة ولا شيك ليست زيارة ولا سجل تاسكات، فالخصومات بتتعارض عليها من غير مرجع مكتوب والتوصيات ما بتتحولش لتاسكات.',
+    policies: [
+      {s:'yours', t:'«إلزام جميع الموظفين باستخدام النظام المعتمد (HR System) في تقديم الطلبات وتسجيل الحضور والانصراف».', n:P('HR System (طلبات/حضور خارج النظام)','تقرير الاستخدام بالفرع','الموظف ومدير الفرع','HR','تنبيه → إنذار شفهي (اللائحة)','نسبة الطلبات عبر النظام/الفرع (الهدف 100%)'), src:'HR.docx (أسبوع 2)'},
+      {s:'yours', t:'مدير الفرع مسؤول عن توعية الموظفين ومتابعة الحضور والتعامل مع المشكلات قبل التصعيد.', n:P('زيارة HR + تقرير الحضور','تقرير التأخير/الغياب بالفرع','مدير الفرع','التشغيل (مدير المنطقة)','تنبيه → إنذار كتابي (اللائحة)','عدد مشكلات الحضور المصعَّدة بلا معالجة من مدير الفرع/الشهر'), src:'HR.docx (أسبوع 2)'},
+      {s:'yours', t:'استكمال تفعيل البصمة وتوفير Manual Attendance للجدد حتى التسجيل.', n:P('HR System (موظفون على Manual Attendance)','كشف الحضور اليدوي الموقّع','مدير الفرع','HR → IT للجهاز','تنبيه (اللائحة) عند غياب الكشف اليدوي','نسبة الموظفين على Manual Attendance (تحسن 15–20%؛ الهدف 0% بعد التسجيل)'), src:'HR.docx (أسبوع 3)'},
+      {s:'yours', t:'تسجيل مشكلات البصمة ومتابعتها حتى الإغلاق (المشكلة، المسؤول، الإجراء، الحالة، إخطار الموظف).', n:P('سجل مشكلات البصمة (مقترح في التقرير، غير موجود)','السجل بالحالة','مدير الفرع (التسجيل) / IT (الحل)','IT','تنبيه → إنذار شفهي عند عدم التسجيل (اللائحة)','مشكلات بصمة مفتوحة > 3 أيام (الهدف 0)'), src:'HR.docx (أسبوع 2)'},
+      {s:'yours', t:'Area Managers: مراجعة أسباب اعتراضات الخصومات دون المطالبة بإلغائها قبل المراجعة.', n:P('HR System (اعتراض خصم)','سجل الاعتراض بالسبب ونتيجة المراجعة','مدير المنطقة','HR','تنبيه لمدير المنطقة عند طلب إلغاء بلا مراجعة','نسبة الاعتراضات المراجَعة قبل أي إلغاء (الهدف 100%)'), src:'HR.docx (أسبوع 2)'},
+      {s:'yours', t:'مدير عمليات الفروع: متابعة التزام المناطق ورفع تقارير دورية.', n:P('مستند (التقرير الدوري)','التقرير بتاريخه','مدير العمليات','HR','تنبيه (إداري)','نسبة التقارير الدورية المرفوعة في موعدها'), src:'HR.docx (أسبوع 2)'},
+      {s:'yours', t:'التفرقة بين خطأ احتساب (يُصحَّح) وخصم عن عدم التزام (يُطبَّق).', n:P('HR System (نوع الاعتراض)','البصمة الخام + قرار المراجعة','الموظف / HR','HR','خطأ احتساب: تسوية المستحقات · عدم التزام: الخصم من اللائحة','نسبة الاعتراضات المصنَّفة بنوع وقرار'), src:'HR.docx (أسبوع 3)'},
+      {s:'yours', t:'التعليمات عبر جروب الواتساب ومسؤولية كل مستوى عن نقلها.', n:P('زيارة HR (سؤال الموظفين عن آخر تعليمات)','نص التعليمات بتاريخه','مدير الفرع / مدير المنطقة','HR','تنبيه (اللائحة) عند عدم النقل','نسبة الموظفين العارفين بآخر تعليمات في الزيارة'), src:'HR.docx (أسبوع 2)'},
+      {s:'std', t:'سجل البصمة (الطوابع الخام) هو المصدر المعتمد للحضور؛ كل تعديل يدوي يحمل سبباً وختماً زمنياً وهوية المعدِّل، والتعديل بدون سبب مخالفة.', n:P('السيستم — سجل تعديلات الحضور','تقرير التعديلات مع السبب والمعدِّل','مدير الفرع / HR','HR',LAD,'نسبة التعديلات بدون سبب مسجَّل = 0%'), src:'Timeclock365 [~]'},
+      {s:'std', t:'تسجيل الموظف الجديد على جهاز البصمة في أول يوم عمل بعد توقيعه إقراراً يُحفظ في ملفه؛ حتى اكتمال التسجيل كشف يدوي موقَّع من مدير الفرع، يُغلق خلال 3 أيام عمل (ممارسة).', n:P('السيستم — مقارنة الموظفين النشطين بالمسجَّلين على الجهاز','الإقرار الموقَّع + تقرير التسجيل','مدير الفرع','HR → IT للجهاز',LAD,'نسبة الموظفين النشطين غير المسجَّلين بعد 3 أيام عمل'), src:'ZeniaHR [~]'},
+      {s:'std', t:'حظر البصمة بالنيابة: البصم لغير الشخص نفسه أو طلب ذلك مخالفة للطرفين؛ العبث بالجهاز أو فصله مخالفة جسيمة.', n:P('كاميرا منطقة الجهاز مقابل سجل البصمة','لقطة الكاميرا + سجل الجهاز','الموظف (الطرفان)','HR','حسب لائحة الجزاءات المعتمدة — المصدر يصفها «misconduct for both»: إنذار كتابي → خصم → تحقيق','عدد حالات البصمة بالنيابة شهرياً (الهدف 0)'), src:'ZeniaHR [✔]'},
+      {s:'std', t:'سياسة مكتوبة ومعلنة للتأخير والغياب بدون إبلاغ: إجراء الإبلاغ، عواقب عدم الإبلاغ، ما يُعدّ غياباً مبرَّراً؛ فترة السماح والعتبات تُحدَّد من اللائحة المعتمدة.', n:P('السيستم — البصمة مقابل جدول الورديات','تقرير التأخير/الغياب اليومي','الموظف','HR',LAD,'دقائق التأخير لكل موظف شهرياً؛ أيام الغياب بدون إبلاغ'), src:'AirMason [~]'},
+      {s:'std', t:'سلم الجزاءات التدريجي: شفهي موثَّق → كتابي → إنذار نهائي → إحالة للجهة المختصة؛ المخالفات الجسيمة (الاعتداء، السرقة، العصيان الصريح، التزوير، التخريب) تُرفع للجهة المختصة وليست فصلاً فورياً بقرار مدير.', n:P('مستند — ملف الجزاءات','نموذج الإنذار الموقَّع ومحضر التحقيق','مدير الفرع (الالتزام بالتسلسل)','HR','السلّم نفسه؛ تجاوزه بلا مخالفة جسيمة = إلغاء الجزاء','نسبة الجزاءات المطابقة للتسلسل واللائحة = 100%'), src:'SHRM [✔]'},
+      {s:'std', t:'لائحة جزاءات معتمدة من الجهة المختصة ومعلنة في كل فرع؛ لا جزاء قبل سماع الموظف وتوثيق المواجهة.', n:P('زيارة — الإعلان في الفرع + مستند — محضر السماع','صورة اللائحة المعلنة + محضر التحقيق','الفرع / HR','HR','الجزاء بلا محضر سماع يُلغى','نسبة الجزاءات التي لها محضر سماع موقَّع = 100%'), src:'ممارسة شائعة'},
+      {s:'std', t:'إقرار دليل الموظف يُوقَّع قبل الوردية الأولى بسجل يبيِّن مَن أقرَّ بأي نسخة ومتى؛ لا عمل منفرد على الكاشير قبل إتمام كل بنود قائمة التدريب.', n:P('السيستم — مستخدم POS مُفعَّل مقابل سجل التدريب','سجل إتمام الوحدات + إقرار الدليل','مدير الفرع','HR + IT (تفعيل المستخدم)',LAD,'Trained-before-Live = 100%'), src:'AirMason + KoronaPOS [~]'},
+      {s:'mine', t:'فترة السماح وعتبة التأخير بالدقائق مكتوبة (الملفات تسجل «20 دقيقة» و«ساعتين» بلا قاعدة): تأخير فوق السماح = خصم بالدقائق من اللائحة؛ 3 مرات في الشهر = إنذار شفهي موثَّق؛ 5 = إنذار كتابي.', n:P('HR System (البصمة مقابل الوردية) + كاميرا المدخل','تقرير التأخير اليومي','الموظف','HR','خصم بالدقائق → إنذار شفهي عند 3 → إنذار كتابي عند 5 (تُعتمد في اللائحة)','عدد الموظفين فوق عتبة 3 تأخيرات/الشهر')},
+      {s:'mine', t:'اعتراض الخصم يُقدَّم على HR System خلال 3 أيام من إشعار الخصم ويُرد عليه خلال 5 أيام عمل بتصنيف (خطأ احتساب / خصم صحيح)؛ لا إلغاء شفهي من مدير المنطقة.', n:P('HR System (اعتراض بلا رد > 5 أيام أو إلغاء بلا سجل)','سجل الاعتراض والرد','HR (الرد) / مدير المنطقة (الإلغاء)','HR','تنبيه إداري لـ HR عند التأخير؛ الإلغاء بلا سجل يُعاد','نسبة الاعتراضات المردود عليها في 5 أيام (الهدف ≥ 95%)')},
+      {s:'mine', t:'التعليمات الرسمية لا تُعتبر نافذة إلا بنشرها في السيستم بتاريخ ورقم؛ الواتساب للتنبيه فقط، والموظف لا يُحاسَب على تعليمات غير منشورة.', n:P('السيستم (سجل التعليمات المنشورة)','التعليمة برقمها وتاريخها','مدير المنطقة / HR','HR','جزاء مبني على تعليمة غير منشورة يُلغى','نسبة التعليمات المنشورة في السيستم من إجمالي المرسل على الواتساب')}
+    ],
+    sops: [
+      {s:'yours', t:'هيكل تقرير HR: ملخص الزيارات → الملاحظات الست (HR System، دور مديري الفروع، حضور الجدد، مشكلات البصمة، دور Area Managers، الدور الرقابي لمدير العمليات) → التقييم → التوصيات (7 ثم 6).', n:'الإجراء الوحيد الموثّق؛ التوصيات بلا مالك ولا تاريخ.', src:'HR.docx (أسبوع 2، 3)'},
+      {s:'yours', t:'آلية مشكلات البصمة المقترحة في التقرير: المشكلة → المسؤول → الإجراء → الحالة → إخطار الموظف؛ واعتراضات الخصومات: مراجعة → إجراء تصحيحي → تسوية المستحقات.', n:'مقترح في النص لم يُنفَّذ بعد.', src:'HR.docx (أسبوع 2)'},
+      {s:'std', t:'البصمة اليومية: كل موظف يبصم شخصياً عند الوصول والانصراف؛ عند عطل الجهاز الإبلاغ لـ HR خلال ساعة واستخدام الكشف اليدوي حتى الإصلاح، وHR تسجِّل من المصدر البديل مع توثيق العطل.', n:'يربط Manual Attendance بعطل موثَّق لا بالعادة.', src:'ZeniaHR [~]'},
+      {s:'std', t:'تصحيح البصمة الناقصة: طلب يذكر الوقت والسبب → تسجيل بختم زمني وهوية المعدِّل والسبب → اعتماد المدير خلال 24 ساعة (ممارسة).', n:'كل تعديل بلا سبب = مخالفة.', src:'Timeclock365 [~]'},
+      {s:'std', t:'جدول التهيئة: قبل اليوم الأول (الزي والمقاسات)؛ اليوم الأول (الملف، تسجيل البصمة والإقرار، الزي والبادج، إقرار الدليل)؛ الأسبوع الأول (التدريب الإلزامي + Buddy)؛ مراجعة 30/90 يوم.', n:'يسدّ «ترك موظفه جديده لفتح الفرع» في مخالفات CCTV.', src:'ZeniaHR + AirMason (ممارسة للتسلسل)'},
+      {s:'std', t:'توقيع الجزاء: تحديد الدرجة من السلم → توثيق الواقعة → مواجهة وسماع → توقيع الإنذار → ملف الموظف.', n:'متطلب محلي لصحة الجزاء.', src:'SHRM [~]'},
+      {s:'std', t:'الزيارة التدقيقية لـ HR: عينة بصمات مقابل الجدول، التعديلات اليدوية وأسبابها، ملفات الجدد، سجلات التدريب، الزي؛ تصنيف الملاحظات (حرج/كبير/بسيط) بمالك وموعد.', n:'يحوّل زيارات المناطق عندكم من ملاحظات عامة إلى شيك ليست.', src:'Timeclock365 + Taqtics [~]'},
+      {s:'std', t:'إنهاء الخدمة: حذف قالب البصمة من كل الأجهزة والخوادم خلال 7 أيام؛ استرداد الزي والبادج والمفاتيح وإلغاء مستخدم POS نفس اليوم.', n:'تاسك مشترك HR → IT → LP.', src:'ZeniaHR [~]'},
+      {s:'mine', t:'SOP الخصومات: البصمة الخام → كشف الخصومات الشهري → إشعار الموظف على HR System → نافذة اعتراض 3 أيام → مراجعة HR (خطأ احتساب / صحيح) → تسوية المستحقات أو تثبيت الخصم → إخطار الموظف ومدير المنطقة.', n:'يسدّ تعارض مديري المناطق مع الخصومات بمسار واحد.'}
+    ],
+    checklist: [
+      {s:'yours', t:'استخدام HR System في الطلبات والحضور.', n:C('بلا مقياس (ملاحظة نصية)','زيارة منطقة','HR'), src:'HR.docx (أسبوع 2)'},
+      {s:'yours', t:'وعي مدير الفرع بإجراءات HR.', n:C('بلا مقياس (ملاحظة نصية)','زيارة منطقة','التشغيل (مدير المنطقة)'), src:'HR.docx (أسبوع 2)'},
+      {s:'yours', t:'تفعيل البصمة للجدد + Manual Attendance.', n:C('بلا مقياس (تحسن 15–20% تقديري)','زيارة منطقة','IT'), src:'HR.docx (أسبوع 3)'},
+      {s:'yours', t:'متابعة مشكلات البصمة مع IT.', n:C('بلا مقياس (ملاحظة نصية)','زيارة منطقة','IT'), src:'HR.docx (أسبوع 2)'},
+      {s:'yours', t:'تعامل Area Manager مع اعتراضات الخصومات.', n:C('بلا مقياس (ملاحظة نصية)','زيارة منطقة','HR'), src:'HR.docx (أسبوع 2)'},
+      {s:'yours', t:'الدور الرقابي لمدير العمليات.', n:C('بلا مقياس (ملاحظة نصية)','زيارة منطقة','HR'), src:'HR.docx (أسبوع 2)'},
+      {s:'std', t:'جهاز البصمة يعمل ومتزامن والساعة صحيحة.', n:C('✓/✗','يومي (تزامن) / أسبوعي (فحص IT)','IT'), src:'ZeniaHR [✔]'},
+      {s:'std', t:'100% من المعيَّنين مسجَّلون على البصمة؛ لا كشف يدوي أطول من 3 أيام عمل.', n:C('عدد غير المسجَّل (الهدف 0)','أسبوعي','HR → IT'), src:'ZeniaHR [~]'},
+      {s:'std', t:'عدد التصحيحات اليدوية أسبوعياً، ولكل تصحيح سبب وهوية معدِّل.', n:C('رقم + % بلا سبب (الهدف 0%)','أسبوعي','HR'), src:'Timeclock365 [~]'},
+      {s:'std', t:'ملف كل موظف جديد مكتمل: إقرار الدليل بنسخته وتاريخه، إقرار إشعار البصمة، العقد والمستندات.', n:C('✓/✗ لكل مستند','كل زيارة','HR'), src:'AirMason + ZeniaHR [✔]'},
+      {s:'std', t:'لائحة الجزاءات وجدول الورديات معلنان في الفرع.', n:C('✓/✗ (صورة)','كل زيارة','HR'), src:'ممارسة شائعة'},
+      {s:'std', t:'سجل الجزاءات: كل جزاء موثَّق بالتسلسل مع محضر مواجهة وتوقيع.', n:C('عدد الجزاءات بلا محضر (الهدف 0)','شهري','HR'), src:'SHRM [~]'},
+      {s:'std', t:'الهواتف الشخصية مدارة وفق القاعدة ولا استخدام أثناء خدمة العميل.', n:C('✓/✗','كل زيارة + CCTV','التشغيل (مدير المنطقة)'), src:'Taqtics [✔]'},
+      {s:'mine', t:'عدد اعتراضات الخصم المفتوحة > 5 أيام عمل.', n:C('رقم (الهدف 0)','أسبوعي','HR')},
+      {s:'mine', t:'الموظفون على Manual Attendance > 3 أيام عمل بلا تذكرة IT.', n:C('رقم (الهدف 0)','أسبوعي','IT')}
+    ],
+    tasks: [
+      {s:'yours', t:'التوصيات (7 ثم 6) للعمليات ومديري المناطق وIT.', n:T('HR (التقرير)','غير محدد','غير محدد (لا مالك ولا تاريخ)','غير محدد'), src:'HR.docx (أسبوع 2، 3)'},
+      {s:'yours', t:'مشكلة بصمة → IT.', n:T('مدير الفرع / HR','IT','غير موثّق','غير محدد'), src:'HR.docx (أسبوع 2)'},
+      {s:'yours', t:'اعتراض خصم → مراجعة → إجراء تصحيحي → تسوية المستحقات.', n:T('الموظف عبر مدير المنطقة','HR','تسوية أو تثبيت (مقترح)','غير محدد'), src:'HR.docx (أسبوع 3)'},
+      {s:'std', t:'تاسك: تسجيل بصمة موظف جديد (أول يوم؛ الحد الأقصى 3 أيام).', n:T('HR عند التعيين','مدير الفرع + IT','تقرير التسجيل + الإقرار الموقَّع','3 أيام عمل'), src:'ZeniaHR [~]'},
+      {s:'std', t:'تاسك: طلب تصحيح بصمة (اعتماد خلال 24 ساعة، إغلاق قبل تشغيل الرواتب).', n:T('الموظف على HR System','مدير الفرع ثم HR','تعديل بسبب وختم زمني','24 ساعة؛ قبل الرواتب'), src:'Timeclock365 (ممارسة للمدد)'},
+      {s:'std', t:'تاسك: مخالفة زي/مظهر تُغلق بإعادة فحص وتصحيح قبل بدء العمل.', n:T('مدير الفرع / CCTV','الموظف','إعادة فحص ✓','قبل بدء الوردية'), src:'Taqtics [~]'},
+      {s:'std', t:'مؤشر: Turnover (مرجع أمريكي 45.6%)، Absenteeism (مرجع 3.2%)، نسبة إتمام التدريب، Manual Correction Rate (< 2% داخلي)، Audit Closure Rate.', n:'الصيغة: التاركون ÷ المتوسط؛ أيام الغياب ÷ أيام العمل؛ المكتمل ÷ المطلوب؛ التصحيحات ÷ الطوابع؛ الملاحظات المقفولة في الموعد ÷ الإجمالي · الأهداف محلية', src:'Boostpoint + Rippling [~] (التصحيح والإقفال: ممارسة)'},
+      {s:'mine', t:'تاسك بين إدارتين: HR → IT (عطل/تسجيل بصمة) بفرع.', n:T('HR أو مدير الفرع','IT','تأكيد الفرع أن الجهاز يعمل وكل الموظفين مسجَّلون','2 أيام عمل؛ المتأخر يظهر عند مدير العمليات')},
+      {s:'mine', t:'مؤشر: نسبة الموظفين على Manual Attendance.', n:'الصيغة: موظفون بكشف يدوي ÷ إجمالي الموظفين · الفعلي: «تحسن 15–20%» بلا رقم أساس · الهدف 0% بعد 3 أيام من التعيين'}
+    ],
+    sources: [
+      {t:'SHRM — Progressive discipline', u:'https://www.shrm.org/topics-tools/employment-law-compliance/one-done-to-skip-progressive-discipline'},
+      {t:'Timeclock365 — Attendance audit checklist', u:'https://timeclock365.com/blog/attendance-audit-checklist/'},
+      {t:'Taqtics — Staff grooming and presentation checklist', u:'https://taqtics.co/checklists/retail/staff-grooming-and-presentation-checklist/'},
+      {t:'AirMason — Employee handbooks for retail', u:'https://www.airmason.com/blog/employee-handbooks-for-retail/'},
+      {t:'ZeniaHR — Biometric attendance policy', u:'https://www.zeniahr.com/hrms/policies/biometric-attendance-policy/'},
+      {t:'Rippling — HR metrics', u:'https://www.rippling.com/blog/best-metrics-to-track-for-hr'},
+      {t:'Boostpoint — Retail employee turnover', u:'https://boostpoint.com/retail-employee-turnover/'},
+      {t:'KoronaPOS — Point of sale training', u:'https://koronapos.com/blog/point-of-sale-training/'}
+    ]
+  },
+
+  /* ============================ 6. نظم المعلومات ============================ */
+  {
+    key: 'it', name: 'نظم المعلومات', en: 'IT',
+    about: 'عندكم: تقرير IT سردي بخطة 90 يوم، نموذج Store Visit ورقي 12 بند بتوقيع مدير الفرع ومدير IT، رفع باقات الإنترنت 140 → 240 جيجا في 3 مواقع، تدريب بالفيديو والواتساب، والأعطال في Ticket System غير مرفق. المعيار بيشوفها إدارة خدمة: تصنيف أعطال P1–P4 بـ SLA، حساب فردي لكل مستخدم POS، سجل أصول، وضع offline مختبر، وتدريب قبل التشغيل (Trained-before-Live).',
+    facts: ['نموذج Store Visit: 12 بند × 3 نماذج (المنصورة: رامة 8 جيجا، الزقازيق: تقطيع صوت، النزهة: كابل الطابعة وشاشة الموبايل)', 'باقة الإنترنت 140 → 240 جيجا (الرباط، مخزن سيتي ستارز، مول مصر)', 'خطة 90 يوم: 1–30 تقييم وتدريب · 31–60 تصحيح · 61–90 قياس وتوثيق', 'IT Manager: Hatem · فيديو How to search.mp4 + قناة YouTube', 'لا سجل إكسل للأعطال؛ Ticket System مذكور غير مرفق'],
+    gap: 'لا سياسة IT مكتوبة واحدة (كلمات السر، استخدام الأجهزة، الإنترنت) ولا SLA للتيكت، والإنجازات بتتكتب سردياً بدل تيكتات تتقفل.',
+    policies: [
+      {s:'yours', t:'«ضمان استقرار أنظمة Microsoft Dynamics LS Central وPOS».', n:P('Ticket System (أعطال POS)','التذاكر بالفرع والمدة','IT','IT','إداري (تقييم أداء الإدارة)','ساعات توقف POS/الفرع/الشهر'), src:'إدارة نظم المعلومات.docx'},
+      {s:'yours', t:'«متابعة كفاءة الشبكات والإنترنت والأجهزة» — رفع الباقة 140 → 240 جيجا في 3 مواقع.', n:P('زيارة Store Visit (Routers/Cables) + شكاوى الفرع','نموذج Store Visit الموقّع','IT / مزود الخدمة','IT','إداري؛ جزائي تعاقدي على المزود','عدد انقطاعات الإنترنت/الفرع/الشهر؛ الفروع التي استهلكت الباقة قبل نهاية الشهر'), src:'IT.docx'},
+      {s:'yours', t:'«تحسين سرعة الاستجابة للبلاغات ومعالجة الأسباب الجذرية».', n:P('Ticket System (زمن الاستجابة)','طوابع وقت التذكرة','IT','IT','إداري','متوسط زمن الاستجابة والحل/الشهر'), src:'إدارة نظم المعلومات.docx'},
+      {s:'yours', t:'«الصيانة الوقائية» للأجهزة.', n:P('سجل الزيارات الوقائية','نموذج Store Visit بتاريخه','IT','IT','إداري','نسبة الفروع بزيارة وقائية في الربع'), src:'إدارة نظم المعلومات.docx'},
+      {s:'yours', t:'البلاغات عبر Ticket System لا الواتساب.', n:P('مقارنة بلاغات الواتساب بالتذاكر','تذكرة برقم','مدير الفرع','IT','تنبيه → إنذار شفهي (اللائحة) للبلاغ خارج النظام','نسبة البلاغات عبر النظام (الهدف 100%)'), src:'IT.docx'},
+      {s:'yours', t:'«توعية الموظفين بالإجراءات الصحيحة للتعامل مع الأجهزة» (تدريب على المرتجع، تسجيل أرقام العملاء، Ticket System، HR System).', n:P('Store Visit (بند Training Employs) + تكرار الأعطال الناتجة عن سوء استخدام','سجل التدريب + التذاكر بسبب «سوء استخدام»','مدير الفرع','IT','تنبيه (اللائحة) للموظف غير المدرَّب','نسبة الموظفين المدرَّبين/الفرع؛ تذاكر سوء الاستخدام/الشهر'), src:'إدارة نظم المعلومات.docx'},
+      {s:'std', t:'تصنيف الأعطال بمصفوفة الأثر × الاستعجال على أربع درجات (Sev1: الكاشير/الدفع متوقف في عدة فروع — Sev2: POS أو الدفع متوقف في فرع — Sev3: جهاز واحد — Sev4: تنبيه مراقبة)؛ P1 استجابة 15–30 دقيقة وحل ≤ 4 ساعات، P2 ≤ 1 ساعة/≤ 8 ساعات عمل، P3 ≤ 4 ساعات/1–3 أيام، P4 3–10 أيام.', n:P('السيستم — نظام التذاكر','طوابع وقت التذكرة (فتح/استجابة/حل)','الإدارة (IT) / المزوِّد','IT','إداري لـ IT؛ تعاقدي للمزود','SLA Compliance ≥ 95%'), src:'Brocent + Gain + XO Team [✔]'},
+      {s:'std', t:'كلمات المرور والوصول للـ POS: حساب فردي لكل مستخدم ولا مشاركة؛ طول ≥ 12 حرفاً؛ تعقيد؛ قفل بعد محاولات فاشلة محدودة؛ خروج تلقائي بعد 15 دقيقة خمول؛ تغيير الافتراضية؛ تغيير دوري (90 يوماً).', n:P('السيستم — إعدادات سياسة كلمات المرور في POS/الدومين','لقطة الإعدادات + تقرير الحسابات','الإدارة (IT) / الموظف للمشاركة','IT',LAD + ' للموظف الذي يشارك حسابه','نسبة الأجهزة/الحسابات المطابقة = 100%'), src:'NordLayer [~]'},
+      {s:'std', t:'فصل الصلاحيات على الكاشير: المرتجعات، الإلغاء، تعديل السعر، فتح الدرج، التقارير، الإعدادات مقصورة على الأدوار المصرَّح لها؛ لا جهاز مسجَّل دخول متروك؛ لا اعتمادات مشتركة.', n:P('السيستم — تقرير الصلاحيات + سجل العمليات، وكاميرا الكاشير','مصفوفة الصلاحيات المعتمدة','الإدارة (IT) للصلاحيات؛ الموظف للجهاز المتروك','IT (الصلاحيات) / منع الخسائر (الاستخدام)',LAD,'عدد المرتجعات/الإلغاءات بحساب غير مصرَّح = 0'), src:'Taqtics [✔]'},
+      {s:'std', t:'إلغاء وصول الموظف (POS، بصمة، بريد) نفس يوم الترك/النقل.', n:P('السيستم — مقارنة مستخدمي POS بقائمة HR للتاركين','تقرير المستخدمين النشطين','الإدارة (IT/HR)','IT','إداري','حسابات نشطة لموظفين تاركين = 0'), src:'ممارسة شائعة'},
+      {s:'std', t:'الاستخدام المقبول: لا تطبيقات غير معتمدة على أجهزة POS؛ لا USB شخصي ولا تصفح من الكاشير.', n:P('السيستم — قائمة البرامج المثبَّتة/سجل الأجهزة الطرفية + زيارة','تقرير الفحص','الموظف / مدير الفرع','IT',LAD,'عدد الأجهزة بتطبيقات غير معتمدة'), src:'Taqtics [~]'},
+      {s:'std', t:'سجل أصول الأجهزة: قائمة لكل فرع تضم كل جهاز وملحقاته مع Tag وإصدار البرنامج وتاريخ انتهاء الضمان/الدعم؛ النقل بين الفروع بتذكرة فقط.', n:P('زيارة — مطابقة الأصول + السيستم','سجل الأصول المحدَّث','الإدارة (IT) / الفرع','IT','تنبيه (اللائحة) لمدير الفرع عند نقل جهاز بلا تذكرة','دقة الأصول = 100%'), src:'Microsoft [~]'},
+      {s:'std', t:'الوضع غير المتصل: قاعدة بيانات offline على أجهزة POS، اختبار الوظائف offline عند كل تحديث، والتحقق من رفع المعاملات عند العودة؛ البيع على ورق حل أخير بإجراء معتمد.', n:P('السيستم — لوحة حالة offline/المعاملات المعلَّقة','تقرير المعاملات المعلَّقة','مدير الفرع / IT','IT',LAD,'معاملات offline معلَّقة > 24 ساعة = 0'), src:'Microsoft + XO Team [~]'},
+      {s:'mine', t:'جهاز الفرع للشغل فقط: اليوتيوب/الماتش على لاب توب الفرع (مخالفات CCTV) مخالفة أجهزة تُكتشف من سجل التصفح/الفلترة لا من الكاميرا فقط؛ IT يفعّل حجب المواقع الترفيهية على شبكة الفرع.', n:P('سجل الفلترة/التصفح لجهاز الفرع + CCTV','تقرير التصفح بالوقت + لقطة','الموظف / مسؤول الفرع','IT (الحجب) + التشغيل (السلوك)','تنبيه → إنذار شفهي → إنذار كتابي (اللائحة)','محاولات الوصول المحجوبة/الفرع/الشهر (اتجاه نازل)')},
+      {s:'mine', t:'الـ DVR وجهاز الفرع على UPS ومُدرجان في فحص الإغلاق: «فصل الكاميرات لعدم مراجعة شحن الكهرباء» و«عدم غلق الكمبيوتر» يتحولان إلى بندي فحص بتنبيه آلي لـ IT عند انقطاع NVR.', n:P('مراقبة NVR عن بُعد (انقطاع > 15 دقيقة) + سجل الطاقة','تنبيه الانقطاع بوقت + لقطة آخر إطار','مدير الفرع','IT','تنبيه → إنذار كتابي (اللائحة) للفصل المتعمد → تحويل لـ LP','ساعات انقطاع NVR/الفرع/الشهر (الهدف 0)')},
+      {s:'mine', t:'كل بند في Store Visit بوصف مشكلة = تيكت برقم في النظام يوم الزيارة؛ النموذج الورقي يُرفع صورة مرفقة بالتيكت، ولا تُغلق الزيارة إلا بتيكت لكل مشكلة.', n:P('السيستم (زيارة مقفولة ومشاكلها بلا تذاكر)','نموذج الزيارة + أرقام التذاكر','IT (الزائر)','IT','إداري','نسبة مشاكل الزيارات المحوَّلة لتذاكر (الهدف 100%)')}
+    ],
+    sops: [
+      {s:'yours', t:'خطة 90 يوم: 1–30 تقييم وحصر وتدريب بالزيارات/الفيديو/واتساب؛ 31–60 إجراءات تصحيحية؛ 61–90 قياس وتوثيق.', n:'إطار زمني بلا SOP تشغيلي.', src:'إدارة نظم المعلومات.docx'},
+      {s:'yours', t:'مانيوال POS محدّث + قناة YouTube + فيديو How to search.', n:'مواد تدريب؛ المانيوال مذكور غير مرفق.', src:'IT.docx + How to search.mp4'},
+      {s:'yours', t:'تدريب الفروع على المرتجع وتسجيل أرقام العملاء والتيكت سيستم والـ HR سيستم.', n:'يسدّ مخالفة CCTV «تكرار تسجيل نفس رقم الموبايل بعدة فواتير».', src:'إدارة نظم المعلومات.docx'},
+      {s:'std', t:'الفحص اليومي عند الفتح: كل جهاز يعمل ومتصل، التاريخ والوقت، سكان تجريبي بالسعر الصحيح، إيصال تجريبي، الدرج يفتح فقط بمعاملة أو صلاحية مدير، معاملة بطاقة تجريبية؛ أداء CCTV/NVR وحالة Wi-Fi.', n:'يُنفَّذ من الفرع ضمن الافتتاح، ويُراجَع في Store Visit.', src:'Taqtics + Mitti [✔]'},
+      {s:'std', t:'الإبلاغ عن عطل: تذكرة بالفرع والجهاز والأعراض والأثر؛ تحديثات كل 15–30 دقيقة لـ Sev1 وكل 30–60 دقيقة لـ Sev2.', n:'يحل محل البلاغ على الواتساب.', src:'XO Team [~]'},
+      {s:'std', t:'تصعيد P1: تفعيل الفريق المناوب فوراً، Incident Commander يملك الجدول والقرارات، قناة واحدة، منسِّق للمزوِّدين وفق SLA العقد، نقاط حوار مكتوبة لموظفي الفرع مع العملاء، إبلاغ مدير المنطقة.', n:'لحالة توقف الكاشير في عدة فروع.', src:'XO Team [✔]'},
+      {s:'std', t:'العمل Offline والعودة: التحويل لوضع offline، البيع بالمتاح، العودة online والتحقق من رفع المعاملات، مراجعة Show journal، اختبار دوري عند كل تحديث.', n:'يسدّ حالة «عطل السيستم/الإنترنت» في الفاتورة اليدوية عندكم.', src:'Microsoft [✔]'},
+      {s:'std', t:'استبدال جهاز: جهاز احتياطي مجهَّز مسبقاً، تعطيل المفقود/المسروق فوراً، إعادة تفعيل Register على الجديد، تحديث سجل الأصول.', n:'مثال من ملفاتكم: شاشة الموبايل في النزهة، رامة المنصورة.', src:'Microsoft [✔]'},
+      {s:'std', t:'تدريب الكاشير على POS: وضع تدريب لا يمس البيع → 30–60 دقيقة استكشاف → 1–2 ساعة معاملات تجريبية → 1–2 وردية بإشراف → مراجعة بعد 30 يوماً؛ لا عمل منفرد قبل إتمام القائمة.', n:'يربط تدريب IT بسجل تدريب LP وHR.', src:'KoronaPOS [✔]'},
+      {s:'mine', t:'SOP تيكت الفرع: مدير الفرع يفتح التذكرة بالجهاز والأعراض وصورة → IT يصنّف P1–P4 خلال 30 دقيقة → حل عن بُعد أو زيارة → إقفال بتأكيد مدير الفرع في السيستم؛ المقفول بلا تأكيد يُعاد فتحه.', n:'يحوّل «الأعطال في Ticket System غير مرفق» إلى دورة ظاهرة في داشبورد الفروع.'}
+    ],
+    checklist: [
+      {s:'yours', t:'Pc-Laptop.', n:C('نص حر («لا يوجد مشكلة» أو وصف)','زيارة Store Visit','IT'), src:'Store Visit (صورة النموذج)'},
+      {s:'yours', t:'Cam.', n:C('نص حر','زيارة Store Visit','IT'), src:'Store Visit (صورة النموذج)'},
+      {s:'yours', t:'Nvr.', n:C('نص حر','زيارة Store Visit','IT'), src:'Store Visit (صورة النموذج)'},
+      {s:'yours', t:'Cash Area.', n:C('نص حر','زيارة Store Visit','IT'), src:'Store Visit (صورة النموذج)'},
+      {s:'yours', t:'Cables.', n:C('نص حر','زيارة Store Visit','IT'), src:'Store Visit (صورة النموذج)'},
+      {s:'yours', t:'Routers.', n:C('نص حر (مثال: تقطيع صوت – الزقازيق)','زيارة Store Visit','IT'), src:'Store Visit (صورة النموذج)'},
+      {s:'yours', t:'Printer Cash.', n:C('نص حر (مثال: كابل الطابعة – النزهة)','زيارة Store Visit','IT'), src:'Store Visit (صورة النموذج)'},
+      {s:'yours', t:'Printer Barcode.', n:C('نص حر','زيارة Store Visit','IT'), src:'Store Visit (صورة النموذج)'},
+      {s:'yours', t:'Cash Drawer.', n:C('نص حر','زيارة Store Visit','IT'), src:'Store Visit (صورة النموذج)'},
+      {s:'yours', t:'Sound System.', n:C('نص حر','زيارة Store Visit','IT'), src:'Store Visit (صورة النموذج)'},
+      {s:'yours', t:'Mobile Store.', n:C('نص حر (مثال: اسكرين الموبايل – النزهة)','زيارة Store Visit','IT'), src:'Store Visit (صورة النموذج)'},
+      {s:'yours', t:'Training Employs + توقيع Store Manager وIT Manager.', n:C('نص حر + توقيعان','زيارة Store Visit','IT'), src:'Store Visit (صورة النموذج)'},
+      {s:'std', t:'سكان تجريبي يُظهر المنتج والسعر الصحيح.', n:C('✓/✗','يومي (الفرع) / كل زيارة (IT)','IT → المرشندايز للسعر'), src:'Taqtics [✔]'},
+      {s:'std', t:'الدرج يفتح فقط مع معاملة أو صلاحية مدير.', n:C('✓/✗','يومي','IT'), src:'Taqtics [✔]'},
+      {s:'std', t:'لا اعتمادات مشتركة؛ لا جهاز مسجَّل دخول متروك.', n:C('✓/✗','كل زيارة + CCTV','IT → منع الخسائر'), src:'Taqtics [✔]'},
+      {s:'std', t:'لا تطبيقات غير معتمدة؛ لا USB.', n:C('✓/✗ + عدد','كل زيارة','IT'), src:'Taqtics [~]'},
+      {s:'std', t:'النسخة الاحتياطية اليومية مكتملة.', n:C('✓/✗','يومي','IT'), src:'Mitti [✔]'},
+      {s:'std', t:'سجل الأصول يطابق الأجهزة والملحقات الفعلية.', n:C('عدد غير المطابق (الهدف 0)','كل زيارة','IT'), src:'Microsoft [✔]'},
+      {s:'std', t:'كلمات المرور الافتراضية مغيَّرة.', n:C('✓/✗','كل زيارة','IT'), src:'NordLayer [✔]'},
+      {s:'mine', t:'الـ DVR وجهاز الفرع على UPS يعمل (اختبار فصل 1 دقيقة).', n:C('✓/✗ + دقائق الصمود','كل زيارة','IT')}
+    ],
+    tasks: [
+      {s:'yours', t:'رفع باقات الإنترنت 140 → 240 جيجا (الرباط، مخزن سيتي ستارز، مول مصر).', n:T('IT','مزود الخدمة','تفعيل الباقة','غير محدد'), src:'IT.docx'},
+      {s:'yours', t:'تصليح الأجهزة من زيارات Store Visit (رامة 8 جيجا، تقطيع صوت، كابل طابعة، شاشة موبايل).', n:T('زيارة IT','IT','إنجاز سردي في التقرير','غير محدد'), src:'إدارة نظم المعلومات.docx'},
+      {s:'yours', t:'التدريب بالزيارات/الفيديو/واتساب + 6 خطوات قادمة.', n:T('IT','IT + مديرو الفروع (يسرى وائل، مروة أشرف، دعاء أحمد)','بند في التقرير','غير محدد'), src:'إدارة نظم المعلومات.docx'},
+      {s:'std', t:'تاسك: تذكرة عطل P1–P4 بهدف SLA Compliance ≥ 95%؛ MTTR مقياس مرافق.', n:T('مدير الفرع (التذكرة)','IT / المزوِّد','تأكيد الفرع','P1 ≤ 4 س · P2 ≤ 8 س عمل · P3 1–3 أيام · P4 3–10 أيام'), src:'Gain + Brocent [✔]'},
+      {s:'std', t:'تاسك: طلب خدمة (غير عطل) بمسار P4؛ صيانة وقائية دورية بهدف PM Compliance ≥ 90%.', n:T('مدير الفرع / جدول IT','IT','تنفيذ + تحديث سجل الأصول','P4: 3–10 أيام · PM: ربع سنوي'), src:'ممارسة شائعة'},
+      {s:'std', t:'مؤشر: POS Uptime (≥ 99.5% داخلي)؛ عدد حوادث P1 شهرياً؛ First-Contact Fix Rate؛ Reopen Rate؛ دقة سجل الأصول 100%؛ Trained-before-Live 100%.', n:'الصيغة: ساعات التشغيل ÷ ساعات العمل؛ عدد؛ المحلول من أول اتصال ÷ الإجمالي؛ المُعاد فتحه ÷ المقفول؛ المطابق ÷ الإجمالي؛ المدرَّبون قبل التشغيل ÷ الجدد', src:'XO Team + Microsoft + KoronaPOS [✔] (Uptime/FCR: ممارسة)'},
+      {s:'mine', t:'تاسك بين إدارتين: HR → IT (بصمة) بفرع.', n:T('HR','IT','تقرير تسجيل/إصلاح الجهاز + تأكيد HR','2 أيام عمل')},
+      {s:'mine', t:'تاسك بين إدارتين: IT → مزود الإنترنت (Orange/غيره) رفع باقة أو إصلاح خط، بلا فرع أو بفرع.', n:T('IT من تذكرة فرع','المزود','تأكيد الفرع عودة الخدمة/الباقة','حسب SLA العقد؛ يظهر في داشبورد IT كتاسك خارجي')},
+      {s:'mine', t:'مؤشر: نسبة تيكتات الفرع المقفولة في SLA بحسب الدرجة، معروضة لكل فرع.', n:'الصيغة: تذاكر مقفولة في المهلة ÷ إجمالي التذاكر لكل درجة شهرياً · الهدف ≥ 95% · اليوم غير قابل للحساب (لا سجل)'}
+    ],
+    sources: [
+      {t:'XO Team — Retail IT incident playbook', u:'https://thexoteam.com/what-happens-when-critical-business-systems-go-down-a-retail-it-incident-playbook/'},
+      {t:'Mitti — IT daily checklist', u:'https://mitti.com/library/information-technology/it-daily-checklist-carlton-f90e8oaptixgf7yc'},
+      {t:'Taqtics — POS functionality checklist', u:'https://taqtics.co/checklists/retail/pos-functionality-checklist/'},
+      {t:'NordLayer — PCI DSS password requirements', u:'https://nordlayer.com/learn/pci-dss/password-requirements/'},
+      {t:'Microsoft Dynamics 365 Commerce — Offline implementation', u:'https://learn.microsoft.com/en-us/dynamics365/commerce/dev-itpro/implementation-considerations-offline'},
+      {t:'Microsoft Dynamics 365 Commerce — Device management', u:'https://learn.microsoft.com/en-us/dynamics365/commerce/dev-itpro/implementation-considerations-devices'},
+      {t:'Brocent — IT support SLA priority levels', u:'https://www.brocent.com/blog/posts/it-support-sla-priority-levels-p1-p2-p3-p4'},
+      {t:'Gain — SLA response time vs resolution time', u:'https://gain.io/blog/sla-response-time-vs-resolution-time'},
+      {t:'KoronaPOS — Point of sale training', u:'https://koronapos.com/blog/point-of-sale-training/'},
+      {t:'ServiceChannel — Year-round retail store maintenance checklist', u:'https://servicechannel.com/blog/the-year-round-retail-store-maintenance-checklist/'}
+    ]
+  },
+
+
+  /* ============================ 7. الصيانة ============================ */
+  {
+    key: 'maintenance', name: 'الصيانة', en: 'Facilities',
+    about: 'عندكم: أنضف سجل تاسكات في الشركة — سجل شكاوى 10 أعمدة، 15 نوع، 10 فنيين، 35 موقع، الحالة Done/جاري/لم يتم، والإقفال بـ «استلام مدير الفرع»؛ 81 شكوى (76 Done) ثم 29 (كلها Done)، وجدول فنيين ونقاشة أسبوعي وتصاريح للمولات. المعيار بيشوفها إدارة أوامر عمل: تصنيف P1–P4 بـ SLA، صيانة وقائية بجدول سنوي، تصريح مول لكل عمل، إقفال بتحقق وصور، وتقييم شهري للمقاولين.',
+    facts: ['سجل الشكاوى: 81 (76 Done) ← 29 (كلها Done)', '15 نوع شكوى · 10 فنيين · 35 موقع', '7 فروع مولات تحتاج تصريح: YRD, P90, MOE, CIS, MOA، جنينة، الرحاب', 'جدول الفنيين 19 صف + جدول النقاشة 16 صف (بلال)', 'مثال معاد: theyard زجاج درج الإكسسوار «لصق بسليكون (مادة غير مناسبة)» → لم يتم الحل → Done أسبوع 3'],
+    gap: 'الصيانة بتشتغل بالشكاوى بس: لا تصنيف أولوية ولا SLA ولا شيك ليست وقائية، فالعطل بيتكرر (theyard) من غير سبب جذري ولا تقييم للفني.',
+    policies: [
+      {s:'yours', t:'كل شكوى بتاريخ ومُسجِّل وفرع ونوع وفني، وتُغلق بـ «استلام مدير الفرع» + «الحالة النهائية».', n:P('سجل الشكاوى (شكوى بلا استلام مدير الفرع)','عمود «استلام مدير الفرع» + الحالة','الفني / مدير الفرع','الصيانة','تنبيه للفني → استبعاد من الجدول عند التكرار (تعاقدي)','نسبة الشكاوى Done باستلام مدير الفرع (الفعلي 76/81 ثم 29/29)'), src:'تقرير صيانه الفروع.xlsx'},
+      {s:'yours', t:'فروع المولات تحتاج «تصريح صيانه» قبل الزيارة (YRD, P90, MOE, CIS, MOA، جنينة، الرحاب).', n:P('جدول الفنيين (عمود تصاريح) + سجل أمن المول','التصريح المرفق بالزيارة','الصيانة (المنسّق)','الصيانة','إداري؛ الفني يُرجَع من المول = زيارة ضائعة تُسجَّل عليه','زيارات مولات بلا تصريح/الشهر (الهدف 0)'), src:'الصيانة.xlsx (جدول الفنيين)'},
+      {s:'yours', t:'التنسيق مع التشغيل على مواعيد صيانات فروع القاهرة.', n:P('جدول الصيانة الأسبوعي','الجدول المعتمد من التشغيل','الصيانة / مدير المنطقة','التشغيل (مدير المنطقة)','إداري','زيارات أُلغيت لعدم التنسيق/الشهر'), src:'الصيانة.docx'},
+      {s:'yours', t:'التعديلات في الفرع بموافقة («نقل مكان الفواحة بموافقة استاذ محمد عبد الصبور»).', n:P('سجل الشكاوى (تعديل بلا اسم المعتمِد)','الموافقة المكتوبة في الملاحظات','الفني / مدير الفرع','الصيانة','تنبيه → إنذار كتابي لمدير الفرع عند تعديل بلا موافقة','تعديلات بلا موافقة/الشهر (الهدف 0)'), src:'تقرير صيانه الفروع.xlsx'},
+      {s:'std', t:'تصنيف أوامر العمل على أربع درجات حسب خطر السلامة وأثر التشغيل: طارئ (استجابة 15–30 دقيقة)، عاجل (1–2 ساعة)، عادي (4–8 ساعات)، مخطط (24–72 ساعة / جدولة خلال 30 يوماً)؛ مدد الحل تُحدَّد في عقد المقاول.', n:P('السيستم — أوامر العمل','طوابع وقت الأمر (فتح/استجابة/إغلاق)','الإدارة (المرافق) / المقاول','الصيانة','إداري لـ الصيانة؛ تعاقدي للمقاول','SLA Compliance لكل درجة'), src:'OxMaint [~]'},
+      {s:'std', t:'SLA حسب الفئة كأهداف تعاقدية: كهرباء/إضاءة استجابة 15 دقيقة للخطر وحل 2 ساعة؛ HVAC استجابة 30 دقيقة وحل 4 ساعات؛ سباكة استجابة 30 دقيقة للغمر وحل 4 ساعات؛ مكافحة حشرات استجابة 4 ساعات وحل 24–48 ساعة؛ غرامات التجاوز بالجنيه في العقد.', n:P('السيستم — أوامر العمل لكل فئة','طوابع الوقت','المقاول','الصيانة','شرط جزائي تعاقدي بالجنيه لكل ساعة تجاوز','نسبة الالتزام بالاستجابة/الحل لكل فئة؛ توافر النظام'), src:'OxMaint [✔]'},
+      {s:'std', t:'الصيانة الوقائية الإلزامية بجدول سنوي معتمد لكل فرع يغطي التكييف والإضاءة والكهرباء والسباكة والأبواب/الأقفال ومعدات السلامة.', n:P('السيستم — أوامر PM المولَّدة مقابل المنفَّذة','تقرير PM الشهري','الإدارة (المرافق)','الصيانة','إداري','PM Compliance ≥ 90%'), src:'ServiceChannel + Vixxo [✔]'},
+      {s:'std', t:'تصاريح العمل في المولات: لا دخول فني بدون تصريح يحدد الوحدة ونوع العمل والتواريخ والساعات وأسماء العاملين وبطاقاتهم والمواد الداخلة/الخارجة؛ الأعمال المزعجة قبل الفتح أو بعد الإغلاق؛ الأعمال الساخنة بتصريح منفصل ومراقبة حريق 30–60 دقيقة بعد الانتهاء؛ الطارئ يُعتمد هاتفياً ويُستكمل التصريح اليوم التالي.', n:P('مستند — التصريح مرفق بأمر العمل','نسخة التصريح + سجل أمن المول','الإدارة (المرافق) / المقاول','الصيانة','تعاقدي للمقاول؛ إداري للمنسّق','نسبة أعمال المولات بتصريح ساري = 100%'), src:'LazyMonkey + Code Ready Safety [✔]'},
+      {s:'std', t:'إغلاق أمر العمل بتحقق من مدير الفرع مع صور وملاحظات وقطع الغيار المستخدمة وتوقيع؛ الإغلاق بدون تأكيد يُعاد فتحه.', n:P('السيستم — حالة الأمر','توقيع مدير الفرع + الصور','الفني / المقاول','الصيانة','تعاقدي: الأمر المُعاد فتحه لا يُحاسَب عليه مرتين','Verified Closure Rate'), src:'OxMaint [~]'},
+      {s:'std', t:'التصعيد: تجاوز عتبات SLA يصعِّد تلقائياً؛ الطارئ يستوجب إرسال المقاول فوراً وإبلاغ الإدارة وتوثيق الحادث؛ الأعطال المتكررة (إعادة خلال 30 يوماً) تستوجب سبباً جذرياً موثَّقاً.', n:P('السيستم — تنبيهات التصعيد','سجل التصعيد وتقرير السبب الجذري','الإدارة (المرافق)','الصيانة','إداري؛ Callback يُخصم من تقييم المقاول','نسبة التصعيدات في موعدها؛ أعطال متكررة بلا سبب جذري = 0'), src:'OxMaint + Vixxo [~]'},
+      {s:'std', t:'عتبة الاعتماد المالي: فوق مبلغ تحدده الشركة بالجنيه يلزم عرض سعر واعتماد قبل التنفيذ، باستثناء الطارئ P1 الذي يُعتمد لاحقاً.', n:P('مستند — عرض السعر والاعتماد مرفقان بالأمر','الاعتماد الموقَّع','الإدارة (المرافق)','الصيانة → المالية','إداري؛ الصرف بلا اعتماد لا يُسدَّد','أوامر فوق العتبة بدون اعتماد = 0'), src:'ممارسة شائعة'},
+      {s:'mine', t:'SLA لكل نوع من الـ 15 بالأيام (خزنه / كهرباء / سيكوريت وابواب = 24 ساعة؛ تكييف / سباكة / مكوة = 48 ساعة؛ نقاشة / نجارة / تركيبات / يفطة = 7 أيام)؛ التجاوز يلوّن الصف أحمر في السجل ويظهر عند مدير الإدارة.', n:P('سجل الشكاوى (تاريخ التسجيل مقابل تاريخ الزيارة)','طوابع الوقت','الفني المعيَّن','الصيانة','تنبيه للفني → خصم من بطاقة تقييمه الشهرية','نسبة الشكاوى داخل SLA بحسب النوع (الهدف ≥ 90%)')},
+      {s:'mine', t:'إعادة الفتح: الشكوى المقفولة Done وتعود بنفس النوع في نفس الفرع خلال 30 يوماً تُسجَّل Callback على الفني ولا تُقفل ثانيةً إلا بسبب جذري مكتوب (حالة theyard: سليكون غير مناسب).', n:P('سجل الشكاوى (نفس الفرع + النوع خلال 30 يوماً)','الشكويان + تقرير السبب الجذري','الفني','الصيانة','تعاقدي: Callback بلا أجر؛ 3 Callbacks/الشهر = استبعاد من الجدول','Callback Rate لكل فني (الهدف < 8%)')},
+      {s:'mine', t:'لا Done بدون استلام مدير الفرع في السيستم + صورة بعد؛ الحالة بدون الاثنين تبقى «جاري العمل» تلقائياً.', n:P('السيستم (Done بلا توقيع أو صورة)','توقيع مدير الفرع على الموبايل + الصورة','الفني','الصيانة','الشكوى تُعاد لـ «جاري» والفني يُنبَّه','نسبة Done الموثَّق (الهدف 100%)')}
+    ],
+    sops: [
+      {s:'yours', t:'جدول صيانة فروع القاهرة بالتنسيق مع التشغيل / تقييم الصيانات / جدول النقاشة / متابعة الفنيين والتأكيد مع مدير الصيانة.', n:'عناوين بلا خطوات؛ جدول الفنيين: اليوم | الفرع | اسم الفنى | تصاريح (19 صف)، النقاشة: اليوم | تاريخ | الفرع | اسم الفنى | تصاريح (16 صف، بلال).', src:'الصيانة.docx + الصيانة.xlsx'},
+      {s:'yours', t:'شرح سيستم الصيانة للفنيين وتجربته في (المهندسين، الرباط، سيتي ستار).', n:'تجربة محدودة على 3 فروع؛ لم يُوثَّق إجراء.', src:'الصيانة.docx'},
+      {s:'std', t:'أمر عمل تفاعلي: الفرع يفتح الطلب بالفئة والوصف والصورة والأثر → تصنيف → تعيين → تحديث → إغلاق بتحقق مدير الفرع وصور وملاحظات وقطع الغيار.', n:'نسخة المعيار من سجلكم ذي الـ 10 أعمدة بإضافة الصورة والتصنيف.', src:'OxMaint [~]'},
+      {s:'std', t:'الطارئ P1: إرسال المقاول فوراً، إبلاغ الإدارة، بدء توثيق الحادث، تأمين الموقع، إبلاغ المول ومدير المنطقة، حل مؤقت ثم حل نهائي اليوم التالي.', n:'مثال من ملفاتكم: «عداد الاستوك الخارجي يوجد به شرز» (Abbas 1).', src:'OxMaint [~]'},
+      {s:'std', t:'جدولة الفنيين بمسار أسبوعي ثابت (Route) للعادي والوقائي، تقطعه الطارئ والعاجل، والمولات ضمن ساعات التصريح.', n:'يبني على جدول الفنيين عندكم بإضافة الأولوية.', src:'LazyMonkey (ممارسة شائعة)'},
+      {s:'std', t:'طلب تصريح المول: المستندات وجهة الاتصال → إخطار مسبق بمدة حسب نوع الطلب → إرسال الأسماء والهويات للأمن → إخراج المخلفات عبر ممر الخدمة في أوقات متفق عليها → جولة إغلاق مع ممثل المول.', n:'لـ 7 فروع المولات عندكم.', src:'LazyMonkey [~]'},
+      {s:'std', t:'الزيارة التدقيقية للمرافق: جولة بقائمة الفحص مع مدير الفرع، تصوير، أمر عمل لكل ملاحظة، مراجعة المتأخر، تقييم المقاولين.', n:'تحوّل الصيانة من شكاوى فقط إلى وقائية.', src:'OxMaint (ممارسة شائعة)'},
+      {s:'mine', t:'SOP تصريح المول قبل الزيارة: جدول الفنيين الأسبوعي يُقفل يوم الخميس → طلب التصاريح لفروع المولات السبعة قبل 48 ساعة من الزيارة → رقم التصريح في عمود «تصاريح» → بلا رقم = الزيارة لا تُجدول.', n:'المعيار حذف «48 ساعة» لغياب مصدر؛ أقترحها قاعدة داخلية لأن عمود «تصاريح» عندكم موجود بلا قاعدة.'}
+    ],
+    checklist: [
+      {s:'yours', t:'قوائم الاختيار في سجل الشكاوى: نوع الشكوى (15: خزنه، نقاشة، كهرباء، نجارة، مكوة، سباكة، سيكوريت وابواب، تنظيف يفطه، تكييف، تركيبات، أخري، م/ محمود، It، ستاند مصر، تغير يفطه) / الفني (10) / الفرع (35) / الحالة (Done، جاري العمل، لم يتم الحل).', n:C('اختيار من قائمة','لكل شكوى (لا زيارة دورية)','الصيانة'), src:'تقرير صيانه الفروع.xlsx'},
+      {s:'std', t:'باب المدخل/الشاتر والأقفال والمزالج والمفصلات وجهاز الإغلاق يعملون.', n:C('✓/✗','شهري (زيارة وقائية)','الصيانة'), src:'ServiceChannel [✔]'},
+      {s:'std', t:'مخارج الطوارئ غير مسدودة ولوحاتها مضاءة.', n:C('✓/✗','شهري','الصيانة'), src:'ServiceChannel [✔]'},
+      {s:'std', t:'إضاءة الصالة والفاترينات مكتملة؛ أي لمبة معطَّلة تُستبدل.', n:C('عدد اللمبات المعطَّلة (الهدف 0)','شهري + بلاغ الفرع','الصيانة'), src:'ServiceChannel [~]'},
+      {s:'std', t:'التكييف يعمل بلا أصوات أو تسريب وضمن النطاق المعتمد.', n:C('✓/✗','شهري','الصيانة'), src:'ServiceChannel [~]'},
+      {s:'std', t:'فلاتر التكييف نظيفة وتاريخ آخر تغيير مسجَّل.', n:C('✓/✗ + التاريخ','شهري','الصيانة'), src:'ServiceChannel [✔]'},
+      {s:'std', t:'اللوحة الكهربائية مُعنونة ودليل الدوائر محدَّث ولا أسلاك مكشوفة.', n:C('✓/✗','ربع سنوي','الصيانة'), src:'Nextech + ServiceChannel [✔]'},
+      {s:'std', t:'لا تسريب مياه أو آثار رطوبة؛ الصرف والحمّامات تعمل.', n:C('✓/✗','شهري','الصيانة'), src:'ServiceChannel [✔]'},
+      {s:'std', t:'طفايات الحريق مشحونة وسارية وفي مواضعها.', n:C('✓/✗ + تاريخ الصلاحية','شهري','الصيانة'), src:'ممارسة شائعة'},
+      {s:'std', t:'لوحة إنذار الحريق بلا أعطال.', n:C('✓/✗','شهري','الصيانة'), src:'Mitti [✔]'},
+      {s:'std', t:'غرف القياس: أبواب/ستائر/مرايا/إضاءة/شماعات سليمة.', n:C('✓/✗','شهري','الصيانة'), src:'ممارسة شائعة (تجزئة الأزياء)'},
+      {s:'std', t:'لا حشرات أو قوارض؛ آخر مكافحة مسجَّلة.', n:C('✓/✗ + التاريخ','شهري','الصيانة'), src:'ServiceChannel + OxMaint [✔]'},
+      {s:'std', t:'تصاريح المول وشهادات الفحص سارية.', n:C('✓/✗ + تاريخ الانتهاء','شهري','الصيانة'), src:'LazyMonkey + OxMaint [~]'},
+      {s:'mine', t:'الخزنة: القفل والمفصلات والقاعدة (أكثر نوع شكوى عندكم بالاسم «خزنه»).', n:C('✓/✗','شهري','الصيانة → منع الخسائر عند عطل القفل')},
+      {s:'mine', t:'المكوة والفاحة: التوصيل والأمان الحراري والسلك (مُدرجة في أنواعكم بلا فحص دوري).', n:C('✓/✗','شهري','الصيانة')}
+    ],
+    tasks: [
+      {s:'yours', t:'سجل الشكاوى: تاريخ التسجيل | مسجل الشكوى | القسم | نوع الشكوى | الشكوى | تاريخ الزيارة | الفني | استلام مدير الفرع | الحالة | ملاحظات.', n:T('مدير الفرع (مسجل الشكوى)','الفني المعيَّن (مصطفى عباس، بلال أحمد، م علي حسنى…)','استلام مدير الفرع + Done','غير محدد (81 → 76 Done؛ 29 → 29 Done)'), src:'تقرير صيانه الفروع.xlsx'},
+      {s:'yours', t:'جدول الفنيين الأسبوعي: اليوم | الفرع | اسم الفنى | تصاريح (19 صف).', n:T('مدير الصيانة','الفنيون','تنفيذ الزيارات المجدولة','أسبوعي'), src:'الصيانة.xlsx'},
+      {s:'yours', t:'جدول النقاشة: اليوم | تاريخ | الفرع | اسم الفنى | تصاريح (16 صف، بلال).', n:T('مدير الصيانة','بلال','تنفيذ + قبول مدير الفرع','أسبوعي'), src:'الصيانة.xlsx'},
+      {s:'std', t:'تاسك: أمر عمل تفاعلي P1–P4 بهدف SLA Compliance ≥ 95%.', n:T('مدير الفرع','الفني / المقاول','تحقق مدير الفرع + صور','حسب الدرجة (15 دقيقة → 72 ساعة استجابة)'), src:'Gain + OxMaint [✔]'},
+      {s:'std', t:'تاسك: أمر PM مولَّد من الجدول السنوي بهدف PM Compliance ≥ 90%؛ طلب تصريح مول لـ 100% من أعمال المولات.', n:T('السيستم (الجدول)','الفني / المنسّق','تنفيذ + صور؛ رقم التصريح','قبل موعد الـ PM؛ التصريح قبل الزيارة'), src:'LazyMonkey [✔] (PM: ممارسة)'},
+      {s:'std', t:'مؤشر: متوسط إغلاق أمر العمل (مرجع 14.7 يوماً متوسطاً مقابل 8.7 للأفضل)؛ First-Time Fix (~72% مقابل > 88%)؛ Callback Rate خلال 30 يوماً (~19% مقابل < 8%)؛ Reactive vs Planned (مرجع 80/20 وقائي/تفاعلي).', n:'الصيغة: متوسط الأيام من التسجيل للإغلاق؛ المحلول من أول زيارة ÷ الإجمالي؛ الإعادة خلال 30 يوماً ÷ الإجمالي؛ أوامر PM ÷ الإجمالي · الأهداف تحددها الشركة', src:'Vixxo + RetailFixit [✔]'},
+      {s:'std', t:'مؤشر: Verified Closure Rate = 100%؛ Vendor Score ≥ 85 (بطاقة موزونة: الاستجابة 30%، جودة الحل 25%، التوثيق 20%، PM 15%، السلامة 10%).', n:'الصيغة: Done بتحقق وصور ÷ Done؛ البطاقة الشهرية لكل فني/مقاول', src:'OxMaint [✔] (العتبة: ممارسة)'},
+      {s:'mine', t:'مؤشر: نسبة Done برضا مدير الفرع من إجمالي Done، لكل فني.', n:'الصيغة: Done بعمود «استلام مدير الفرع» موقَّع ÷ إجمالي Done · الفعلي قابل للحساب من سجلكم (76/81) · الهدف 100%'},
+      {s:'mine', t:'تاسك بين إدارتين: الصيانة → التشغيل (تثبيت ميعاد صيانة فروع القاهرة الأسبوعي).', n:T('مدير الصيانة (الخميس)','مدير المنطقة','اعتماد الجدول في السيستم','قبل الأحد؛ غياب الاعتماد = الجدول ينفذ كما هو')}
+    ],
+    sources: [
+      {t:'OxMaint — SLA design for hard/soft services in malls', u:'https://oxmaint.com/industries/facility-management/sla-design-for-hardsoft-services-troubleshooting-handbook-for-malls'},
+      {t:'OxMaint — Work order priority classification (CMMS)', u:'https://oxmaint.com/industries/facility-management/facility-work-order-priority-classification-cmms-guide'},
+      {t:'ServiceChannel — Year-round retail store maintenance checklist', u:'https://servicechannel.com/blog/the-year-round-retail-store-maintenance-checklist/'},
+      {t:'Vixxo — Data-first facilities management benchmarks', u:'https://www.vixxo.com/facilities-management-news/what-is-data-first-facilities-management-benchmarks-costs-and-the-case-for-change'},
+      {t:'LazyMonkey — Mall work permit process', u:'https://lazymonkey.in/blog/mall-work-permit-process/'},
+      {t:'Code Ready Safety — Hot work programs and permits', u:'https://www.codereadysafety.com/hot-work-programs-permits/'},
+      {t:'RetailFixit — 5 maintenance KPIs for multi-location managers', u:'https://www.retailfixit.com/the-5-maintenance-kpis-every-multi-location-manager-should-track/'},
+      {t:'Nextech — Electrical preventive maintenance for retail', u:'https://www.nextechna.com/blog/electrical-preventive-maintenance-for-retail-restaurants-a-practical-checklist-for-managers/'},
+      {t:'Gain — SLA response time vs resolution time', u:'https://gain.io/blog/sla-response-time-vs-resolution-time'},
+      {t:'Mitti — IT daily checklist', u:'https://mitti.com/library/information-technology/it-daily-checklist-carlton-f90e8oaptixgf7yc'}
+    ]
+  },
+
+  /* ============================ 8. مراقبة المخزون ============================ */
+  {
+    key: 'stock_control', name: 'مراقبة المخزون', en: 'Stock Control',
+    about: 'عندكم: شيت متابعة زيارات بـ 7 نقاط مراجعة بتقييم جيد/متوسط/ضعيف + ملاحظات + إجراء تصحيحي + تاريخ متابعة، 7 → 13 فرع تراكمي، وتدريب مدير الفرع والمسؤول الثاني على 7 مواضيع. المعيار بيشوفها إدارة دقة المخزون: الاستلام بالعدّ لا بالافتراض، IBT من الطرفين خلال 48 ساعة، 6 أكواد تسوية فقط، تجميد أثناء الجرد، وعجز إداري شهري بالسبب.',
+    facts: ['7 نقاط مراجعة × (جيد / متوسط / ضعيف)', '7 → 13 فرع · 49 → 91 بند · 39 → 83 صف تدريب', 'الزائرون: مصطفى وليد، عادل محمد، احمد جودة', 'مخالفة متكررة: «عدم ارسال ميل بشيت استلام البضاعة اكتر من 4 مرات»', 'أسبوع 1: لم يرسلوا (جرد مخازن الجملة)'],
+    gap: 'السياسات ضمنية في عمود الإجراء التصحيحي، ونص الـ SOP للمواضيع السبعة مش في الملفات، والعجز غير المفسَّر ما بيتحسبش.',
+    policies: [
+      {s:'yours', t:'إرسال ميل بشيت الاستلام بعد كل استلام («عدم ارسال ميل بشيت استلام البضاعة اكتر من 4 مرات»).', n:P('مطابقة إيميلات الاستلام بحركات الاستلام في السيستم','الإيميل بتاريخه + شيت الاستلام','مدير الفرع','مراقبة المخزون','تنبيه → إنذار كتابي عند التكرار (الحالة: 4 مرات)','استلامات بلا إيميل/الفرع/الشهر (الهدف 0)'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'كل قطعة بكود وسعر من شيت Check price («تكويد المنتجات وتسعيرها من شيت Check price»).', n:P('زيارة (عينة قطع) + Check price','صورة القطعة + الشيت','مدير الفرع','مراقبة المخزون','تنبيه → إنذار شفهي (اللائحة)','تقييم بند «الباركود وتكويد المنتجات» (جيد/متوسط/ضعيف)'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'الديفوهات والدراي كلين تُراجَع مع مسئول التشغيل وتخرج بالطريقة المتبعة.', n:P('زيارة (تالف على الصالة أو في المخزن بلا إجراء)','صورة + مستند الإخراج','مدير الفرع','مراقبة المخزون → التشغيل','تنبيه → إنذار شفهي (اللائحة)','تقييم بند «البضاعة التالفة»؛ قطع تالفة بلا إخراج > الزيارة القادمة'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'تجهيز الفرع للجرد قبل الموعد («تجهيز الفرع طبقا للتعليمات قبل موعد الجرد»).', n:P('زيارة ما قبل الجرد','شيك ليست الجاهزية','مدير الفرع','مراقبة المخزون','تنبيه → إنذار كتابي عند تأجيل الجرد بسبب الفرع','تقييم بند «جاهزية الفرع للجرد»؛ جرود أُجِّلت/الموسم'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'الدورة المستندية: فايل بالنسخة الموقّعة من المستلم وتاريخ الخروج، توقيع السائق بالاسم والتاريخ على IBT، وعدم تكرار التحويل في IN وOUT.', n:P('زيارة (الفايل) + السيستم (تحويل مكرر)','النسخة الموقّعة + IBT بتوقيع السائق','مدير الفرع','مراقبة المخزون','تنبيه → إنذار كتابي (اللائحة)','تقييم بند «الدورة المستندية (in&out)»؛ تحويلات مكررة/الشهر'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'تنظيم المخزن داخل الفرع.', n:P('زيارة','صورة المخزن','مدير الفرع','مراقبة المخزون','تنبيه (اللائحة)','تقييم بند «تنظيم المخزون داخل الفرع»'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'std', t:'الاستلام بالعدّ لا بالافتراض: لا يُقيَّد استلام إلا بعد العدّ الفعلي (كمية وحالة) ومطابقته بالمانيفست؛ أي فرق يُسجَّل كفرق استلام قبل التقييد؛ الزيادة تُحجز خارج المخزون القابل للبيع حتى المراجعة.', n:P('السيستم (استلام مقيَّد بدون مستند فروق) + زيارة','مانيفست + تقرير فروق موقّع','مدير الفرع','مراقبة المخزون',LAD,'% الاستلامات المقيَّدة بالعدّ مع مستند مطابقة'), src:'Xorosoft [~]'},
+      {s:'std', t:'التحويلات بين الفروع (IBT) تُقيَّد من الطرفين في أقرب وقت للحركة (نفس اليوم كحد تحدده الشركة)؛ التحويل المفتوح أكثر من 48 ساعة يظهر على تقرير استثناءات.', n:P('السيستم (تقرير IBT مفتوح > 48 س)','مستند التحويل بتوقيعي الإرسال والاستلام','الفرع المُستلم للتأخير، الفرع المُرسل لفرق الكمية','مراقبة المخزون',LAD,'% التحويلات المستلمة خلال 48 ساعة'), src:'Xorosoft + Uphance [~]'},
+      {s:'std', t:'أكواد سبب التسوية — ستة فقط: فرق استلام، فرق تجهيز/بيع، تلف، سحب عينة/تسويق، إرجاع للمخزون، تسوية جرد دوري؛ «أخرى» تُرفض عند الإدخال.', n:P('السيستم (تقرير تسويات بدون كود أو بكود غير الستة)','سجل التسويات','الموظف المُدخِل ومدير الفرع','مراقبة المخزون',LAD,'% التسويات بكود صحيح (الهدف 100%)'), src:'Uphance [✔]'},
+      {s:'std', t:'التجميد أثناء الجرد الكامل (Cut-off): لا حركة دخول/خروج غير مسجلة أثناء الجرد؛ تُوقَف عمليات الاستلام والإرسال.', n:P('السيستم (حركات مقيَّدة أثناء نافذة الجرد)','محضر الجرد بوقت البدء والانتهاء','مدير الفرع','مراقبة المخزون',LAD,'عدد الحركات غير المصرَّح بها أثناء الجرد (الهدف 0)'), src:'Shopify [✔]'},
+      {s:'std', t:'البضاعة التالفة/المعيبة: عند اكتشافها تُنقل إلى حالة «محجوز/غير قابل للبيع» مع بقائها مرئية في السيستم، ويُوثَّق مصيرها (شطب/إصلاح/تخفيض) بقرار.', n:P('زيارة (تالف على الصالة/في المخزون القابل للبيع) + السيستم','صورة + سجل التالف بكود «تلف»','مدير الفرع','مراقبة المخزون',LAD,'% القطع التالفة المحجوزة في السيستم خلال المهلة'), src:'Xorosoft + Stockount + Mitti [✔]'},
+      {s:'std', t:'إرجاع الدراي كلين: كل قطعة تخرج للدراي كلين بمستند تحويل مرقّم وتُستلم بنفس الرقم؛ الغياب أكثر من مهلة تحددها الشركة بدون مستند = عجز على الفرع.', n:P('السيستم (تحويل «إلى الدراي كلين» مفتوح بعد المهلة)','مستند الخروج والاستلام','الفرع','مراقبة المخزون',LAD + ' + العجز يُحقَّق','% قطع الدراي كلين المُعادة خلال المهلة'), src:'ممارسة شائعة'},
+      {s:'std', t:'المخزون السالب: لا يُترك رصيد سالب في السيستم؛ كل رصيد سالب يُحقَّق ويُصحَّح خلال مهلة تحددها الشركة (مقترح 24 ساعة).', n:P('السيستم (تقرير أرصدة سالبة يومي)','تحقيق موثق لكل SKU سالب','مدير الفرع','مراقبة المخزون',LAD,'عدد SKU بالسالب في نهاية اليوم (الهدف 0)'), src:'Mitti [~]'},
+      {s:'std', t:'المساءلة عن العجز غير المفسَّر: الفرق الذي لا يُغطَّى بأكواد السبب يُصنَّف «عجز إداري» ويُقارن شهرياً بفرق الجرد الفعلي؛ تحميله على مدير الفرع قرار داخلي بعد تحقيق.', n:P('السيستم (تقرير شهري: فرق الجرد − التسويات المكوَّدة)','تقرير العجز بالسبب','مدير الفرع','مراقبة المخزون → منع الخسائر فوق الحد',LAD + ' — بعد تحقيق مكتوب','% العجز غير المفسَّر من إجمالي العجز'), src:'Uphance [~]'},
+      {s:'mine', t:'ميل شيت الاستلام = نفس اليوم: التأخير بعد 24 ساعة مخالفة تُسجَّل آلياً من مقارنة الإيميلات بحركات الاستلام؛ 4 مرات في الشهر (الحالة في ملفكم) = إنذار كتابي لمدير الفرع.', n:P('السيستم (استلام مقيَّد بلا إيميل خلال 24 ساعة)','سجل الاستلام مقابل البريد','مدير الفرع','مراقبة المخزون','تنبيه عند الأولى → إنذار شفهي عند الثانية → إنذار كتابي عند الرابعة','نسبة الاستلامات بإيميل خلال 24 ساعة (الهدف ≥ 98%)')},
+      {s:'mine', t:'التقييم «ضعيف» في أي نقطة من السبعة = تاسك إجباري على مدير الفرع بمهلة 7 أيام وزيارة متابعة، لا «الزيارة القادمة» بلا تاريخ؛ «ضعيف» مرتين متتاليتين في نفس النقطة = تصعيد لمدير المنطقة.', n:P('السيستم (بند ضعيف بلا تاسك أو تاسك متأخر)','التاسك بتاريخه ونتيجة زيارة المتابعة','مدير الفرع','مراقبة المخزون → التشغيل (مدير المنطقة) عند التكرار','تنبيه → إنذار كتابي عند «ضعيف» متتالٍ','نسبة بنود «ضعيف» المرفوعة إلى «متوسط» أو «جيد» في زيارة المتابعة')}
+    ],
+    sops: [
+      {s:'yours', t:'استلام البضاعة طبقاً للشيت.', n:'موضوع تدريب لمدير الفرع والمسئول الثاني؛ النص غير مرفق.', src:'متابعة_زيارات_الفروع (2).xlsx (شيت التدريب)'},
+      {s:'yours', t:'شيت IN & OUT ورصد التحويلات.', n:'موضوع تدريب؛ النص غير مرفق.', src:'متابعة_زيارات_الفروع (2).xlsx'},
+      {s:'yours', t:'شيت Price Check.', n:'موضوع تدريب؛ النص غير مرفق.', src:'متابعة_زيارات_الفروع (2).xlsx'},
+      {s:'yours', t:'معرفة رصيد الفرع ومطابقته بالسيستم.', n:'موضوع تدريب؛ النص غير مرفق.', src:'متابعة_زيارات_الفروع (2).xlsx'},
+      {s:'yours', t:'تنظيم الدورة المستندية.', n:'موضوع تدريب؛ النص غير مرفق.', src:'متابعة_زيارات_الفروع (2).xlsx'},
+      {s:'yours', t:'تجهيز الفرع للجرد وتغيير الأكواد التالفة.', n:'موضوع تدريب؛ النص غير مرفق.', src:'متابعة_زيارات_الفروع (2).xlsx'},
+      {s:'yours', t:'تنظيم المخزون داخل الفرع.', n:'موضوع تدريب؛ النص غير مرفق. المتدربون: مدير الفرع + المسئول الثاني (39 → 83 صف).', src:'متابعة_زيارات_الفروع (2).xlsx'},
+      {s:'std', t:'استلام شحنة: فحص ظاهري للحالة → فتح وعدّ بالباركود → مطابقة الكمية والحالة بالمستند → تقرير فروق الاستلام نفس اليوم → تقييد على النظام.', n:'النص المقترح لموضوعكم الأول.', src:'Xorosoft [~]'},
+      {s:'std', t:'تحويل IBT: طلب معتمد → تجهيز وعدّ → مستند تحويل بالسيستم مع تسجيل مَن أنشأ/اعتمد/جهّز/أرسل/استلم → استلام بالعدّ → تأكيد الاستلام → أي تحويل مفتوح > 48 ساعة على تقرير استثناءات → تاسك فرق IBT على الطرفين.', n:'النص المقترح لـ IN & OUT عندكم.', src:'Xorosoft [~]'},
+      {s:'std', t:'الجرد الدوري (Cycle Count): تصنيف ABC → تكرار العدّ يتناسب مع الفئة (A أسبوعياً أو أكثر، C شهرياً/ربع سنوي) → تحقيق جذري قبل أي تسوية.', n:'يُضاف لمواضيعكم السبعة.', src:'Shopify + ChecklistGuro [~]'},
+      {s:'std', t:'جاهزية الجرد الكامل: جدولة في فترة هادئة → تجميع المستندات → تفريغ كل الكراتين → تحديد مَن يعدّ → تجميد الحركات قبل 24–48 ساعة → عدّ → تحقيق الفروق وتسويتها → تقرير.', n:'النص المقترح لـ «تجهيز الفرع للجرد».', src:'Shopify + ChecklistGuro [~]'},
+      {s:'std', t:'تدقيق الباركود والسعر: عينة أسبوعية بحجم تحدده الشركة (مقترح 30–50 قطعة) → مقارنة بالكاشير → إعادة طباعة فورية → تسجيل نسبة المطابقة.', n:'النص المقترح لـ Price Check.', src:'AisleStock + Stockount [~]'},
+      {s:'mine', t:'كتابة نص الـ SOP للمواضيع السبعة كخطوات مرقّمة بصور من فروع نموذجية، ونشرها في السيستم كمستند بإصدار، وربط كل جلسة تدريب بتوقيع المتدرب على الموبايل.', n:'يسدّ «نص الـ SOP نفسه مش في الملفات» ويجعل 83 صف تدريب قابلة للإثبات.'}
+    ],
+    checklist: [
+      {s:'yours', t:'تنظيم المخزون داخل الفرع.', n:C('جيد / متوسط / ضعيف + ملاحظات + إجراء تصحيحي + تاريخ المتابعة','زيارة (الزيارة القادمة)','مراقبة المخزون'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'إجراءات استلام البضاعة.', n:C('جيد / متوسط / ضعيف','زيارة','مراقبة المخزون'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'التعامل مع شيت Check price.', n:C('جيد / متوسط / ضعيف','زيارة','مراقبة المخزون'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'الباركود وتكويد المنتجات.', n:C('جيد / متوسط / ضعيف','زيارة','مراقبة المخزون'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'البضاعة التالفة.', n:C('جيد / متوسط / ضعيف','زيارة','مراقبة المخزون → التشغيل'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'جاهزية الفرع للجرد.', n:C('جيد / متوسط / ضعيف','زيارة','مراقبة المخزون'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'الدورة المستندية (in&out).', n:C('جيد / متوسط / ضعيف','زيارة','مراقبة المخزون'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'std', t:'مستندات الاستلام موقّعة ومقيَّدة في أقرب وقت للحركة (نفس اليوم).', n:C('✓/✗ + عدد المتأخر','كل زيارة + تقرير يومي','مراقبة المخزون'), src:'Xorosoft [~]'},
+      {s:'std', t:'لا IBT مُرسَل غير مستلَم أكثر من 48 ساعة.', n:C('عدد المفتوح (الهدف 0)','يومي من السيستم','مراقبة المخزون'), src:'Xorosoft [~]'},
+      {s:'std', t:'المخزون السالب = 0.', n:C('عدد SKU بالسالب','يومي','مراقبة المخزون'), src:'Mitti [✔]'},
+      {s:'std', t:'كل التسويات بكود من الستة؛ لا «أخرى».', n:C('% بكود صحيح (الهدف 100%)','أسبوعي','مراقبة المخزون'), src:'Uphance [✔]'},
+      {s:'std', t:'الجرد الدوري لأصناف A منفَّذ وموثّق.', n:C('✓/✗','أسبوعي','مراقبة المخزون'), src:'Shopify + Mitti [✔]'},
+      {s:'std', t:'التالف معزول ومسجّل غير قابل للبيع؛ لا تالف على الصالة.', n:C('✓/✗ + عدد','كل زيارة','مراقبة المخزون'), src:'Xorosoft + Stockount [✔]'},
+      {s:'std', t:'عينة باركود/سعر بمطابقة ≥ 98%.', n:C('% المطابق في العينة','أسبوعي','مراقبة المخزون → المرشندايز للسعر'), src:'AisleStock [~]'},
+      {s:'std', t:'الأصناف بلا حركة 30/60/90 يوم محددة ومرفوعة للمرشندايز.', n:C('✓/✗ + عدد الأصناف','شهري','المرشندايز'), src:'Stockount [✔]'},
+      {s:'mine', t:'عدد إيميلات شيت الاستلام المرسلة مقابل عدد الاستلامات في السيستم للشهر.', n:C('نسبة (الهدف 100%)','شهري','مراقبة المخزون')}
+    ],
+    tasks: [
+      {s:'yours', t:'إجراء تصحيحي: «مراجعة الديفوهات مع مسئول التشغيل واستكمال إجراءات الإخراج».', n:T('الزائر (مصطفى وليد / عادل محمد / احمد جودة)','مدير الفرع + مسئول التشغيل','تقييم أعلى في الزيارة القادمة','«الزيارة القادمة» (بلا تاريخ ثابت)'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'إجراء تصحيحي: «تجهيز الفرع طبقا للتعليمات قبل موعد الجرد».', n:T('الزائر','مدير الفرع','جاهزية في زيارة ما قبل الجرد','قبل موعد الجرد'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'إجراء تصحيحي: «تكويد المنتجات وتسعيرها من شيت Check price».', n:T('الزائر','مدير الفرع','عينة مطابقة في الزيارة القادمة','الزيارة القادمة'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'إجراء تصحيحي: «عمل فايل والاحتفاظ بالنسخة الموقعه من المستلم».', n:T('الزائر','مدير الفرع','الفايل موجود في الزيارة القادمة','الزيارة القادمة'), src:'متابعة_زيارات_الفروع.xlsx'},
+      {s:'yours', t:'سجل التدريب: مدير الفرع + المسئول الثاني × 7 مواضيع (39 → 83 صف).', n:T('مراقبة المخزون (جدول الزيارات)','الزائر','صف في الشيت','غير محدد'), src:'متابعة_زيارات_الفروع (2).xlsx'},
+      {s:'std', t:'تاسكات: فرق استلام (48 ساعة)، IBT معلّق > 48 ساعة/فرق IBT، تحقيق فرق جرد، قرار بضاعة تالفة، تصحيح باركود/سعر بصورة إثبات، تجهيز جرد كامل بشيك ليست قبل الجرد.', n:T('السيستم (تقرير الاستثناءات) أو الزائر','مدير الفرع / مدير المخزون','مستند أو صورة إثبات','48 ساعة للفروق؛ قرار التالف 48 ساعة؛ الجرد: تجميد قبل 24–48 ساعة'), src:'Xorosoft + Shopify + ChecklistGuro [~]'},
+      {s:'std', t:'مؤشر: نسبة العجز ≤ 1–1.5% من تكلفة البضاعة المباعة؛ تقرير العجز بكود السبب شهرياً؛ تقييد الاستلام نفس اليوم ≥ 98%؛ IBT مُستلَم خلال 48 ساعة ≥ 98%.', n:'الصيغة: (دفتري − فعلي) ÷ تكلفة المبيعات؛ تقرير بالكود؛ المقيَّد في اليوم ÷ الإجمالي؛ المستلَم في 48 س ÷ الإجمالي', src:'Uphance + Xorosoft [✔]'},
+      {s:'std', t:'مؤشر: الالتزام بجدول الجرد الدوري 100%؛ دقة بطاقات السعر ≥ 98%؛ دقة المخزون ≥ 95% ثم 97–98% (هدف داخلي).', n:'الصيغة: جرود منفَّذة ÷ مجدولة؛ بطاقات مطابقة ÷ العينة؛ SKU مطابق ÷ المعدود', src:'Mitti + AisleStock [✔] (الدقة: ممارسة)'},
+      {s:'mine', t:'مؤشر: نسبة الفروع «جيد» في كل النقاط السبعة (من شيت ملخص الفروع).', n:'الصيغة: فروع بلا «متوسط» أو «ضعيف» ÷ الفروع المزارة · قابل للحساب اليوم من شيتكم · الهدف ≥ 70% بعد 90 يوماً'},
+      {s:'mine', t:'تاسك بين إدارتين: مراقبة المخزون → التشغيل (إخراج الديفوهات والدراي كلين) بفرع.', n:T('الزائر من بند «البضاعة التالفة» ضعيف','مسئول التشغيل + مدير الفرع','مستند الإخراج في السيستم','7 أيام')}
+    ],
+    sources: [
+      {t:'Shopify — Inventory audit', u:'https://www.shopify.com/blog/inventory-audit'},
+      {t:'Uphance — Shrink rate benchmark for apparel brands', u:'https://www.uphance.com/blog/what-is-a-shrink-rate-benchmark-for-apparel-brands/'},
+      {t:'Stockount — Retail audit checklist', u:'https://www.stockount.com/articles/retail-audit-checklist'},
+      {t:'Mitti — Future audit', u:'https://mitti.com/library/retail/future-audit-tv1ldcm8ys5nmmnx'},
+      {t:'Mitti — Risk and compliance: shrinkage, inventory management', u:'https://mitti.com/library/retail/risk-and-compliance-shrinkage-inventory-management-and-online'},
+      {t:'NRF — The misperception of shrink', u:'https://nrf.com/blog/the-misperception-of-shrink-and-its-impact-on-organized-retail-crime'},
+      {t:'Xorosoft — Inventory transfer discrepancies', u:'https://xorosoft.com/inventory-transfer-discrepancies/'},
+      {t:'ChecklistGuro — Inventory accuracy checklist', u:'https://checklistguro.com/blog/inventory-accuracy-checklist-retail-stock-control-loss-prevention'},
+      {t:'AisleStock — Planogram compliance', u:'https://aislestock.com/planogram-compliance'}
+    ]
+  },
+
+  /* ============================ 9. المرشندايز ============================ */
+  {
+    key: 'merchandise', name: 'المرشندايز', en: 'Merchandising',
+    about: 'عندكم: ما بعتوش في الثلاث أسابيع (أسبوع 1: «جار إعداد خطة الزيارة»)؛ في السيستم 12 بند من 45 ملاحظة قديمة في 7 فئات: العرض المرئي، الجودة، التوافر، التسعير، التخزين، معرفة الفريق، الاستلام والتزويد. المعيار بيشوفها إدارة تخطيط البضاعة: توزيع على الفرع لا المجموعة، تغذية Pull أسبوعية، قراءة بيع 6–8 أسابيع، سلامة منحنى المقاسات، وتخفيض مركزي.',
+    facts: ['0 تقارير في 3 أسابيع (أسبوع 1: «جار إعداد خطة الزيارة»)', '12 بند في 7 فئات في السيستم (من 45 ملاحظة قديمة)', 'الفئات: العرض المرئي · الجودة · التوافر · التسعير · التخزين · معرفة الفريق · الاستلام والتزويد', 'الملاحظات القديمة بتتحوّل تيكتات للفرع'],
+    gap: 'لا سياسة ولا SOP للتغذية (Replenishment) ولا شيت عاجل/توب ليست، والشيك ليست موجودة من ملاحظات قديمة بلا تأكيد من الإدارة.',
+    policies: [
+      {s:'std', t:'التوزيع الأولي والاحتجاز المركزي: التوزيع على حجم الفرع ومبيعاته التاريخية، مع احتجاز جزء بالمخزن المركزي لإعادة التوجيه بعد قراءة أول مبيعات.', n:P('مستند (خطة التوزيع) + السيستم (كمية المخزن المركزي بعد الإرسال)','شيت التوزيع المعتمد','إدارة المرشندايز','المرشندايز','إداري (تقييم أداء الإدارة)','% الموديلات الجديدة التي لها نسبة احتجاز موثقة'), src:'Toolio [✔]'},
+      {s:'std', t:'التغذية حسب الطلب الفعلي (Pull): التغذية على البيع الفعلي ومستوى المخزون بالفرع، لا دفع مسبق.', n:P('السيستم (تحويلات تغذية بدون بيع مقابل)','تقرير البيع/المخزون المرفق بأمر التغذية','إدارة المرشندايز','المرشندايز','إداري','% أوامر التغذية المستندة إلى تقرير بيع'), src:'Toolio + BCG [✔]'},
+      {s:'std', t:'سلامة منحنى المقاسات: التغذية تُحسب لكل مقاس لاستعادة المنحنى؛ المقاسات الأساسية للأصناف الأساسية لا تنفد.', n:P('السيستم (تقرير أسبوعي: الموديلات الأساسية بمنحنى كامل)','التقرير','إدارة المرشندايز للنفاد المركزي، الفرع إن كان المقاس في مخزنه','المرشندايز',LAD + ' للفرع الحابس للمقاس في المخزن','% الموديلات الأساسية بمقاسات أساسية كاملة (Size-run integrity)'), src:'iSync [✔]'},
+      {s:'std', t:'قراءة البيع 6–8 أسابيع لكل موديل جديد قبل قرار (مطاردة/احتجاز/تخفيض)، مع متابعة أسبوعية.', n:P('مستند (سجل قرارات الموديلات)','تقرير القراءة + القرار','إدارة المرشندايز','المرشندايز','إداري','% الموديلات الجديدة التي لها قرار موثق خلال 8 أسابيع'), src:'AIMS360 [✔]'},
+      {s:'std', t:'سلامة الأسعار مركزية: أي تغيير سعر يصدر مركزياً بتاريخ ووقت لكل الفروع؛ ممنوع التخفيض المحلي.', n:P('السيستم (تغيير سعر غير مركزي) + زيارة','سجل تغييرات السعر','مدير الفرع','المرشندايز → منع الخسائر','إنذار كتابي → تحقيق (اللائحة) — تخفيض محلي = تلاعب سعر','عدد التخفيضات المحلية غير المصرَّح بها (الهدف 0)'), src:'ممارسة شائعة'},
+      {s:'std', t:'التحويل قبل التخفيض: قبل تخفيض موديل بطيء يُراجَع هل هو بطيء فعلاً أم في الفرع/المقاس الخطأ.', n:P('مستند (قرار التخفيض)','تقرير بيع بالفرع والمقاس مرفق بالقرار','إدارة المرشندايز','المرشندايز','إداري','% قرارات التخفيض المسبوقة بتحليل فرع/مقاس'), src:'AIMS360 [✔]'},
+      {s:'std', t:'تغذية راجعة أسبوعية من الفروع (أسرع/أبطأ/نواقص).', n:P('السيستم/مستند (نموذج الأسبوع)','النموذج المُرسل بتاريخه','مدير الفرع','المرشندايز',LAD,'% الفروع المُرسِلة في الموعد'), src:'Toolio [✔]'},
+      {s:'mine', t:'كل بند من فئات السيستم السبعة له سياسة أم ومقياس؛ البند القديم بلا سياسة أم أو بلا تأكيد من إدارة المرشندايز خلال 14 يوماً يُشال من الشيك ليست.', n:P('السيستم (بند بلا سياسة مرتبطة)','جدول ربط البند بالسياسة','إدارة المرشندايز','المرشندايز','إداري','% بنود الشيك ليست المرتبطة بسياسة (الهدف 100%)')},
+      {s:'mine', t:'التقرير الأسبوعي للمرشندايز إلزامي (3 أسابيع بلا تقرير): غيابه يظهر في ملف «الإدارات التي لم ترسل» تلقائياً ويُنبَّه مدير الإدارة من مدير العمليات.', n:P('السيستم (تقرير الأسبوع غائب يوم الأحد)','التقرير بتاريخه','مدير إدارة المرشندايز','التشغيل (مدير العمليات)','تنبيه إداري → تقييم أداء','نسبة الأسابيع بتقرير (الفعلي 0/3)')}
+    ],
+    sops: [
+      {s:'std', t:'التغذية الأسبوعية: تقرير بيع ومخزون بالفرع/الموديل/اللون/المقاس → أسابيع التغطية لكل SKU ومقاس → النواقص واختلال المقاسات → أوامر تحويل → إشعار → متابعة.', n:'الـ Replenishment SOP الغائب عندكم.', src:'Toolio + iSync [✔]'},
+      {s:'std', t:'شيت التوب ليست والعاجل: أعلى 20 موديل → فحص توافرها بكل الفروع → شيت عاجل بمهلة تحددها الشركة (24–48 ساعة ممارسة).', n:'شيت Urgent وTop List المذكوران في تحليل الفجوات.', src:'Stockount [~]'},
+      {s:'std', t:'قراءة البيع والتصرّف: متابعة أسبوعية → قراءة رسمية عند 6–8 أسابيع → الفرع أولاً ثم المقاس ثم مقارنة نفس الأسبوع من الموسم السابق → قرار (نقل/ترويج/تجميع/تخفيض).', n:'يُسجَّل في سجل قرارات الموديلات.', src:'AIMS360 [✔]'},
+      {s:'std', t:'تنفيذ التخفيضات: قائمة مركزية بتاريخ → تحديث السيستم → طباعة مجموعة بطاقات جديدة كاملة → تدقيق عينة أسبوعي → تقرير.', n:'يسدّ فئة «التسعير» عندكم بإجراء.', src:'AisleStock [~]'},
+      {s:'std', t:'بطيء الحركة: تقرير 30/60/90 يوم → تحويل/ترويج/تجميع/تخفيض أو احتجاز لموسم لاحق/قناة off-price.', n:'يستلم مدخله من مراقبة المخزون (بند الأصناف بلا حركة).', src:'Stockount + BCG [✔]'},
+      {s:'mine', t:'SOP زيارة المرشندايز للفرع بالفئات السبعة («خطة الزيارة» التي كانت جار إعدادها): قبل (تقرير بيع/مخزون الفرع) → أثناء (الفئات السبعة بمقياس ✓/✗ + صور) → بعد (تيكت لكل بند فاشل بمالك وموعد).', n:'يحوّل الـ 12 بند القديمة إلى زيارة دورية موثقة.'}
+    ],
+    checklist: [
+      {s:'yours', t:'العرض المرئي.', n:C('✓/✗ (ملاحظة → تيكت)','غير محدد','المرشندايز / VM'), src:'السيستم (12 بند من 45 ملاحظة قديمة)'},
+      {s:'yours', t:'الجودة.', n:C('✓/✗ (ملاحظة → تيكت)','غير محدد','المرشندايز'), src:'السيستم (12 بند من 45 ملاحظة قديمة)'},
+      {s:'yours', t:'التوافر.', n:C('✓/✗ (ملاحظة → تيكت)','غير محدد','المرشندايز'), src:'السيستم (12 بند من 45 ملاحظة قديمة)'},
+      {s:'yours', t:'التسعير.', n:C('✓/✗ (ملاحظة → تيكت)','غير محدد','المرشندايز'), src:'السيستم (12 بند من 45 ملاحظة قديمة)'},
+      {s:'yours', t:'التخزين.', n:C('✓/✗ (ملاحظة → تيكت)','غير محدد','المرشندايز → مراقبة المخزون'), src:'السيستم (12 بند من 45 ملاحظة قديمة)'},
+      {s:'yours', t:'معرفة الفريق.', n:C('✓/✗ (ملاحظة → تيكت)','غير محدد','التشغيل (مدير المنطقة)'), src:'السيستم (12 بند من 45 ملاحظة قديمة)'},
+      {s:'yours', t:'الاستلام والتزويد.', n:C('✓/✗ (ملاحظة → تيكت)','غير محدد','المرشندايز'), src:'السيستم (12 بند من 45 ملاحظة قديمة)'},
+      {s:'std', t:'Top 20 متوفرة بكل المقاسات الأساسية ≥ هدف الشركة (مقترح 95%).', n:C('% التوافر','أسبوعي','المرشندايز'), src:'Stockount [~]'},
+      {s:'std', t:'نفاد التوب ليست (OOS) ≤ 5%.', n:C('% النفاد','أسبوعي','المرشندايز'), src:'Fieldpie [✔]'},
+      {s:'std', t:'تقرير التغذية الراجعة الأسبوعي مُرسل في موعده.', n:C('✓/✗','أسبوعي','التشغيل (مدير المنطقة)'), src:'Toolio [✔]'},
+      {s:'std', t:'أسعار السيستم مطابقة للبطاقات ≥ 98%.', n:C('% المطابق في العينة','أسبوعي','المرشندايز'), src:'AisleStock [✔]'},
+      {s:'std', t:'الأصناف بلا حركة 30/60/90 لها قرار.', n:C('✓/✗ + عدد بلا قرار','شهري','المرشندايز'), src:'Stockount [✔]'},
+      {s:'std', t:'Sell-through للموديلات الجديدة عند 6–8 أسابيع 60–80/85%؛ أقل من 50% يحتاج إجراء.', n:C('% لكل موديل','أسبوعي','المرشندايز'), src:'AIMS360 + SPS [✔]'},
+      {s:'std', t:'العروض الترويجية الحالية مجهّزة ومسعّرة.', n:C('✓/✗','كل زيارة + يوم التفعيل','المرشندايز'), src:'Stockount [✔]'},
+      {s:'mine', t:'عدد تيكتات المرشندايز المفتوحة على الفرع من ملاحظات قديمة > 30 يوماً.', n:C('رقم (الهدف 0)','شهري','المرشندايز')}
+    ],
+    tasks: [
+      {s:'yours', t:'ملاحظة مرشندايز → تيكت للفرع.', n:T('المرشندايز (ملاحظة قديمة)','مدير الفرع','غير محدد','غير محدد'), src:'السيستم (الكتالوج)'},
+      {s:'std', t:'تاسكات: تغذية عاجلة (مهلة الشركة)، تحويل موازنة، تطبيق تخفيض بصور يوم التفعيل، تصحيح سعر، تقرير أسبوعي متأخر على مدير الفرع، قرار موديل ضعيف بعد قراءة 6–8 أسابيع.', n:T('المرشندايز من التقرير الأسبوعي','مدير الفرع / المخزن المركزي','صورة أو حركة في السيستم','العاجل 24–48 ساعة؛ التخفيض يوم التفعيل؛ القرار عند 8 أسابيع'), src:'AIMS360 [~]'},
+      {s:'std', t:'مؤشر: Sell-through 60–80% بقراءة 6–8 أسابيع؛ أسابيع التغطية (أساسي ≈ 12، موضة ≤ 8)؛ التوافر ≥ 95%.', n:'الصيغة: المبيع ÷ المستلَم؛ المخزون ÷ متوسط البيع الأسبوعي؛ SKU متوفر ÷ الإجمالي', src:'AIMS360 + SPS + Toolio + Fieldpie [✔]'},
+      {s:'std', t:'مؤشر: سلامة منحنى المقاسات؛ دوران المخزون 4–6 مرات/سنة؛ GMROI كنسبة (جنيه هامش لكل جنيه تكلفة مخزون) بهدف تحدده الشركة.', n:'الصيغة: موديلات أساسية بمنحنى كامل ÷ الإجمالي؛ تكلفة المبيعات ÷ متوسط المخزون؛ الهامش ÷ متوسط تكلفة المخزون', src:'iSync + SPS + Fieldpie [✔]'},
+      {s:'std', t:'مؤشر: Markdown rate وFull-price sell-through يُقاسان بهدف تحدده الشركة؛ التزام التغذية الراجعة 100%.', n:'الصيغة: قيمة التخفيض ÷ المبيعات؛ المبيع بالسعر الكامل ÷ المستلَم؛ الفروع المُرسِلة ÷ الإجمالي', src:'SPS + AIMS360 + Toolio [~]'},
+      {s:'mine', t:'مؤشر: عدد تقارير المرشندايز الأسبوعية المرسلة ÷ أسابيع الشهر.', n:'الصيغة: المرسل ÷ 4 · الفعلي 0/3 · الهدف 4/4؛ يظهر في داشبورد مدير العمليات'}
+    ],
+    sources: [
+      {t:'Toolio — Ultimate guide to retail allocation', u:'https://www.toolio.com/post/the-ultimate-guide-to-retail-allocation'},
+      {t:'BCG — Three-season management for fashion and luxury', u:'https://www.bcg.com/publications/2020/three-season-management-strategy-for-fashion-and-luxury-retailers'},
+      {t:'iSync — Inventory replenishment for apparel', u:'https://isyncsolutions.com/resources/inventory-replenishment-apparel'},
+      {t:'AIMS360 — Sell-through rate in apparel', u:'https://www.aims360.com/fashion-business-resources/sell-through-rate-apparel-industry-erp-software-sellthrough-calculator'},
+      {t:'SPS Commerce — Key metrics for fashion, apparel and footwear', u:'https://www.spscommerce.com/community/articles/key-metrics-to-track-in-fashion-apparel-and-footwear'},
+      {t:'Fieldpie — Merchandising KPIs', u:'https://www.fieldpie.com/blog/merchandising-kpis/'},
+      {t:'Stockount — Retail audit checklist', u:'https://www.stockount.com/articles/retail-audit-checklist'},
+      {t:'AisleStock — Planogram compliance', u:'https://aislestock.com/planogram-compliance'},
+      {t:'Uphance — Shrink rate benchmark for apparel brands', u:'https://www.uphance.com/blog/what-is-a-shrink-rate-benchmark-for-apparel-brands/'}
+    ]
+  },
+
+  /* ============================ 10. العرض المرئي ============================ */
+  {
+    key: 'vm', name: 'العرض المرئي', en: 'Visual Merchandising',
+    about: 'عندكم: لا شيء في الثلاث أسابيع (فئة «أخرى» فقط في السيستم)؛ المحلل اقترح إما تقديم الأركان الأربعة من الصفر أو الدمج مع المرشندايز. المعيار بيشوفها إدارة صورة الفرع: فاترينة مطابقة للحملة يوم الإطلاق، بلانوجرام ≥ 90–95%، صور قبل الافتتاح بزاوية الدليل، إغلاق الملاحظات بدليل، وإضاءة بلا لمبة محروقة.',
+    facts: ['0 بنود في الملفات والسيستم (فئة «أخرى» فقط)', 'مخالفة ذات صلة سجّلتها CCTV: «وقوف الموظفة علي منتصف الشيلفات»', 'ملاحظات العرض المرئي القديمة موجودة تحت المرشندايز (فئة «العرض المرئي»)', 'خيار المحلل: الدمج مع المرشندايز أو التأسيس من الصفر'],
+    gap: 'الإدارة بلا أي ركن؛ أول خطوة قرار الدمج أو التأسيس ثم دليل VM بصور مرجعية.',
+    policies: [
+      {s:'std', t:'مطابقة الفاترينة للحملة المعتمدة والتقويم الموسمي؛ الحملة الخطأ أو غياب عرض الإطلاق = فجوة حرجة.', n:P('صورة (قبل الافتتاح يوم التنفيذ) + زيارة','صورة الفاترينة مقابل الصورة المرجعية','مدير الفرع','VM',LAD,'% الفروع المطابقة للحملة في يوم الإطلاق'), src:'Taqtics + Bindy [✔]'},
+      {s:'std', t:'الالتزام بالبلانوجرام/دليل العرض ≥ 90–95%؛ ممنوع عروض أو استبدالات محلية غير معتمدة.', n:P('زيارة/صورة (تدقيق VM)','درجة التدقيق + صور','مدير الفرع','VM',LAD,'% بنود البلانوجرام المطابقة'), src:'AisleStock + Fieldpie + Taqtics [✔]'},
+      {s:'std', t:'اللافتات والسعر: كل عرض بلافتة وسعر صحيح؛ مواد العروض المنتهية/القديمة/المكتوبة يدوياً تُزال.', n:P('زيارة/صورة','صورة العرض واللافتة','مدير الفرع','VM',LAD,'عدد اللافتات المنتهية المرصودة في الزيارة (الهدف 0)'), src:'Bindy + Taqtics [✔]'},
+      {s:'std', t:'الإضاءة: لا لمبات محروقة؛ الفاترينة مضاءة بعد الإغلاق.', n:P('زيارة (بما فيها زيارة مسائية) / صورة','صورة + بلاغ صيانة','مدير الفرع للبلاغ، الصيانة للإصلاح','VM → الصيانة',LAD + ' لعدم الإبلاغ','عدد اللمبات المحروقة غير المبلَّغ عنها'), src:'Bindy + Taqtics [✔]'},
+      {s:'std', t:'تسليم الصور داخل السيستم بنفس زاوية الدليل قبل الافتتاح يوم التنفيذ.', n:P('السيستم (صور مرفوعة قبل وقت الافتتاح)','الصور بطابع الوقت','مدير الفرع','VM',LAD,'% الفروع التي رفعت الصور في الموعد'), src:'Yoobic [~]'},
+      {s:'std', t:'إغلاق الملاحظات بدليل موضوعي (صورة محدَّثة/إعادة فحص/اعتماد VM)، لكل ملاحظة مالك وتاريخ استحقاق؛ الرد على الملاحظات نفس اليوم.', n:P('السيستم (ملاحظات مفتوحة بعد الاستحقاق)','صورة الإغلاق + اعتماد','مدير الفرع','VM',LAD,'% الملاحظات المغلقة في موعدها؛ الحرجة المفتوحة = 0'), src:'Taqtics + Yoobic [✔]'},
+      {s:'std', t:'الكثافة على الفيكستشر متوازنة: لا مكتظ ولا فارغ.', n:P('زيارة/صورة','صور الفيكستشرز','مدير الفرع','VM',LAD,'% الفيكستشرز المطابقة للكثافة'), src:'Bindy + Taqtics [✔]'},
+      {s:'mine', t:'ملاحظات العرض من أي إدارة (CCTV: الوقوف على الشيلفات؛ المرشندايز: فئة «العرض المرئي»؛ التشغيل: الفاترينة) تُوجَّه لـ VM كمسؤول رد خلال 48 ساعة، بحيث تتكوّن نواة الإدارة من ملاحظات موجودة فعلاً.', n:P('السيستم (ملاحظة مصنّفة «عرض» بلا مسؤول VM)','سجل التوجيه والرد','مدير الفرع (التنفيذ) / VM (الرد)','VM','تنبيه → إنذار شفهي (اللائحة) للفرع؛ إداري لـ VM','نسبة ملاحظات العرض المردود عليها من VM خلال 48 ساعة')}
+    ],
+    sops: [
+      {s:'std', t:'تنفيذ فاترينة: دليل بصورة مرجعية → تجهيز → تنفيذ قبل الافتتاح → تنظيف → إضاءة → تصوير من الزاوية المرجعية → رفع → اعتماد VM.', n:'يُنفَّذ مع كل حملة.', src:'Yoobic + getbitreport + Taqtics [~]'},
+      {s:'std', t:'إعادة ضبط بلانوجرام: تفريغ القسم → تنظيف → بطاقات جديدة → رصّ حسب البلانوجرام → face & front → صور قبل/بعد → تقرير إتمام.', n:'يُنفَّذ عند كل دليل جديد أو انحراف.', src:'AisleStock [✔]'},
+      {s:'std', t:'تدقيق VM دوري بتواتر تحدده الشركة (المصدر يذكر شهرياً) → تقييم كل قسم (مطابق / يحتاج إجراء / فجوة حرجة) → أدلة → درجة → مالك وتاريخ استحقاق لكل بند فاشل → تاسكات.', n:'بديل مناسب لـ 30 فرعاً: رفع الصور داخل سيستم الفروع بالزوايا الست.', src:'Taqtics + getbitreport [~]'},
+      {s:'std', t:'الروتين اليومي: مسؤوليات نظافة يومية موزّعة على الفريق، إعادة تعبئة العروض المستقلة يومياً، فحص اللمبات واللافتات.', n:'يُدمج في الشيك ليست اليومي لمدير الفرع.', src:'Bindy [✔]'},
+      {s:'std', t:'دليل VM كخطوات بصور مرجعية مخصص لصيغة الفرع قبل التنفيذ؛ وفحص الانحراف بعد أسبوعين من الإطلاق بصور سريعة وإعادة ضبط ما انحرف.', n:'الدليل هو المستند الأول المطلوب من الإدارة.', src:'Yoobic [✔]'},
+      {s:'mine', t:'SOP التأسيس: قرار الدمج مع المرشندايز أو التأسيس (خلال 30 يوماً) → دليل VM أولي من صور أفضل 3 فروع حالياً → تعميم على 20 فرعاً → أول تدقيق بالصور → تقويم حملات الموسم.', n:'يحوّل «الإدارة لازم تقدم الأربعة من الصفر» إلى خطوات بتواريخ.'}
+    ],
+    checklist: [
+      {s:'std', t:'الواجهة الخارجية نظيفة، الاسم واضح ومضاء، ساعات العمل محدَّثة وظاهرة.', n:C('✓/✗','أسبوعي','VM → الصيانة'), src:'Bindy [✔]'},
+      {s:'std', t:'الفاترينة مطابقة للحملة المعتمدة.', n:C('✓/✗ (صورة مقابل المرجع)','كل حملة','VM'), src:'Taqtics [✔]'},
+      {s:'std', t:'إضاءة الفاترينة تعمل بعد الإغلاق.', n:C('✓/✗ (زيارة مسائية)','شهري','VM → الصيانة'), src:'Bindy [✔]'},
+      {s:'std', t:'المانيكان نظيف بطقم مطابق للمرجع والقطع متاحة بجواره.', n:C('✓/✗','أسبوعي','VM'), src:'Taqtics [~]'},
+      {s:'std', t:'منطقة المدخل (أول 1.5–4.5 م) مفتوحة وغير مزدحمة.', n:C('✓/✗','أسبوعي','VM'), src:'Bindy [✔]'},
+      {s:'std', t:'التخطيط مطابق للبلانوجرام/دليل العرض.', n:C('% البنود المطابقة (الهدف ≥ 90%)','شهري','VM'), src:'AisleStock + Taqtics [✔]'},
+      {s:'std', t:'لا اكتظاظ ولا فجوات؛ ترتيب بالمقاس/اللون.', n:C('✓/✗','أسبوعي','VM'), src:'Taqtics + Bindy [~]'},
+      {s:'std', t:'كل عرض بلافتة وسعر؛ الغرض مفهوم في 5 ثوانٍ؛ لا لافتة منتهية أو مكتوبة يدوياً.', n:C('عدد اللافتات الخاطئة (الهدف 0)','أسبوعي','VM'), src:'Bindy + Taqtics [✔]'},
+      {s:'std', t:'لا لمبة محروقة.', n:C('عدد (الهدف 0)','أسبوعي','الصيانة'), src:'Bindy [✔]'},
+      {s:'std', t:'صور ما بعد التنفيذ مرفوعة قبل الافتتاح.', n:C('✓/✗ (طابع الوقت)','كل حملة','VM'), src:'Yoobic [✔]'},
+      {s:'std', t:'لا ملاحظة حرجة مفتوحة من التدقيق السابق؛ لكل ملاحظة مالك وموعد ودليل إغلاق.', n:C('عدد المفتوح (الهدف 0)','كل تدقيق','VM'), src:'Taqtics + getbitreport [✔]'},
+      {s:'mine', t:'الفكسترات والشيلفات ثابتة ولا يُستخدَم أي منها كسلّم (مخالفة CCTV «وقوف الموظفة علي منتصف الشيلفات»).', n:C('✓/✗','أسبوعي + CCTV','VM → الصيانة للتثبيت؛ التشغيل للسلوك')}
+    ],
+    tasks: [
+      {s:'std', t:'تاسكات: تنفيذ حملة/فاترينة (اعتماد الصور)، تصحيح ملاحظة VM بمالك وموعد (حرجة نفس اليوم/عادية 48–72 ساعة تحددها الشركة)، إعادة ضبط بلانوجرام بصور قبل/بعد، تجهيز تخفيضات، صيانة إضاءة/فيكستشر، استبدال لافتات.', n:T('VM (الدليل) أو التدقيق','مدير الفرع / الصيانة','صورة إغلاق + اعتماد VM','الحملة: قبل الافتتاح يوم التنفيذ؛ الحرجة نفس اليوم'), src:'Yoobic + Taqtics + AisleStock [~]'},
+      {s:'std', t:'مؤشر: VM Compliance 85–95%؛ Planogram compliance ≥ 90–95%؛ درجة التدقيق ≥ هدف الشركة (مقترح 90%).', n:'الصيغة: بنود مطابقة ÷ إجمالي البنود لكل فرع شهرياً', src:'Yoobic + AisleStock + Fieldpie [✔]'},
+      {s:'std', t:'مؤشر: مراجعة 100% من الصور لا عينة؛ الرد على الملاحظات نفس اليوم؛ ملاحظات حرجة مفتوحة = 0؛ Time to compliance من إطلاق الدليل حتى امتثال كامل الشبكة.', n:'الصيغة: صور مُراجَعة ÷ مرفوعة؛ ردود نفس اليوم ÷ الملاحظات؛ عدد؛ أيام', src:'Yoobic + Taqtics [✔]'},
+      {s:'std', t:'مؤشر: أثر البيع — التحويل، UPT، مبيعات/م² في مناطق الحملة.', n:'الصيغة: مقارنة قبل/بعد الحملة لكل فرع', src:'Yoobic [✔]'},
+      {s:'mine', t:'تاسك بين إدارتين: CCTV → VM (ملاحظة عرض من الفيديو: فاترينة غير مضاءة، فكسترة مكسورة، عرض مخالف) بفرع.', n:T('مراجع الكاميرات','VM ثم مدير الفرع','صورة إغلاق معتمدة من VM','48 ساعة')},
+      {s:'mine', t:'مؤشر التأسيس: عدد الفروع التي رفعت صورة الفاترينة الأسبوعية ÷ 20.', n:'الصيغة: فروع بصورة قبل افتتاح السبت ÷ 20 · الفعلي 0 · الهدف 20/20 بعد 60 يوماً من قرار التأسيس'}
+    ],
+    sources: [
+      {t:'Taqtics — Visual merchandising audit checklist', u:'https://taqtics.co/checklists/retail/visual-merchandising-audit-checklist/'},
+      {t:'Bindy — Visual merchandising checklist', u:'https://blog.bindy.com/visual-merchandising-checklist/'},
+      {t:'Yoobic — Visual merchandising in retail', u:'https://yoobic.com/blog/visual-merchandising-in-retail/'},
+      {t:'AisleStock — Planogram compliance', u:'https://aislestock.com/planogram-compliance'},
+      {t:'Mitti — AHQ VM checklist', u:'https://mitti.com/library/retail/ahq-vm-checklist'},
+      {t:'getbitreport — Visual merchandising audit checklist', u:'https://getbitreport.com/blog/visual-merchandising-audit-checklist/'},
+      {t:'Fieldpie — Merchandising KPIs', u:'https://www.fieldpie.com/blog/merchandising-kpis/'}
+    ]
+  }
+  ];
+})();
+
+</script>
+<script>
+const DATA = window.__DEPT_DATA__ || [];
+const PILLARS = [
+  {k:'policies', title:'السياسات', ic:'§', def:'قواعد ملزمة للفرع، المخالفة ليها جزاء وإدارة مسؤولة عن الرد.'},
+  {k:'sops', title:'الـ SOP', ic:'≡', def:'خطوات تنفيذ الشغل، وبيتدرّب عليها الموظف.'},
+  {k:'checklist', title:'الشيك ليست مع الفروع', ic:'✓', def:'البنود اللي الإدارة بتراجعها في الفرع بشكل دوري.'},
+  {k:'tasks', title:'التاسكات والمؤشرات', ic:'⚑', def:'شغل بيتفتح وبيتقفل مع الفروع أو مع إدارات تانية، والأرقام اللي بتتقاس.'},
+];
+const SRC = {yours:'من ملفاتكم', std:'معيار عالمي', mine:'مقترح مني'};
+const ICON = {operation:'🏬', lp:'🛡', cctv:'🎥', finance:'💵', hr:'👥', it:'🖥', maintenance:'🔧', stock_control:'📦', merchandise:'👗', vm:'🪟'};
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const count = (d,k,s) => (d[k]||[]).filter(x=>x.s===s).length;
+const total = d => PILLARS.reduce((a,p)=>a+(d[p.k]||[]).length,0);
+
+function meta(n){
+  if(!n) return '';
+  const parts = String(n).split(' · ').map(x=>x.trim()).filter(Boolean);
+  if(parts.length < 2) return `<div class="note">${esc(n)}</div>`;
+  return `<div class="meta">${parts.map(p=>{
+    const i = p.indexOf(':');
+    if(i<=0) return `<div class="wide">${esc(p)}</div>`;
+    const k = p.slice(0,i).trim(), v = p.slice(i+1).trim();
+    const wide = v.length > 70 || /الجزاء|المؤشر|الصيغة|يتقفل/.test(k);
+    return `<div class="${wide?'wide':''}"><b>${esc(k)}</b>${esc(v)}</div>`;
+  }).join('')}</div>`;
+}
+function srcLine(it){
+  if(!it.src) return it.s==='mine' ? `<div class="src">اقتراح مبني على الفجوة بين ملفاتكم والمعيار</div>` : '';
+  const m = String(it.src).match(/^(.*?)\s*\[(✔|~)\]\s*$/);
+  if(m) return `<div class="src"><span>المصدر: ${esc(m[1])}</span><span class="verdict">[${m[2]}] ${m[2]==='✔'?'مدعوم':'مدعوم جزئياً'}</span></div>`;
+  return `<div class="src">${it.s==='yours'?'الملف: ':'المصدر: '}${esc(it.src)}</div>`;
+}
+function item(it, n){
+  return `<article class="item ${it.s}" data-src="${it.s}" data-text="${esc((it.t+' '+(it.n||'')).toLowerCase())}">
+    <div class="head"><span class="num">${n}</span><div class="text">${esc(it.t)}</div></div>
+    ${meta(it.n)}${srcLine(it)}
+  </article>`;
+}
+function pillarHtml(d, p, idx){
+  const list = d[p.k] || [];
+  const groups = ['yours','std','mine'].map(s=>({s, items:list.filter(x=>x.s===s)})).filter(g=>g.items.length);
+  let n = 0;
+  return `<section class="pillar" id="p-${idx}-${p.k}">
+    <header><span class="ic">${p.ic}</span><div><h3>${p.title}</h3><p>${p.def}</p></div>
+      <div class="counts">${['yours','std','mine'].map(s=>`<span class="pill ${s}">${count(d,p.k,s)}</span>`).join('')}</div></header>
+    ${groups.length ? groups.map(g=>`<div class="group-label" data-src="${g.s}"><span class="pill ${g.s}">${SRC[g.s]}</span></div><div class="items">${g.items.map(it=>item(it,++n)).join('')}</div>`).join('') : `<div class="empty">لا توجد بنود.</div>`}
+  </section>`;
+}
+function deptHtml(d, i){
+  return `<section class="dept" id="dept-${i}">
+    <div class="dept-head">
+      <div class="title"><span class="ic">${ICON[d.key]||'▣'}</span><h2>${esc(d.name)}<small>${esc(d.en||'')} · ${total(d)} بند</small></h2></div>
+      ${d.about?`<p class="about">${esc(d.about)}</p>`:''}
+      ${d.facts&&d.facts.length?`<div class="facts">${d.facts.map(f=>`<span>${esc(f)}</span>`).join('')}</div>`:''}
+      ${d.gap?`<div class="gapbox"><b>أكبر فجوة</b><span>${esc(d.gap)}</span></div>`:''}
+    </div>
+    <div class="pillar-nav">${PILLARS.map(p=>`<a href="#p-${i}-${p.k}">${p.ic} ${p.title}<span class="n">${(d[p.k]||[]).length}</span></a>`).join('')}</div>
+    ${PILLARS.map(p=>pillarHtml(d,p,i)).join('')}
+    ${d.sources&&d.sources.length?`<details class="sources"><summary>المصادر العالمية اللي اتفتحت لهذه الإدارة (${d.sources.length})</summary><ol>${d.sources.map(s=>`<li>${esc(s.t)} — <a href="${esc(s.u)}" target="_blank" rel="noopener">${esc(s.u)}</a></li>`).join('')}</ol></details>`:''}
+  </section>`;
+}
+function overview(){
+  const sum = s => DATA.reduce((a,d)=>a+PILLARS.reduce((b,p)=>b+count(d,p.k,s),0),0);
+  const all = DATA.reduce((a,d)=>a+total(d),0);
+  document.getElementById('hero').innerHTML = [
+    ['', all, 'إجمالي البنود في 10 إدارات'],
+    ['std', sum('std'), 'معيار عالمي اتحقق منه'],
+    ['yours', sum('yours'), 'موجود في ملفاتكم'],
+    ['mine', sum('mine'), 'مقترح لسدّ الفجوات'],
+    ['', DATA.reduce((a,d)=>a+(d.policies||[]).length,0), 'سياسة قابلة للقياس (6 عناصر لكل واحدة)'],
+  ].map(([c,v,l])=>`<div class="kpi ${c}"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+  const bar = (d,k)=>{const y=count(d,k,'yours'),s=count(d,k,'std'),m=count(d,k,'mine'),t=y+s+m||1;
+    return `<div class="bar"><i class="yours" style="width:${y/t*100}%"></i><i class="std" style="width:${s/t*100}%"></i><i class="mine" style="width:${m/t*100}%"></i></div><div class="nums"><b class="y">${y}</b><b class="s">${s}</b><b class="m">${m}</b></div>`;};
+  document.getElementById('matrix').innerHTML = `<div class="hd"><h2>الإدارات في نظرة واحدة</h2><p>الشريط = نسبة البنود بالمصدر (بنفسجي ملفاتكم، أزرق المعيار، أخضر المقترح). اضغط على الإدارة لفتحها.</p></div>
+  <div style="overflow:auto"><table><thead><tr><th>الإدارة</th>${PILLARS.map(p=>`<th>${p.title}</th>`).join('')}<th>أكبر فجوة</th></tr></thead><tbody>${
+    DATA.map((d,i)=>`<tr class="row" data-i="${i}"><td class="name"><b>${ICON[d.key]||''} ${esc(d.name)}</b><small>${esc(d.en||'')} · ${total(d)} بند</small></td>${PILLARS.map(p=>`<td>${bar(d,p.k)}</td>`).join('')}<td class="gap">${esc(d.gap||'')}</td></tr>`).join('')
+  }</tbody></table></div>`;
+}
+function show(i){
+  document.querySelectorAll('#depts-nav button').forEach(b=>b.classList.toggle('active', b.dataset.i===String(i)));
+  document.querySelectorAll('section.dept').forEach(s=>s.classList.toggle('active', s.id===(i==='overview'?'dept-overview':`dept-${i}`)));
+  const d = i==='overview' ? null : DATA[i];
+  document.getElementById('pageTitle').innerHTML = d ? `${esc(d.name)}<small>${esc(d.en||'')} · ${total(d)} بند · ${(d.policies||[]).length} سياسة</small>` : 'نظرة عامة<small>لكل إدارة: إيه المعيار، إيه الموجود عندكم، إيه المقترح، وكل سياسة بتتقاس</small>';
+  window.scrollTo({top:0,behavior:'smooth'});
+  applyFilters();
+}
+function applyFilters(){
+  const on = {}; document.querySelectorAll('#srcSeg button').forEach(b=>on[b.dataset.src]=b.classList.contains('on'));
+  const q = (document.getElementById('q').value||'').trim().toLowerCase();
+  document.querySelectorAll('.item').forEach(el=>{
+    const hide = !on[el.dataset.src] || (q && !el.dataset.text.includes(q));
+    el.classList.toggle('hidden', hide);
+  });
+  document.querySelectorAll('.group-label').forEach(g=>g.style.display = on[g.dataset.src] ? '' : 'none');
+}
+function render(){
+  document.getElementById('depts-nav').innerHTML = `<button data-i="overview" class="active"><span class="ic">▦</span><span class="lbl">نظرة عامة<small>كل الإدارات</small></span></button>` +
+    DATA.map((d,i)=>`<button data-i="${i}"><span class="ic">${ICON[d.key]||'▣'}</span><span class="lbl">${esc(d.name)}<small>${esc(d.en||'')}</small></span><span class="cnt">${total(d)}</span></button>`).join('');
+  document.getElementById('depts').innerHTML = DATA.map(deptHtml).join('');
+  overview();
+  document.getElementById('depts-nav').addEventListener('click', e=>{const b=e.target.closest('button'); if(b) show(b.dataset.i==='overview'?'overview':Number(b.dataset.i));});
+  document.getElementById('matrix').addEventListener('click', e=>{const r=e.target.closest('tr.row'); if(r) show(Number(r.dataset.i));});
+  document.getElementById('srcSeg').addEventListener('click', e=>{const b=e.target.closest('button'); if(!b) return; b.classList.toggle('on'); applyFilters();});
+  document.getElementById('q').addEventListener('input', applyFilters);
+  document.getElementById('themeToggle').addEventListener('change', e=>{document.documentElement.dataset.theme = e.target.checked ? 'dark' : 'light';});
+  document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+  // search across departments: jump to the first department with a hit when on overview
+  document.getElementById('q').addEventListener('change', ()=>{
+    const q=(document.getElementById('q').value||'').trim().toLowerCase(); if(!q) return;
+    const active=document.querySelector('section.dept.active');
+    if(active && active.id==='dept-overview'){ const i=DATA.findIndex(d=>PILLARS.some(p=>(d[p.k]||[]).some(it=>(it.t+' '+(it.n||'')).toLowerCase().includes(q)))); if(i>=0) show(i); }
+  });
+}
+render();
+</script>
+</body>
+</html>
