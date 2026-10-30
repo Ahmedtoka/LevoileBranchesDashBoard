@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>هيكل الإدارات</title>
+<meta name="description" content="التصور الكامل لكل إدارة في LeVoile: السياسات والـ SOP والشيك ليست والتاسكات، مع تمييز المعيار العالمي عن ما هو موجود في ملفاتكم وعن المقترح.">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f4f6; --surface:#ffffff; --ink:#1f1a1d; --muted:#6b5f66; --line:#e8dfe4;
+  --brand:#9c1e6e; --brand-soft:#f6e6ef;
+  --std:#1d4ed8; --std-soft:#e6eefc;
+  --mine:#047857; --mine-soft:#e3f5ee;
+  --warn:#b45309; --warn-soft:#fdf1e0;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15121a; --surface:#1f1a24; --ink:#f3eef1; --muted:#b3a6ad; --line:#3a3040;
+    --brand:#e06cb4; --brand-soft:#3a1f31; --std:#8fb0ff; --std-soft:#1f2a46; --mine:#5fd3a6; --mine-soft:#163227; --warn:#f0b35b; --warn-soft:#3b2a12;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15121a; --surface:#1f1a24; --ink:#f3eef1; --muted:#b3a6ad; --line:#3a3040;
+  --brand:#e06cb4; --brand-soft:#3a1f31; --std:#8fb0ff; --std-soft:#1f2a46; --mine:#5fd3a6; --mine-soft:#163227; --warn:#f0b35b; --warn-soft:#3b2a12;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6;font-size:15px}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 60px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 20px;margin-bottom:14px}
+header.top h1{margin:0;font-size:1.55rem;color:var(--brand)}
+header.top p{margin:0;color:var(--muted);max-width:720px}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 18px}
+.tag{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:600;border:1px solid transparent;white-space:nowrap}
+.tag.std{background:var(--std-soft);color:var(--std);border-color:color-mix(in srgb,var(--std) 35%,transparent)}
+.tag.yours{background:var(--brand-soft);color:var(--brand);border-color:color-mix(in srgb,var(--brand) 35%,transparent)}
+.tag.mine{background:var(--mine-soft);color:var(--mine);border-color:color-mix(in srgb,var(--mine) 35%,transparent)}
+.tag.gap{background:var(--warn-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.filters label{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.85rem;cursor:pointer}
+.filters input{accent-color:var(--brand)}
+nav.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+nav.tabs button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 14px;font:inherit;font-size:.88rem;cursor:pointer}
+nav.tabs button.active{background:var(--brand);border-color:var(--brand);color:#fff}
+nav.tabs button .n{opacity:.7;font-size:.75rem;margin-inline-start:4px}
+section.dept{display:none}
+section.dept.active{display:block}
+.dept-head{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-bottom:14px}
+.dept-head h2{margin:0 0 6px;font-size:1.3rem}
+.dept-head p{margin:0;color:var(--muted)}
+.dept-head .facts{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:.85rem;color:var(--muted)}
+.dept-head .facts b{color:var(--ink)}
+.pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
+.pillar{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.pillar h3{margin:0 0 4px;font-size:1.05rem;display:flex;align-items:center;gap:8px}
+.pillar h3 .ic{width:28px;height:28px;border-radius:8px;display:inline-grid;place-items:center;background:var(--brand-soft);color:var(--brand);font-size:.95rem}
+.pillar .def{margin:0 0 10px;color:var(--muted);font-size:.82rem}
+.pillar ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.pillar li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;padding:7px 9px;border-radius:10px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 92%,var(--bg))}
+.pillar li.std{border-inline-start:4px solid var(--std)}
+.pillar li.yours{border-inline-start:4px solid var(--brand)}
+.pillar li.mine{border-inline-start:4px solid var(--mine)}
+.pillar li .t{font-size:.92rem}
+.pillar li .t small{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
+.pillar li .t small.meta{display:flex;flex-wrap:wrap;gap:3px 10px;margin-top:5px}
+.pillar li .t small.meta span{background:color-mix(in srgb,var(--bg) 70%,var(--surface));border:1px solid var(--line);border-radius:6px;padding:1px 7px;line-height:1.5}
+.pillar li .t small.meta b{color:var(--ink);font-weight:600}
+.pillar li .t .src{color:var(--muted);font-size:.74rem}
+.pillar li .t .src a{color:inherit}
+.pillar li.hidden{display:none}
+.gapbox{margin-top:12px;background:var(--warn-soft);border:1px dashed color-mix(in srgb,var(--warn) 45%,transparent);border-radius:10px;padding:8px 12px;font-size:.85rem}
+.gapbox b{color:var(--warn)}
+.summary{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;overflow:auto}
+.summary table{border-collapse:collapse;width:100%;font-size:.86rem}
+.summary th,.summary td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:right;white-space:nowrap}
+.summary th{color:var(--muted);font-weight:600;font-size:.78rem}
+.summary td .tag{font-size:.72rem}
+.sources{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 16px;font-size:.82rem}
+.sources summary{cursor:pointer;font-weight:600}
+.sources ol{margin:8px 0 0;padding-inline-start:20px}
+.sources a{color:var(--std);word-break:break-all}
+footer{margin-top:24px;color:var(--muted);font-size:.8rem}
+@media print{
+  body{background:#fff;color:#000;font-size:12px}
+  nav.tabs,.filters,.legend .hint{display:none}
+  section.dept{display:block!important;break-before:page}
+  section.dept:first-of-type{break-before:auto}
+  .pillars{grid-template-columns:1fr 1fr}
+  .pillar li{break-inside:avoid}
+}
+@media (max-width:640px){
+  .pillars{grid-template-columns:1fr}
+  header.top h1{font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div>
+    <h1>هيكل الإدارات: السياسات · الـ SOP · الشيك ليست · التاسكات</h1>
+    <p>لكل إدارة إيه المعيار المتعارف عليه في سلاسل الريتيل، إيه الموجود فعلاً في ملفاتكم (الثلاث أسابيع)، وإيه اللي بقترحه. اختار إدارة من التابات، وفلتر بالمصدر.</p>
+  </div>
+</header>
+
+<div class="legend">
+  <span class="tag std">معيار عالمي</span>
+  <span class="tag yours">موجود في ملفاتكم</span>
+  <span class="tag mine">مقترح مني</span>
+  <span class="tag gap">فجوة</span>
+  <span class="hint" style="color:var(--muted);font-size:.8rem">· الأزرق من مصادر الريتيل العالمية (الروابط في آخر كل إدارة)، البنفسجي اقتباس من ملفاتكم، الأخضر اقتراحي من دراسة الاتنين.</span>
+</div>
+
+<div class="filters" id="filters">
+  <label><input type="checkbox" data-src="std" checked> معيار عالمي</label>
+  <label><input type="checkbox" data-src="yours" checked> من ملفاتكم</label>
+  <label><input type="checkbox" data-src="mine" checked> مقترح مني</label>
+  <span style="flex:1"></span>
+  <label><input type="checkbox" id="themeToggle"> وضع داكن</label>
+  <button onclick="window.print()" style="border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 14px;font:inherit;font-size:.85rem;cursor:pointer">طباعة / PDF</button>
+</div>
+
+<div class="summary" id="summary"></div>
+<nav class="tabs" id="tabs"></nav>
+<main id="depts"></main>
+<footer>LeVoile · إعداد 2026-10-30 · المصادر العالمية مذكورة لكل إدارة؛ بنود "ملفاتكم" مأخوذة من تقارير الأسابيع الثلاثة (أكتوبر 2026).</footer>
+</div>
+
+<script src="department-blueprint-data.js"></script>
+<script>
+/* DATA is filled from the research + the three-week files. Each item: {s:'std'|'yours'|'mine', t:'text', n:'note', src:'file or url label'} */
+const DATA = window.__DEPT_DATA__ || [];
+const PILLARS = [
+  {k:'policies', title:'السياسات', ic:'§', def:'قواعد ملزمة للفرع، المخالفة ليها جزاء.'},
+  {k:'sops', title:'الـ SOP', ic:'≡', def:'خطوات تنفيذ الشغل، وبيتدرّب عليها الموظف.'},
+  {k:'checklist', title:'الشيك ليست مع الفروع', ic:'✓', def:'البنود اللي الإدارة بتراجعها في الفرع بشكل دوري.'},
+  {k:'tasks', title:'التاسكات والمؤشرات', ic:'⚑', def:'شغل بيتفتح وبيتقفل مع الفروع أو مع إدارات تانية، والأرقام اللي بتتقاس.'},
+];
+const SRC_LABEL = {std:'معيار عالمي', yours:'من ملفاتكم', mine:'مقترح مني'};
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function noteHtml(n){
+  if(!n) return '';
+  const parts = String(n).split(' · ').map(x=>x.trim()).filter(Boolean);
+  if(parts.length < 2) return `<small>${esc(n)}</small>`;
+  return `<small class="meta">${parts.map(p=>{const i=p.indexOf(':'); return i>0 ? `<span><b>${esc(p.slice(0,i))}:</b> ${esc(p.slice(i+1).trim())}</span>` : `<span>${esc(p)}</span>`;}).join('')}</small>`;
+}
+function item(it){
+  const note = noteHtml(it.n);
+  const src = it.src ? `<span class="src">${esc(it.src)}</span>` : '';
+  return `<li class="${it.s}" data-src="${it.s}"><span class="tag ${it.s}">${SRC_LABEL[it.s]}</span><span class="t">${esc(it.t)}${note}${src}</span></li>`;
+}
+function render(){
+  const tabs = document.getElementById('tabs'), main = document.getElementById('depts');
+  tabs.innerHTML = DATA.map((d,i)=>`<button data-i="${i}" class="${i===0?'active':''}">${esc(d.name)}<span class="n">${d.en||''}</span></button>`).join('');
+  main.innerHTML = DATA.map((d,i)=>`
+    <section class="dept ${i===0?'active':''}" id="dept-${i}">
+      <div class="dept-head">
+        <h2>${esc(d.name)} <span style="color:var(--muted);font-weight:400;font-size:.95rem">${esc(d.en||'')}</span></h2>
+        <p>${esc(d.about||'')}</p>
+        <div class="facts">${(d.facts||[]).map(f=>`<span>${f}</span>`).join('')}</div>
+        ${d.gap?`<div class="gapbox"><b>أكبر فجوة:</b> ${esc(d.gap)}</div>`:''}
+      </div>
+      <div class="pillars">
+        ${PILLARS.map(p=>`<div class="pillar"><h3><span class="ic">${p.ic}</span>${p.title}</h3><p class="def">${p.def}</p><ul>${(d[p.k]||[]).map(item).join('')}</ul></div>`).join('')}
+      </div>
+      ${d.sources&&d.sources.length?`<details class="sources"><summary>المصادر العالمية (${d.sources.length})</summary><ol>${d.sources.map(s=>`<li>${esc(s.t)} — <a href="${esc(s.u)}" target="_blank" rel="noopener">${esc(s.u)}</a></li>`).join('')}</ol></details>`:''}
+    </section>`).join('');
+  tabs.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+    tabs.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));
+    main.querySelectorAll('section.dept').forEach((s,i)=>s.classList.toggle('active',String(i)===b.dataset.i));
+    window.scrollTo({top:0,behavior:'smooth'});});
+  // summary table
+  const cnt=(d,k,s)=>(d[k]||[]).filter(x=>x.s===s).length;
+  document.getElementById('summary').innerHTML = `<table><thead><tr><th>الإدارة</th>${PILLARS.map(p=>`<th>${p.title}</th>`).join('')}<th>أكبر فجوة</th></tr></thead><tbody>${
+    DATA.map((d,i)=>`<tr style="cursor:pointer" onclick="document.querySelector('#tabs button[data-i=\\'${i}\\']').click()"><td><b>${esc(d.name)}</b></td>${PILLARS.map(p=>`<td><span class="tag std">${cnt(d,p.k,'std')}</span> <span class="tag yours">${cnt(d,p.k,'yours')}</span> <span class="tag mine">${cnt(d,p.k,'mine')}</span></td>`).join('')}<td style="white-space:normal;max-width:260px;font-size:.8rem;color:var(--muted)">${esc(d.gap||'')}</td></tr>`).join('')
+  }</tbody></table><p style="margin:8px 0 0;color:var(--muted);font-size:.78rem">الأرقام = عدد البنود لكل مصدر. اضغط على الإدارة لفتحها.</p>`;
+}
+document.getElementById('filters').addEventListener('change',e=>{
+  if(e.target.id==='themeToggle'){document.documentElement.dataset.theme=e.target.checked?'dark':'light';return;}
+  const on={};document.querySelectorAll('#filters input[data-src]').forEach(c=>on[c.dataset.src]=c.checked);
+  document.querySelectorAll('.pillar li').forEach(li=>li.classList.toggle('hidden',!on[li.dataset.src]));
+});
+render();
+</script>
+</body>
+</html>
