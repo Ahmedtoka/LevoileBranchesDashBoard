@@ -129,18 +129,27 @@ section.dept.active{display:block}
 .pill.mine{background:var(--mine-soft);color:var(--mine);border-color:color-mix(in srgb,var(--mine) 30%,transparent)}
 .group-label{display:flex;align-items:center;gap:8px;margin:14px 0 8px;color:var(--muted);font-size:.78rem;font-weight:600}
 .group-label::after{content:"";flex:1;height:1px;background:var(--line-2)}
-.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:10px}
-.item{position:relative;background:var(--surface-2);border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:12px 14px 12px 14px;border-inline-start-width:4px}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:12px}
+.item{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px;border-inline-start-width:5px;box-shadow:0 1px 2px rgba(35,28,32,.04)}
 .item.std{border-inline-start-color:var(--std)} .item.yours{border-inline-start-color:var(--brand)} .item.mine{border-inline-start-color:var(--mine)}
-.item .head{display:flex;gap:8px;align-items:flex-start}
-.item .num{flex:none;width:22px;height:22px;border-radius:7px;background:var(--surface);border:1px solid var(--line);font-size:.7rem;display:grid;place-items:center;color:var(--muted);font-variant-numeric:tabular-nums}
-.item .text{font-size:.92rem;line-height:1.55;flex:1}
-.item .meta{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 10px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
-.item .meta div{font-size:.76rem;line-height:1.45;color:var(--ink)}
-.item .meta div b{display:block;color:var(--muted);font-weight:600;font-size:.68rem;letter-spacing:.02em}
-.item .meta div.wide{grid-column:1/-1}
-.item .src{margin-top:8px;font-size:.72rem;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.item .head{display:flex;gap:10px;align-items:flex-start}
+.item .num{flex:none;width:26px;height:26px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.74rem;display:grid;place-items:center;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:2px}
+.item .text{font-size:.95rem;line-height:1.6;flex:1}
+.item .text .lead{font-weight:700}
+.item .text q{quotes:"«" "»";color:var(--brand-ink)}
+.item .meta{display:grid;grid-template-columns:124px minmax(0,1fr);margin-top:11px;border:1px solid var(--line-2);border-radius:10px;overflow:hidden}
+.item .meta>div{padding:6px 10px;font-size:.8rem;line-height:1.5;border-top:1px solid var(--line-2)}
+.item .meta>div:nth-child(-n+2){border-top:0}
+.item .meta>div.k{color:var(--muted);font-weight:600;font-size:.74rem;display:flex;align-items:center;gap:6px;background:var(--surface-2);white-space:nowrap}
+.item .meta>div.k .i{width:18px;height:18px;border-radius:6px;display:grid;place-items:center;font-size:.7rem;background:var(--surface);border:1px solid var(--line);flex:none}
+.item .meta>div.v{min-width:0;overflow-wrap:anywhere}
+.item .meta>div.v.resp{font-weight:700;color:var(--brand-ink)}
+.ladder{display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center}
+.ladder span{background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:0 8px;font-size:.74rem;line-height:1.6}
+.ladder i{color:var(--muted);font-style:normal;font-size:.7rem}
+.item .src{margin-top:9px;font-size:.73rem;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .item .src .verdict{font-weight:700}
+.item .src .verdict.ok{color:var(--mine)} .item .src .verdict.part{color:var(--warn)}
 .item.hidden{display:none}
 .item .note{margin-top:8px;font-size:.78rem;color:var(--muted);line-height:1.5}
 .empty{color:var(--muted);font-size:.84rem;padding:8px 2px}
@@ -159,6 +168,7 @@ footer{margin-top:24px;color:var(--muted);font-size:.78rem}
   .side .tools{flex-direction:row;flex-wrap:wrap}
   main{padding:16px}
   .items{grid-template-columns:1fr}
+  .item .meta{grid-template-columns:100px minmax(0,1fr)}
   .sources ol{columns:1}
 }
 @media print{
@@ -168,7 +178,7 @@ footer{margin-top:24px;color:var(--muted);font-size:.78rem}
   main{padding:0}
   section.dept{display:block!important;break-before:page}
   .pillar,.item,.kpi,.dept-head{box-shadow:none;break-inside:avoid}
-  .items{grid-template-columns:1fr 1fr}
+  .items{grid-template-columns:1fr}
   .item.hidden{display:none!important}
 }
 </style>
@@ -226,27 +236,41 @@ const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>'
 const count = (d,k,s) => (d[k]||[]).filter(x=>x.s===s).length;
 const total = d => PILLARS.reduce((a,p)=>a+(d[p.k]||[]).length,0);
 
+const META_ORDER = ['يُكتشف','الدليل','على','المسؤول عن الرد','الجزاء','المؤشر','المقياس','التكرار','لو فشل يروح لـ','يفتحه','ينفذه','يتقفل بـ','SLA','الصيغة والهدف','الصيغة','الهدف'];
+const META_ICON = {'يُكتشف':'👁','الدليل':'📎','على':'👤','المسؤول عن الرد':'🏷','الجزاء':'⚖','المؤشر':'📈','المقياس':'📏','التكرار':'🔁','لو فشل يروح لـ':'➡','يفتحه':'▶','ينفذه':'🛠','يتقفل بـ':'✔','SLA':'⏱','الصيغة والهدف':'📈','الصيغة':'📈','الهدف':'🎯'};
+function ladder(v){
+  if(!/→/.test(v)) return esc(v);
+  const arrow = v.indexOf('→');
+  const i = v.lastIndexOf(':', arrow);
+  const hasPrefix = i>0;
+  const prefix = hasPrefix ? v.slice(0,i+1) : '';
+  const chain = hasPrefix ? v.slice(i+1) : v;
+  return (prefix?`<span>${esc(prefix)}</span> `:'') + `<span class="ladder">${chain.split('→').map(x=>`<span>${esc(x.trim())}</span>`).join('<i>←</i>')}</span>`;
+}
 function meta(n){
   if(!n) return '';
   const parts = String(n).split(' · ').map(x=>x.trim()).filter(Boolean);
   if(parts.length < 2) return `<div class="note">${esc(n)}</div>`;
-  return `<div class="meta">${parts.map(p=>{
-    const i = p.indexOf(':');
-    if(i<=0) return `<div class="wide">${esc(p)}</div>`;
-    const k = p.slice(0,i).trim(), v = p.slice(i+1).trim();
-    const wide = v.length > 70 || /الجزاء|المؤشر|الصيغة|يتقفل/.test(k);
-    return `<div class="${wide?'wide':''}"><b>${esc(k)}</b>${esc(v)}</div>`;
-  }).join('')}</div>`;
+  const kv = parts.map(p=>{const i=p.indexOf(':'); return i>0 && i<30 ? [p.slice(0,i).trim(), p.slice(i+1).trim()] : ['ملاحظة', p];});
+  kv.sort((a,b)=>{const ia=META_ORDER.indexOf(a[0]), ib=META_ORDER.indexOf(b[0]); return (ia<0?99:ia)-(ib<0?99:ib);});
+  return `<div class="meta">${kv.map(([k,v])=>`<div class="k"><span class="i">${META_ICON[k]||'•'}</span>${esc(k)}</div><div class="v ${/المسؤول عن الرد|لو فشل يروح لـ/.test(k)?'resp':''}">${k==='الجزاء'?ladder(v):esc(v)}</div>`).join('')}</div>`;
+}
+function leadText(t){
+  t = String(t);
+  const m = t.match(/^([^:«»]{3,40}):\s*([\s\S]+)$/);
+  const body = m ? m[2] : t;
+  const html = esc(body).replace(/«([^»]+)»/g,'<q>$1</q>');
+  return (m ? `<span class="lead">${esc(m[1])}:</span> ` : '') + html;
 }
 function srcLine(it){
   if(!it.src) return it.s==='mine' ? `<div class="src">اقتراح مبني على الفجوة بين ملفاتكم والمعيار</div>` : '';
   const m = String(it.src).match(/^(.*?)\s*\[(✔|~)\]\s*$/);
-  if(m) return `<div class="src"><span>المصدر: ${esc(m[1])}</span><span class="verdict">[${m[2]}] ${m[2]==='✔'?'مدعوم':'مدعوم جزئياً'}</span></div>`;
+  if(m) return `<div class="src"><span>المصدر: ${esc(m[1])}</span><span class="verdict ${m[2]==='✔'?'ok':'part'}">${m[2]==='✔'?'✔ مدعوم بالمصدر':'~ المبدأ مدعوم والرقم اتخفف'}</span></div>`;
   return `<div class="src">${it.s==='yours'?'الملف: ':'المصدر: '}${esc(it.src)}</div>`;
 }
 function item(it, n){
   return `<article class="item ${it.s}" data-src="${it.s}" data-text="${esc((it.t+' '+(it.n||'')).toLowerCase())}">
-    <div class="head"><span class="num">${n}</span><div class="text">${esc(it.t)}</div></div>
+    <div class="head"><span class="num">${n}</span><div class="text">${leadText(it.t)}</div></div>
     ${meta(it.n)}${srcLine(it)}
   </article>`;
 }
