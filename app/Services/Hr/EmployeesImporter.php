@@ -103,6 +103,7 @@ class EmployeesImporter
         $links = [];
         $merges = [];
         $ambiguous = [];
+        $coded = Employee::whereNotNull('code')->pluck('id', 'code')->mapWithKeys(fn ($id, $code) => [(string) $code => (int) $id]);
         $staff = collect($people)->whereNotNull('branch_id');
         $byBranch = $staff->groupBy('branch_id');
         foreach (Employee::whereNull('code')->with('branch')->orderBy('id')->get() as $old) {
@@ -115,9 +116,12 @@ class EmployeesImporter
 
                 continue;
             }
-            $code = $hits->first()['code'];
-            $first = array_search($code, $links, true);
-            if ($first === false) {
+            $code = (string) $hits->first()['code'];
+            $first = array_search($code, array_map('strval', $links), true);
+            if (isset($coded[$code])) {
+                // The employee is already on file (loaded before these CCTV names came in): merge into them.
+                $merges[$old->id] = $coded[$code];
+            } elseif ($first === false) {
                 $links[$old->id] = $code;
             } else {
                 $merges[$old->id] = $first;

@@ -50,6 +50,22 @@ class EmployeesImportTest extends TestCase
         $this->assertFalse(Employee::where('code', '3003')->sole()->active);
     }
 
+    public function test_cctv_names_that_arrive_after_the_staff_file_merge_into_the_coded_employee(): void
+    {
+        $city = Seeds::branch('Nasr City - City Stars Mall', ['active' => true]);
+        $path = $this->file([['3002', 'شهد اشرف محمد طه', 'Cashier', 'City Stars']]);
+        $this->artisan('employees:import', ['path' => $path])->assertSuccessful();
+        $coded = Employee::where('code', '3002')->sole();
+
+        // The CCTV import comes later and writes the first name only.
+        $short = Employee::create(['name' => 'شهد اشرف', 'branch_id' => $city->id]);
+        $this->artisan('employees:import', ['path' => $path])->assertSuccessful();
+
+        $this->assertNull($short->fresh(), 'merged into the employee already on file');
+        $this->assertSame(1, Employee::count());
+        $this->assertSame('شهد اشرف محمد طه', $coded->fresh()->name);
+    }
+
     private function file(array $rows): string
     {
         $book = new Spreadsheet;
