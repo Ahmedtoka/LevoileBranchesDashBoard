@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>دستور Le Voile</title>
+<style>
+:root{--bg:#f8f4f1;--surface:#fff;--soft:#f7e8f3;--ink:#2a1d27;--muted:#6f6069;--line:#ecd1e5;--brand:#9d197e;--brand-ink:#7a1362;--on:#fff;--law:#0b6b57;--law-soft:#dcf3ec;--std:#2450a6;--std-soft:#e2eaf9;--des:#8a5a00;--des-soft:#fff1d0;--side:#3b092f;--side-ink:#f7e8f3}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171116;--surface:#211920;--soft:#3a1f33;--ink:#f6eff4;--muted:#b9a9b4;--line:#44303e;--brand:#e27cc6;--brand-ink:#f3a9de;--on:#2a1224;--law:#6fdcbf;--law-soft:#123229;--std:#a6c1f7;--std-soft:#1a2a4a;--des:#f2c46b;--des-soft:#3b2d12;--side:#120b11}}
+:root[data-theme="dark"]{--bg:#171116;--surface:#211920;--soft:#3a1f33;--ink:#f6eff4;--muted:#b9a9b4;--line:#44303e;--brand:#e27cc6;--brand-ink:#f3a9de;--on:#2a1224;--law:#6fdcbf;--law-soft:#123229;--std:#a6c1f7;--std-soft:#1a2a4a;--des:#f2c46b;--des-soft:#3b2d12;--side:#120b11}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.85 "Segoe UI",Tahoma,Arial,sans-serif;display:grid;grid-template-columns:270px minmax(0,1fr);min-height:100vh}
+aside{background:var(--side);color:var(--side-ink);padding:22px 14px;position:sticky;top:0;height:100vh;overflow:auto}
+aside b.logo{display:block;font-size:1.3rem;padding:0 10px}aside small{display:block;padding:0 10px 14px;opacity:.75}
+nav button{display:block;width:100%;font:inherit;font-size:.92rem;text-align:start;color:inherit;background:none;border:0;border-radius:9px;padding:7px 11px;cursor:pointer}
+nav button:hover{background:rgba(255,255,255,.1)}nav button[aria-current="true"]{background:#9d197e;color:#fff}
+nav a.sim{display:block;margin:14px 0 0;padding:9px 11px;border-radius:9px;border:1px solid rgba(255,255,255,.3);color:inherit;text-decoration:none;font-size:.92rem}
+main{padding:34px clamp(16px,4vw,48px) 70px;min-width:0}
+article{max-width:1080px;margin:auto;display:none}article.on{display:block}
+h1{font-size:clamp(1.9rem,4vw,3rem);line-height:1.2;margin:0 0 12px}
+h2{font-size:clamp(1.4rem,2.5vw,1.9rem);line-height:1.3;margin:0 0 12px}
+h3{font-size:1.15rem;line-height:1.4;margin:28px 0 8px;color:var(--brand-ink)}
+p{margin:0 0 12px;max-width:80ch}a{color:var(--brand-ink)}
+.lead{font-size:1.1rem;color:var(--muted)}
+.table{overflow:auto;margin:12px 0 20px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem;line-height:1.6}
+th,td{padding:9px 12px;text-align:start;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--soft);white-space:nowrap}tr:last-child td{border-bottom:0}
+.tag{display:inline-block;font-size:.74rem;font-weight:600;border-radius:99px;padding:0 9px;margin-inline:2px;white-space:nowrap}
+.tag.law{background:var(--law-soft);color:var(--law)}.tag.std{background:var(--std-soft);color:var(--std)}.tag.des{background:var(--des-soft);color:var(--des)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0 22px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px}.card h4{margin:0 0 5px;font-size:1rem}.card p{margin:0;font-size:.92rem}
+.urgent{border-color:var(--brand);border-width:2px}
+.art{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin-bottom:10px}
+.art b.n{color:var(--brand-ink);margin-inline-end:6px}
+.org{display:flex;flex-direction:column;align-items:center;gap:10px;margin:18px 0 24px}
+.org .row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.org .box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 13px;text-align:center;font-size:.9rem;min-width:115px}
+.org .box.key{background:var(--brand);color:var(--on);border-color:var(--brand);font-weight:600}.org .box.audit{border:2px solid var(--brand);font-weight:600}
+.org i{width:2px;height:15px;background:var(--line)}.org small{display:block;color:inherit;opacity:.75;font-size:.76rem}
+.tabs{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0 18px}.tabs button{font:inherit;font-size:.92rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:6px 14px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--on)}
+.pane{display:none}.pane.on{display:block}
+.ladder{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:12px 0 20px;padding:0;counter-reset:s}
+.ladder li{counter-increment:s;flex:1 1 130px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:.88rem}
+.ladder li::before{content:counter(s) ". ";color:var(--brand-ink);font-weight:700}
+button:focus-visible,a:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.tools{display:flex;gap:8px;margin-top:12px}.tools button{flex:1;font:inherit;font-size:.82rem;color:inherit;background:none;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:5px;cursor:pointer}
+@media (max-width:820px){body{display:block}aside{position:static;height:auto}nav{display:flex;overflow:auto;gap:4px;padding-bottom:6px}nav button{width:auto;white-space:nowrap}nav a.sim{white-space:nowrap;margin:0}main{padding:24px 16px 50px}}
+@media print{aside{display:none}body{display:block;background:#fff}article{display:block;break-after:page}.pane{display:block}.tabs{display:none}}
+</style>
+</head>
+<body>
+<aside>
+  <b class="logo">Le Voile</b><small>دستور الشركة · مسودة نوفمبر 2026</small>
+  <nav id="nav" aria-label="أبواب الدستور"></nav>
+  <div class="tools"><button type="button" onclick="print()">طباعة / PDF</button></div>
+</aside>
+<main>
+
+<article id="start" data-t="البداية">
+  <h1>دستور Le Voile</h1>
+  <p class="lead">وثيقة حاكمة واحدة تربط الهوية والصلاحيات وسياسات كل إدارة بسلسلة تشغيل تنتهي بمؤشر، تحت رقابة مراجعة داخلية مستقلة. هذه مسودة مبنية على بحث مستقل من مصادر عامة، ومن غير ملفات الشركة الداخلية.</p>
+  <div class="grid">
+    <div class="card"><h4><span class="tag law">قانون</span></h4><p>قاعدة مصرية ذكرتها المصادر من غير تعارض. لم يُقرأ نص الجريدة الرسمية، فلا بد من مراجعة المستشار.</p></div>
+    <div class="card"><h4><span class="tag std">معيار</span></h4><p>إطار مهني موثق مثل IIA وCOSO وISO. لا يُلزم الشركة قانونًا بذاته.</p></div>
+    <div class="card"><h4><span class="tag des">تصميم</span></h4><p>اقتراح لهذا الدستور، بما فيه الهيكل والمالكون والأدلة. يحتاج قرارًا من الشركة.</p></div>
+  </div>
+  <h3>أربعة أمور تُحسم قبل الاعتماد</h3>
+  <div class="grid">
+    <div class="card urgent"><h4>الشكل القانوني</h4><p>غير منشور علنًا، وهو الذي يحدد هل الجهة الحاكمة مجلس إدارة أم مديرون.</p></div>
+    <div class="card urgent"><h4>حماية البيانات</h4><p>يُتوقع بدء الإنفاذ في 1 نوفمبر 2026، وتحتاج التراخيص وتصريح الكاميرات إجراءات تسبق أي موعد باقٍ.</p></div>
+    <div class="card urgent"><h4>لائحة العمل</h4><p>الجزاء لا ينفذ من الدستور، بل عبر لائحة تعتمدها مديرية العمل وفق قواعد أغسطس 2026.</p></div>
+    <div class="card urgent"><h4>الإيصال الإلكتروني</h4><p>يجب فحص هل الشركة مدرجة في ملحق القرار 281/2025، وأثره على كل نقطة بيع.</p></div>
+  </div>
+  <h3>اللي الدستور بيمنعه صراحة</h3>
+  <p>لا خصم تلقائي من العجز، ولا جزاء من الفرع من غير تحقيق، ولا عبارة «لا إرجاع على التخفيضات»، ولا دفع بلا مطابقة، ولا قرار تأديبي من تنبيه آلي.</p>
+</article>
+
+<article id="identity" data-t="الهوية">
+  <h2>الباب الأول: الهوية والغرض</h2>
+  <div class="art"><b class="n">م1</b>Le Voile علامة أزياء مصرية. <span class="tag des">تصميم</span> تقوم هويتها المقترحة على أربع صفات، تعتمدها الشركة قبل نشرها: أزياء عصرية، وقيمة عادلة، وجودة، وشمول للمحجبات وغير المحجبات.</div>
+  <div class="art"><b class="n">م2</b>كل وعد عام عن الجودة أو السعر له مالك ودليل، لأن الخداع محظور بالمادة 9 من قانون حماية المستهلك. <span class="tag law">قانون</span></div>
+  <div class="art"><b class="n">م3</b>الدستور جزآن: عام (الهوية، حقوق العميل، مدونة الموردين، قناة الإبلاغ)، وداخلي (الصلاحيات والحدود والضوابط). <span class="tag des">تصميم</span></div>
+  <div class="art"><b class="n">م4</b>ترتيب الوثائق: القانون، ثم عقد التأسيس، ثم الدستور، ثم السياسات، ثم الإجراءات، ثم تعليمات الفرع ونماذجه. ولا تتجاوز وثيقة ما فوقها. <span class="tag des">تصميم</span></div>
+  <div class="art"><b class="n">م5</b>الأرقام القانونية المتغيرة، مثل الغرامات والضرائب، تكون في سجل قانوني ملحق، لا في نص الدستور. <span class="tag des">تصميم</span></div>
+  <div class="art"><b class="n">م6</b>ما لم يُعتمد رقم من الجهة الحاكمة، يُكتب «تحدده الجهة الحاكمة». والسنة الأولى لقياس خط الأساس قبل وضع المستهدفات. <span class="tag des">تصميم</span></div>
+  {{SEC:الهوية العامة}}
+</article>
+
+<article id="gov" data-t="الهيكل والحوكمة">
+  <h2>الباب الثاني: هيكل الشركة والحوكمة</h2>
+  <p>الهيكل التالي مقترح. لم يوجد معيار يفرض هيكلًا لشركة بهذا الحجم. <span class="tag des">تصميم</span></p>
+  <div class="org" aria-label="الهيكل المقترح">
+    <div class="row"><div class="box key">الملاك / الجمعية العامة</div></div><i></i>
+    <div class="row"><div class="box key">الجهة الحاكمة<small>مجلس أو مديرون حسب الشكل القانوني</small></div><div class="box audit">لجنة إشراف المراجعة<small>تتبعها المراجعة وظيفيًا</small></div></div><i></i>
+    <div class="row"><div class="box key">الرئيس التنفيذي</div><div class="box audit">المراجعة الداخلية<small>الخط الثالث، إداريًا للرئيس التنفيذي</small></div></div><i></i>
+    <div class="row">
+      <div class="box">الإدارة المالية</div><div class="box">Supply Chain</div><div class="box">الموارد البشرية</div><div class="box">التشغيل والمبيعات</div><div class="box">تقنية المعلومات</div><div class="box">التسويق والتجارة الإلكترونية<small>تحتاج دراسة</small></div>
+    </div><i></i>
+    <div class="row"><div class="box">الخط الثاني: القانونية والالتزام · أمن المعلومات · مسؤول حماية البيانات · منع الخسائر</div></div>
+  </div>
+  <div class="art"><b class="n">م7</b>كل إدارة خط أول يملك ضوابطه ومخاطره، والخط الثاني يشرف، والمراجعة تؤكد باستقلال، وفق نموذج الخطوط الثلاثة. <span class="tag std">معيار</span></div>
+  <div class="art"><b class="n">م8</b>منع الخسائر خارج خط إدارة الفروع حتى لا تراقب نفسها. <span class="tag des">تصميم</span></div>
+  {{SEC:الشكل القانوني}}
+</article>
+
+<article id="doa" data-t="الصلاحيات">
+  <h2>الباب الثالث: مصفوفة الصلاحيات</h2>
+  <p>ق = يقترح · ر = يراجع · ع = يعتمد · ب = يُبلَّغ. الأدوار مقترحة، وكل المبالغ تحددها الجهة الحاكمة. <span class="tag des">تصميم</span></p>
+  <div class="table"><table>
+    <tr><th>القرار</th><th>الجهة الحاكمة</th><th>الرئيس التنفيذي</th><th>رئيس القسم</th><th>المالية</th><th>القانونية</th><th>المراجعة</th></tr>
+    <tr><td>فتح وغلق فرع</td><td>ع</td><td>ق</td><td>ق</td><td>ر</td><td>ر</td><td>ب</td></tr>
+    <tr><td>عقود الإيجار</td><td>ع فوق الحد</td><td>ع</td><td>ق</td><td>ر</td><td>ر</td><td>ب</td></tr>
+    <tr><td>الإنفاق الرأسمالي</td><td>ع فوق الحد</td><td>ع</td><td>ق</td><td>ر</td><td>—</td><td>ب</td></tr>
+    <tr><td>عقد مورد أو مصنع</td><td>ع فوق الحد</td><td>ع</td><td>ق</td><td>ر</td><td>ر</td><td>—</td></tr>
+    <tr><td>أمر شراء</td><td>—</td><td>ع فوق الحد</td><td>ع</td><td>ر الميزانية</td><td>—</td><td>—</td></tr>
+    <tr><td>التسعير والتخفيضات</td><td>ع السياسة</td><td>ع فوق الحد</td><td>ق</td><td>ر الهامش</td><td>ر الإعلان</td><td>—</td></tr>
+    <tr><td>استرداد خارج السياسة</td><td>—</td><td>ع فوق الحد</td><td>ع</td><td>ب</td><td>ر</td><td>—</td></tr>
+    <tr><td>التوقيعات البنكية</td><td>ع</td><td>ق</td><td>—</td><td>ق</td><td>—</td><td>ب</td></tr>
+    <tr><td>شطب مخزون</td><td>ع فوق الحد</td><td>ع</td><td>ق</td><td>ر</td><td>—</td><td>ب</td></tr>
+    <tr><td>التعيين</td><td>ع القيادات</td><td>ع القيادات</td><td>ق</td><td>ر الميزانية</td><td>—</td><td>—</td></tr>
+    <tr><td>إنهاء الخدمة</td><td>ب القيادات</td><td>ع</td><td>ق</td><td>—</td><td>ر إلزامي</td><td>—</td></tr>
+    <tr><td>الأطراف ذات العلاقة</td><td>ع</td><td>ق</td><td>—</td><td>ر</td><td>ر</td><td>ب</td></tr>
+    <tr><td>التسويات القضائية</td><td>ع فوق الحد</td><td>ع</td><td>—</td><td>ر</td><td>ق</td><td>ب</td></tr>
+  </table></div>
+  <div class="art"><b class="n">م9</b>أي تجاوز للمصفوفة يُسجل كتابيًا ويُبلَّغ للجهة الحاكمة. ويُمنع تجزئة الأمر لتفادي الحد. <span class="tag des">تصميم</span></div>
+  <h2 style="margin-top:32px">الباب الرابع: مدونة السلوك والإبلاغ</h2>
+  <div class="art"><b class="n">م10</b>تغطي المدونة: تعارض المصالح والقرابة، وهدايا الموردين، والخزينة، ومشتريات الموظفين، ومعاملة العميلات، والتحرش، وخصوصية غرف القياس والكاميرات، والبيانات الشخصية، ومعايير عمل المصانع، ووسائل التواصل، والملكية الفكرية. <span class="tag des">تصميم</span></div>
+  <div class="art"><b class="n">م11</b>قناة إبلاغ متعددة، إحداها مستقلة عن خط الإدارة، مع خيار عدم كشف الهوية ومنع الانتقام، وتمتد للموردين. الكود المصري يذكر عناصر سياسة الإبلاغ في البند 4.6. <span class="tag std">معيار</span></div>
+  <div class="art"><b class="n">م12</b>لم يُحسم وجود قانون عام يحمي المبلغين في القطاع الخاص، فتُكتب الحماية التزامًا في السياسة والعقد. <span class="tag des">تصميم</span></div>
+</article>
+
+<article id="policies" data-t="سياسات الإدارات">
+  <h2>الباب الخامس: سياسات الإدارات</h2>
+  <p>لكل سياسة مالك وطريقة كشف ودليل. عبارة «الجهة الحاكمة تحدد» تعني أن المصادر لا تعطي رقمًا صالحًا.</p>
+  <div class="tabs" id="tabs"></div>
+  <div class="pane" data-t="الإدارة المالية">{{SEC:المالية:}}</div>
+  <div class="pane" data-t="Supply Chain">{{SEC:سلسلة الإمداد:}}</div>
+  <div class="pane" data-t="الموارد البشرية">{{SEC:الموارد البشرية:}}</div>
+  <div class="pane" data-t="التشغيل والمبيعات">{{SEC:العمليات والمبيعات:}}</div>
+  <div class="pane" data-t="تقنية المعلومات">{{SEC:تقنية المعلومات}}</div>
+</article>
+
+<article id="flow" data-t="الفلو">
+  <h2>الباب السادس: الفلو الواحد</h2>
+  <ol class="ladder"><li>الدستور</li><li>السياسة</li><li>الإجراء SOP</li><li>قائمة الفحص</li><li>المخالفة والفرز</li><li>المهمة</li><li>المؤشر</li></ol>
+  <div class="art"><b class="n">م13</b>التنبيه أو الفرق في قائمة الفحص يفتح حالة، ولا يعني اتهامًا. وكل حالة تمر بفرز بشري قبل أي أثر على موظف. <span class="tag des">تصميم</span></div>
+  <div class="art"><b class="n">م14</b>لا يتحقق مالك المهمة من إغلاق مهمته، ولا تُغلق مهمة بلا دليل. وإذا تكرر الفرق تتغير الوثيقة لا الموظف فقط. <span class="tag des">تصميم</span></div>
+  {{SEC:السلسلة الواحدة}}
+</article>
+
+<article id="audit" data-t="إدارة الأوديت">
+  <h2>الباب السابع: إدارة المراجعة الداخلية</h2>
+  <p class="lead">إدارة مستقلة تراقب كل الإدارات، وتتبع الجهة الحاكمة وظيفيًا. لا تدير العمليات، ولا تقفل مهام الإدارة، وتراجع أيضًا نظام الذكاء الاصطناعي نفسه.</p>
+  <div class="org" aria-label="هيكل المراجعة الداخلية">
+    <div class="row"><div class="box key">لجنة الإشراف / الجهة الحاكمة</div></div><i></i>
+    <div class="row"><div class="box audit">رئيس المراجعة الداخلية<small>متفرغ</small></div></div><i></i>
+    <div class="row"><div class="box">مراجعة مالية</div><div class="box">مراجعة Supply Chain والإنتاج</div><div class="box">مراجعة HR</div><div class="box">مراجعة التشغيل والمبيعات</div><div class="box">تحليلات وIT<small>مع إسناد خارجي مشترك</small></div></div>
+  </div>
+  <p>الوحدات مقترحة، ولا يذكر الدستور عدد موظفين لغياب مرجع موثوق. <span class="tag des">تصميم</span></p>
+  {{SEC:إدارة المراجعة}}
+</article>
+
+<article id="future" data-t="المستقبل">
+  <h2>الباب الثامن: الدستور المستقبلي</h2>
+  <p class="lead">خريطة مقترحة ترتب الشغل من القانون إلى البيانات ثم الذكاء الاصطناعي. عكس الترتيب ده خطر، لأن الأتمتة قبل حسم الأسئلة القانونية بتكرر الغلطة في كل الفروع. <span class="tag des">تصميم</span></p>
+  <div class="grid">
+    <div class="card"><h4>الآن: الأساس القانوني</h4><p>الوثائق القانونية للشركة، وحماية البيانات، ولائحة العمل، وحقوق الإرجاع، والإيصال الإلكتروني، ومنع الخصومات غير المسندة.</p></div>
+    <div class="card"><h4>2027: الانضباط</h4><p>مصفوفة الصلاحيات، والسياسات، وخط الأساس لكل مؤشر، وميثاق المراجعة، وأول خطة مبنية على المخاطر، وخطة المتطلبات الموضوعية من IIA.</p></div>
+    <div class="card"><h4>بعدها: البيانات الموحدة</h4><p>رقم واحد من نقطة البيع والمخزون والموارد البشرية، وقاموس مؤشرات ملزم، ومراجعة مستمرة للعمليات عالية الخطر.</p></div>
+    <div class="card"><h4>ثم: وكلاء تحت الحوكمة</h4><p>وكلاء يفرزون ويوثقون، مع تحقق مستقل. لا كتابة في الأنظمة، ولا أثر وظيفي آلي.</p></div>
+  </div>
+  <h3>رهانات تُبنى في الدستور من دلوقتي</h3>
+  <div class="art"><b class="n">م15</b><strong>سلسلة توريد مسؤولة:</strong> معايير العمل تمتد للمصانع والباطن، استرشادًا بإرشادات OECD للملابس والأحذية. <span class="tag std">معيار</span></div>
+  <div class="art"><b class="n">م16</b><strong>المرونة والاستدامة:</strong> يُراجع الدستور سنويًا مقابل مبادئ G20/OECD 2023، التي أضافت فصلًا عن الاستدامة والمرونة. <span class="tag std">معيار</span></div>
+  <div class="art"><b class="n">م17</b><strong>البيع عبر القنوات:</strong> وعد واحد للعميل في الفرع والبيع عن بعد، بسياسة مستقلة تلتزم بقواعد البيع عن بعد. <span class="tag law">قانون</span></div>
+  <div class="art"><b class="n">م18</b><strong>الخصوصية من التصميم:</strong> أي نظام أو كاميرا أو أداة ذكاء اصطناعي جديدة تمر بمسؤول حماية البيانات قبل التشغيل. <span class="tag des">تصميم</span></div>
+  <div class="art"><b class="n">م19</b><strong>مراجعة الدستور:</strong> مراجعة سنوية، وجدول «الالتزام أو التفسير» مقابل الكود المصري، وسجل بكل تعديل ومالكه. <span class="tag des">تصميم</span></div>
+  <h3>حدود هذه الرؤية</h3>
+  <p>لم يدرس البحث بعمق تطوير المنتج أو التسويق أو التجارة الإلكترونية، فهذه الفصول تحتاج دراسة قبل صياغتها.</p>
+</article>
+
+<article id="registers" data-t="السجلات">
+  <h2>السجلات: اللي لسه مفتوح</h2>
+  <p>سجل صريح بما تعارضت فيه المصادر، وما يحتاج مستشارًا، وما تقدمه الشركة بنفسها.</p>
+  {{SEC:ما تقدمه}}
+  {{SEC:بنود مراجعة}}
+  {{SEC:التعارضات}}
+  <p><a href="https://www.theiia.org/en/standards/" rel="noopener" target="_blank">IIA Standards</a> · المصادر الكاملة مربوطة داخل كل باب.</p>
+</article>
+</main>
+<script>
+const arts=[...document.querySelectorAll('article')], nav=document.getElementById('nav');
+nav.innerHTML=arts.map(a=>`<button type="button" data-id="${a.id}">${a.dataset.t}</button>`).join('')+'<a class="sim" href="levoile-constitution-simulator.html">▶ السيميوليتر</a>';
+function go(id){if(!arts.some(a=>a.id===id))id='start';arts.forEach(a=>a.classList.toggle('on',a.id===id));[...nav.querySelectorAll('button')].forEach(b=>b.setAttribute('aria-current',b.dataset.id===id));scrollTo(0,0);if(location.hash!=='#'+id)history.replaceState(null,'','#'+id)}
+nav.addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.id)});
+const panes=[...document.querySelectorAll('.pane')],tabs=document.getElementById('tabs');
+tabs.innerHTML=panes.map((p,i)=>`<button type="button" data-i="${i}">${p.dataset.t}</button>`).join('');
+function tab(i){panes.forEach((p,j)=>p.classList.toggle('on',j===i));[...tabs.children].forEach((b,j)=>b.setAttribute('aria-pressed',j===i))}
+tabs.addEventListener('click',e=>{const b=e.target.closest('button');if(b)tab(+b.dataset.i)});
+tab(0);go(location.hash.slice(1)||'start');
+</script>
+</body>
+</html>

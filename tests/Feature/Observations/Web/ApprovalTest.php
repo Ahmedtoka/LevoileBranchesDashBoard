@@ -47,7 +47,7 @@ class ApprovalTest extends TestCase
         Carbon::setTestNow('2026-10-25 10:00:00');
         config(['services.anthropic.key' => null, 'observations.manager_approval' => true]);
 
-        $this->cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $this->cctv = Seeds::department('vm', ['is_reporting' => true]);
         $this->stock = Seeds::department('stock_control', ['is_reporting' => true]);
         $this->operation = Seeds::department('operation');
         $this->branch = Seeds::branch('Saraya Mall');
@@ -98,7 +98,7 @@ class ApprovalTest extends TestCase
         $this->actingAs($this->stockManager)->get('/observations/visits/to-approve')->assertOk()->assertDontSee($mine->code)->assertSee($other->code);
 
         $this->actingAs($this->recorder)->get('/observations/visits/to-approve')->assertForbidden();
-        $hr = Seeds::department('hr', ['is_reporting' => false]);
+        $hr = Seeds::department('marketing', ['is_reporting' => false]);
         $this->actingAs(Seeds::user('department_manager', ['department_id' => $hr->id, 'is_department_manager' => true]))->get('/observations/visits/to-approve')->assertForbidden();
 
         // Visit page: own department only; an approved visit is still readable (its tickets).
@@ -110,7 +110,7 @@ class ApprovalTest extends TestCase
 
     public function test_sidebar_link_follows_the_approver_rule(): void
     {
-        $hr = Seeds::department('hr', ['is_reporting' => false]);
+        $hr = Seeds::department('marketing', ['is_reporting' => false]);
         foreach ([$this->cctvManager, $this->ops, Seeds::user('super_admin')] as $user) {
             $this->actingAs($user)->get('/dashboard')->assertOk()->assertSee('/observations/visits/to-approve');
         }

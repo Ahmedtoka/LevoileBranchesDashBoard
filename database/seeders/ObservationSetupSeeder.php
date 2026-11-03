@@ -134,6 +134,8 @@ class ObservationSetupSeeder extends Seeder
                         'default_cc_department_ids' => $this->departmentIdList($cat['cc'] ?? []),
                         'default_sla_hours' => $cat['sla_hours'] ?? null,
                         'sort_order' => $index + 1,
+                        // A category the catalog retires stays for its old rows but is no longer offered.
+                        'active' => $cat['active'] ?? true,
                     ],
                 );
 

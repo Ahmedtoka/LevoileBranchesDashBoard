@@ -187,7 +187,12 @@ class MappersTest extends TestCase
         $this->assertSame($this->categoryId($cctv, 'floor'), $r['category_id']);
         $this->assertSame($this->itemId('CCTV-FLOOR-NO-NAMETAG'), $r['catalog_item_id']);
 
+        // Break-time points had no catalog item until the 2026-11-03 CCTV items; now the keyword finds one.
         $r = $m->match($cctv, 'مخالفات تتعلق بمنطقة الفلور', 'خروج الموظفة بريك بعد وقت البريك الفعلي');
+        $this->assertSame($this->categoryId($cctv, 'floor'), $r['category_id']);
+        $this->assertSame($this->itemId('CCTV-FLOOR-BREAK'), $r['catalog_item_id']);
+
+        $r = $m->match($cctv, 'مخالفات تتعلق بمنطقة الفلور', 'ملاحظة لا تشبه أي بند');
         $this->assertSame($this->categoryId($cctv, 'floor'), $r['category_id']);
         $this->assertNull($r['catalog_item_id'], 'no keyword hit: category only');
 

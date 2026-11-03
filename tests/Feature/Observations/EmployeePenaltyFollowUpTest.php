@@ -36,7 +36,7 @@ class EmployeePenaltyFollowUpTest extends TestCase
         Carbon::setTestNow('2026-10-28 10:00:00');
         config(['services.anthropic.key' => null, 'observations.manager_approval' => true]);
 
-        $this->cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $this->cctv = Seeds::department('vm', ['is_reporting' => true]);
         $this->operation = Seeds::department('operation', ['is_reporting' => true]);
         $this->branch = Seeds::branch('Saraya Mall');
         $this->recorder = Seeds::user('department_employee', ['department_id' => $this->cctv->id]);

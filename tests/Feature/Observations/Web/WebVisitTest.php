@@ -26,7 +26,7 @@ class WebVisitTest extends TestCase
     {
         parent::setUp();
 
-        $this->cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $this->cctv = Seeds::department('vm', ['is_reporting' => true]);
         $this->branch = Seeds::branch('Saraya Mall', ['active' => true]);
         $this->recorder = Seeds::user('department_employee', ['department_id' => $this->cctv->id]);
     }

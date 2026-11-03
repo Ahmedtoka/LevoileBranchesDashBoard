@@ -105,6 +105,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/purchasing/{pr}/status', [\App\Http\Controllers\Web\PurchaseRequestController::class, 'status'])->name('purchasing.status');
 
     // ---- Observations & risk (operations web) ----
+    Route::get('/constitution/evidence/{file}', [\App\Http\Controllers\Web\ConstitutionController::class, 'evidence'])->where('file', '[A-Za-z0-9-]+(\.[a-z0-9]+)')->name('constitution.evidence');
+    Route::get('/constitution/{page}', [\App\Http\Controllers\Web\ConstitutionController::class, 'page'])->name('constitution.page');
+
     // export.csv MUST stay above /observations/{observation} (also constrained to digits), or "export.csv" is read as an id.
     Route::get('/observations', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'index'])->name('observations.index');
     Route::get('/observations/export.csv', [\App\Http\Controllers\Web\Observations\ObservationController::class, 'export'])->name('observations.export');
@@ -161,4 +164,11 @@ Route::middleware('auth')->group(function () {
 
     require __DIR__.'/observations-admin.php';
     require __DIR__.'/observations-approval.php';
+    require __DIR__.'/cctv.php';
+    require __DIR__.'/finance.php';
+    require __DIR__.'/hr.php';
+    // "لوحة المخالفات" (2026-11-03): every department's violations by branch, for management.
+    Route::get('/violations-board', [\App\Http\Controllers\Web\ViolationsBoardController::class, 'index'])->name('board.index');
+    // "مهام إدارتي" (2026-11-03): problems sent to my department, and solutions waiting for our approval.
+    Route::get('/tasks', [\App\Http\Controllers\Web\TasksController::class, 'index'])->name('tasks.index');
 });

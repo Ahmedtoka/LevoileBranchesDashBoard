@@ -21,3 +21,7 @@ yarn-error.log
 /.vscode
 /.zed
 /public/handover/
+/storage/app/handover-evidence
+/storage/app/private/
+/.claude/
+__pycache__/

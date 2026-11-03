@@ -22,3 +22,6 @@
         <a href="{{ route('observations.employees') }}" class="{{ request()->routeIs('observations.employees') ? 'active' : '' }}"><i class="bi bi-person-badge me-2"></i>{{ t('obs.nav.employees','تقرير الموظفين') }}</a>
     @endif
 @endif
+<div class="nav-label">{{ dt('الدستور','Constitution') }}</div>
+<a href="{{ route('constitution.page', 'department-blueprint.standalone.html') }}" target="_blank" rel="noopener"><i class="bi bi-journal-text me-2"></i>{{ dt('دستور الإدارات','Department constitution') }}</a>
+<a href="{{ route('constitution.page', 'department-simulator.html') }}" target="_blank" rel="noopener"><i class="bi bi-play-circle me-2"></i>{{ dt('سيميوليتر الإدارات','Department simulator') }}</a>

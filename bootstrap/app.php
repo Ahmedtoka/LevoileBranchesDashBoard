@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureUserHasRole;
+use App\Http\Middleware\KeepDepartmentHome;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -17,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
         ]);
-        $middleware->web(append: [SetLocale::class]);
+        $middleware->web(append: [SetLocale::class, KeepDepartmentHome::class]);
         // Spec 9.3: the web page /observations/new calls the API with the session (stateful Sanctum).
         $middleware->statefulApi();
     })

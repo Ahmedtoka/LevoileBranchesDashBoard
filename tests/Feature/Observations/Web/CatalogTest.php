@@ -47,7 +47,7 @@ class CatalogTest extends TestCase
 
     public function test_create_item_with_extra_fields_and_rule(): void
     {
-        $cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $cctv = Seeds::department('vm', ['is_reporting' => true]);
         $operation = Seeds::department('operation');
         $lp = Seeds::department('lp');
         $medium = RiskLevel::create(['slug' => 'medium', 'name_ar' => 'متوسطة', 'name_en' => 'Medium', 'color' => '#eab308', 'sort_order' => 3, 'default_sla_hours' => 72, 'requires_field_verification' => false, 'ticket_priority' => 'medium', 'active' => true]);
@@ -123,7 +123,7 @@ class CatalogTest extends TestCase
 
     public function test_other_department_manager_forbidden(): void
     {
-        $cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $cctv = Seeds::department('vm', ['is_reporting' => true]);
         $stock = Seeds::department('stock_control', ['is_reporting' => true]);
         $cctvCat = $this->category($cctv, 'cameras');
         $stockCat = $this->category($stock, 'damaged');
@@ -151,7 +151,7 @@ class CatalogTest extends TestCase
 
     public function test_delete_blocked_when_used_toggle_allowed(): void
     {
-        $cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $cctv = Seeds::department('vm', ['is_reporting' => true]);
         $admin = Seeds::user('super_admin');
         $cat = $this->category($cctv);
         $used = $this->item($cat, 'CCTV-USED', ['usage_count' => 3]);

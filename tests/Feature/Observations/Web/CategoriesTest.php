@@ -39,7 +39,7 @@ class CategoriesTest extends TestCase
 
     public function test_manager_sees_only_own_department(): void
     {
-        $cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $cctv = Seeds::department('vm', ['is_reporting' => true]);
         $stock = Seeds::department('stock_control', ['is_reporting' => true]);
         $this->category($cctv, 'cameras');
         $this->category($stock, 'damaged_goods');
@@ -55,7 +55,7 @@ class CategoriesTest extends TestCase
         $this->actingAs($admin)->get('/admin/observation-categories?department_id='.$stock->id)->assertOk()->assertDontSee('Cameras');
 
         // Manager of a NON-reporting department and plain employees get nothing.
-        $hr = Seeds::department('hr', ['is_reporting' => false]);
+        $hr = Seeds::department('marketing', ['is_reporting' => false]);
         $this->actingAs(Seeds::user('department_manager', ['department_id' => $hr->id, 'is_department_manager' => true]))
             ->get('/admin/observation-categories')->assertForbidden();
         $this->actingAs(Seeds::user('department_employee', ['department_id' => $cctv->id]))
@@ -69,7 +69,7 @@ class CategoriesTest extends TestCase
 
     public function test_create_with_defaults(): void
     {
-        $cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $cctv = Seeds::department('vm', ['is_reporting' => true]);
         $operation = Seeds::department('operation');
         $lp = Seeds::department('lp');
         $high = RiskLevel::create(['slug' => 'high', 'name_ar' => 'عالية', 'name_en' => 'High', 'color' => '#f97316', 'sort_order' => 2, 'default_sla_hours' => 48, 'requires_field_verification' => true, 'ticket_priority' => 'high', 'active' => true]);
@@ -119,7 +119,7 @@ class CategoriesTest extends TestCase
 
     public function test_reorder(): void
     {
-        $cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $cctv = Seeds::department('vm', ['is_reporting' => true]);
         $a = $this->category($cctv, 'a', 1);
         $b = $this->category($cctv, 'b', 2);
         $c = $this->category($cctv, 'c', 3);
@@ -145,7 +145,7 @@ class CategoriesTest extends TestCase
 
     public function test_category_delete_blocked_when_used(): void
     {
-        $cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $cctv = Seeds::department('vm', ['is_reporting' => true]);
         $admin = Seeds::user('super_admin');
         $withItem = $this->category($cctv, 'with_item');
         ObservationCatalogItem::create(['category_id' => $withItem->id, 'code' => 'CCTV-X', 'label_ar' => 'x', 'label_en' => 'x', 'kind' => 'issue', 'keywords' => [], 'extra_fields' => [], 'usage_count' => 0, 'sort_order' => 1, 'active' => true]);

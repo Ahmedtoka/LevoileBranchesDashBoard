@@ -546,8 +546,9 @@ class ObservationService
 
             $this->copyAfterEvidence($observation, $t);
 
-            // A null risk (none) needs no field verification.
-            if ($observation->riskLevel?->requires_field_verification) {
+            // A null risk (none) needs no field verification; neither does a desk review (cameras, finance),
+            // where the reporter's approval of the solution is the check.
+            if ($observation->riskLevel?->requires_field_verification && ! TicketService::fromDeskReview($t)) {
                 $observation->update(['status' => 'waiting_verification']);
 
                 return;

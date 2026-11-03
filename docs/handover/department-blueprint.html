@@ -352,6 +352,26 @@ dialog.editor::backdrop{background:rgba(20,12,18,.5)}
   .item.st-rejected{display:none!important}
   .st.adopted{display:none}
 }
+.ev-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ev-chip{display:inline-flex;align-items:center;gap:5px;border:1px dashed var(--line);background:var(--surface-2);color:var(--ink);border-radius:9px;padding:3px 9px;font:inherit;font-size:.84rem;cursor:pointer;text-align:start}
+.ev-chip:hover,.ev-chip:focus-visible{border-color:var(--brand);color:var(--brand-ink)}
+.ev-chip.has{border-style:solid;border-color:color-mix(in srgb,var(--brand) 45%,transparent);background:var(--brand-soft)}
+.ev-dlg{width:min(860px,calc(100vw - 32px));max-height:calc(100vh - 40px);padding:0;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.ev-dlg::backdrop{background:rgba(10,6,10,.55)}
+.ev-dlg .ehd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:1}
+.ev-dlg h3{margin:0;font-size:1.05rem}
+.ev-body{padding:16px 18px 20px}.ev-body h4{margin:18px 0 8px;font-size:.92rem}
+.ev-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.ev-st{font-size:.76rem;border-radius:99px;padding:2px 10px;border:1px solid var(--line)}
+.ev-st.real{background:var(--mine-soft);color:var(--mine);border-color:transparent}.ev-st.related{background:var(--std-soft);color:var(--std);border-color:transparent}.ev-st.template{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.ev-what{margin:10px 0 6px;line-height:1.75}.ev-who{margin:0;color:var(--muted);font-size:.88rem}.ev-who b{color:var(--ink)}.ev-none{color:var(--muted);font-size:.88rem;margin:0}
+.ev-tpl{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ev-tpl .r{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);border-bottom:1px solid var(--line-2);font-size:.86rem}.ev-tpl .r:last-child{border-bottom:0}
+.ev-tpl span{padding:8px 11px;background:var(--surface-2)}.ev-tpl i{border-inline-start:1px solid var(--line-2);min-height:34px}
+.ev-files{display:flex;flex-direction:column;gap:7px}
+.ev-file{display:flex;flex-wrap:wrap;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:.88rem}.ev-file span{flex:1;min-width:170px}
+.ev-view{margin-top:14px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.ev-view iframe{display:block;width:100%;height:65vh;border:0}.ev-view img{display:block;max-width:100%;margin:auto}
 </style>
 </head>
 <body>
@@ -428,14 +448,20 @@ dialog.editor::backdrop{background:rgba(20,12,18,.5)}
     </div>
   </form>
 </dialog>
+<dialog class="ev-dlg" id="evDlg" aria-labelledby="evTitle">
+  <div class="ehd"><h3 id="evTitle"></h3><button type="button" class="btn ghost sm" data-ev-close aria-label="إغلاق">✕</button></div>
+  <div class="ev-body" id="evBody"></div>
+</dialog>
 <div class="toast" id="toast"></div>
 
 <script id="state-seed" type="application/json"></script>
 <script src="department-blueprint-data.js"></script>
 <script src="department-blueprint-refs.js"></script>
+<script src="department-blueprint-evidence.js"></script>
 <script>
 const DATA = window.__DEPT_DATA__ || [];
 const REFS = window.__REFS__ || {std:[],yours:[],dropped:[],types:{}};
+const EVID = window.__EVIDENCE__ || {files:{},types:[],fallback:{}};
 const PILLARS = [
   {k:'policies', title:'السياسات', ic:'§', def:'قواعد ملزمة للفرع، المخالفة ليها جزاء وإدارة مسؤولة عن الرد.', tpl:['يُكتشف','الدليل','على','المسؤول عن الرد','الجزاء','المؤشر']},
   {k:'sops', title:'الـ SOP', ic:'≡', def:'خطوات تنفيذ الشغل، وبيتدرّب عليها الموظف.', tpl:[]},
@@ -499,12 +525,47 @@ function ladder(v){
   const prefix = i>0 ? v.slice(0,i+1) : ''; const chain = i>0 ? v.slice(i+1) : v;
   return (prefix?`<span>${esc(prefix)}</span> `:'') + `<span class="ladder">${chain.split('→').map(x=>`<span>${esc(x.trim())}</span>`).join('<i>←</i>')}</span>`;
 }
-function meta(n){
+const EV_TYPES = EVID.types.map(t=>({t, re:new RegExp(t.m)}));
+const EV_STATUS = {real:'موجود في ملفاتكم', related:'فيه ملف بيغطيه جزئياً', template:'تمبلت مقترح'};
+const evType = tok => (EV_TYPES.find(x=>x.re.test(tok))||{t:EVID.fallback}).t;
+const evFiles = (t,dept) => (t.files||[]).map(id=>EVID.files[id]).filter(f=>f && (!f.dept || f.dept===dept));
+function evChips(v,dept){
+  return `<span class="ev-chips">${String(v).split(/\s\+\s/).map(tok=>{
+    const files = evFiles(evType(tok),dept).length;
+    return `<button type="button" class="ev-chip ${files?'has':''}" data-ev="${esc(tok)}" data-dept="${esc(dept||'')}" title="اعرف يعني إيه"><span aria-hidden="true">${files?'📎':'ⓘ'}</span>${esc(tok)}</button>`;
+  }).join('')}</span>`;
+}
+function openEvidence(tok,dept){
+  const t=evType(tok), files=evFiles(t,dept), dlg=document.getElementById('evDlg');
+  document.getElementById('evTitle').textContent=tok;
+  document.getElementById('evBody').innerHTML=`
+    <div class="ev-head"><b>${esc(t.name)}</b><span class="ev-st ${t.status}">${EV_STATUS[t.status]}</span></div>
+    <p class="ev-what">${esc(t.what)}</p>
+    <p class="ev-who"><b>مين وإمتى:</b> ${esc(t.who)}</p>
+    <h4>${t.status==='real'?'الخانات الأساسية':'شكل التمبلت المقترح'}</h4>
+    <div class="ev-tpl">${t.fields.map(f=>`<div class="r"><span>${esc(f)}</span><i></i></div>`).join('')}</div>
+    <h4>المرفقات${files.length?` (${files.length})`:''}</h4>
+    ${files.length?`<div class="ev-files">${files.map(f=>`<div class="ev-file"><span>${esc(f.t)}</span><button type="button" class="btn sm primary" data-ev-open="${esc(f.p||f.o)}">فتح</button><a class="btn sm" href="evidence/${esc(f.o)}" download>تحميل الأصل</a></div>`).join('')}</div>`:'<p class="ev-none">مفيش ملف مرفق للبند ده في الملفات اللي اتقرت.</p>'}
+    <div class="ev-view" id="evView" hidden></div>`;
+  dlg.showModal();
+}
+function evShow(path,btn){
+  const box=document.getElementById('evView'), url='evidence/'+path;
+  box.hidden=false;
+  box.innerHTML=/\.(jpe?g|png)$/i.test(path)?`<img src="${esc(url)}" alt="${esc(btn.previousElementSibling.textContent)}">`:`<iframe src="${esc(url)}" title="${esc(btn.previousElementSibling.textContent)}"></iframe>`;
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+document.addEventListener('click', e=>{
+  const chip=e.target.closest('.ev-chip'); if(chip){ openEvidence(chip.dataset.ev, chip.dataset.dept); return; }
+  const op=e.target.closest('[data-ev-open]'); if(op){ evShow(op.dataset.evOpen, op); return; }
+  if(e.target.closest('[data-ev-close]') || e.target.id==='evDlg') document.getElementById('evDlg').close();
+});
+function meta(n,dept){
   const kv = parseMeta(n);
   if(!kv.length) return '';
   if(kv.length < 2 && kv[0][0]==='ملاحظة') return `<div class="note">${esc(n)}</div>`;
   kv.sort((a,b)=>{const ia=META_ORDER.indexOf(a[0]), ib=META_ORDER.indexOf(b[0]); return (ia<0?99:ia)-(ib<0?99:ib);});
-  return `<div class="meta">${kv.map(([k,v])=>`<div class="k"><span class="i">${META_ICON[k]||'•'}</span>${esc(k)}</div><div class="v ${/المسؤول عن الرد|لو فشل يروح لـ/.test(k)?'resp':''}">${k==='الجزاء'?ladder(v):esc(v)}</div>`).join('')}</div>`;
+  return `<div class="meta">${kv.map(([k,v])=>`<div class="k"><span class="i">${META_ICON[k]||'•'}</span>${esc(k)}</div><div class="v ${/المسؤول عن الرد|لو فشل يروح لـ/.test(k)?'resp':''}">${k==='الجزاء'?ladder(v):k==='الدليل'?evChips(v,dept):esc(v)}</div>`).join('')}</div>`;
 }
 function leadText(t){
   t = String(t);
@@ -544,7 +605,7 @@ function itemHtml(it, n){
   const dn = it.decisionNote ? `<div class="dnote"><b>${it.status==='rejected'?'سبب الاستبعاد':'ملاحظة الجلسة'}</b>${esc(it.decisionNote)}</div>` : '';
   return `<article class="item ${it.s} st-${it.status}" data-id="${esc(it.id)}" data-src="${it.s}" data-st="${it.status}" data-text="${esc((it.t+' '+(it.n||'')+' '+(it.decisionNote||'')).toLowerCase())}">
     <div class="head"><span class="num">${n}</span><div class="text">${leadText(it.t)}</div><span class="st ${it.status}">${STL[it.status]}</span></div>
-    ${meta(it.n)}${srcLine(it)}${dn}${acts(it)}
+    ${meta(it.n, it.dept || String(it.id).split('.')[0])}${srcLine(it)}${dn}${acts(it)}
   </article>`;
 }
 function pillarHtml(d, p, idx){

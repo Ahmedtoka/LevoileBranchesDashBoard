@@ -1,0 +1,368 @@
+{
+  "std": [
+    {
+      "k": "COSO",
+      "type": "body",
+      "m": [
+        "COSO"
+      ],
+      "who": "لجنة المنظمات الراعية لهيئة Treadway، صاحبة إطار الرقابة الداخلية المتكامل 2013",
+      "what": "صياغة المبادئ 1 إلى 17 كما نقلها تقييم رقابي لمدينة College Station، ومنها المبدأ 8 (الاحتيال) و10 ونقطة تركيز فصل المهام و11 و12 و16 و17؛ والمكونات الخمسة وشرط أن تكون قائمة وعاملة معاً من Journal of Accountancy؛ ونقاط تركيز المبدأ 8 من Linford",
+      "why": "الإطار المرجعي للرقابة الداخلية على التقارير المالية، والأصل الصادر من COSO مدفوع ولم يُقرأ مباشرة",
+      "urls": [
+        [
+          "City of College Station — COSO internal control assessment",
+          "https://www.cstx.gov/media/k1un1zae/18-02-coso-internal-control-assessment.pdf"
+        ],
+        [
+          "Journal of Accountancy — COSO 2013",
+          "https://www.journalofaccountancy.com/news/2013/may/20137970.html"
+        ],
+        [
+          "Linford & Co — COSO Principle 8",
+          "https://linfordco.com/blog/fraud-risk-assessment-coso-principle-8/"
+        ]
+      ]
+    },
+    {
+      "k": "IFRS",
+      "type": "body",
+      "m": [
+        "IAS 2",
+        "IFRS"
+      ],
+      "who": "مؤسسة IFRS ومجلس معايير المحاسبة الدولية",
+      "what": "ملخص IAS 2: القياس بالتكلفة أو صافي القيمة القابلة للتحقق أيهما أقل، وصيغ الوارد أولاً والمتوسط المرجح، وتحميل التخفيض والفقد على فترة حدوثه",
+      "why": "مرجع شارح لـ EAS 2 المقابل؛ الملزم في مصر هو EAS لا IFRS",
+      "urls": [
+        [
+          "IAS 2 Inventories",
+          "https://www.ifrs.org/issued-standards/list-of-standards/ias-2-inventories/"
+        ]
+      ]
+    },
+    {
+      "k": "SAO واشنطن",
+      "type": "body",
+      "m": [
+        "SAO"
+      ],
+      "who": "مكتب مراجع ولاية واشنطن (مركز الابتكار الحكومي)",
+      "what": "أفضل ممارسات التسويات البنكية (15 بنداً: شهرياً على الأقل، التوثيق، فصل المعد عن الإيداع والدفع والتوقيع، المراجعة المستقلة الموقعة، مهلة لحل الفروق مثل أسبوعين، مراجعة المفوضين)؛ ودليل فصل المهام (القواعد الذهبية الست، فصول تحصيل النقد والحسابات الدائنة والرواتب، الجرد المفاجئ، الموازنة اليومية، ملف الموردين)",
+      "why": "من المصادر الرسمية القليلة التي تنشر خطوات قابلة للنقل كإجراء؛ موجهة للحكومات المحلية فطُبقت على شركة تجزئة بتكييف",
+      "urls": [
+        [
+          "Best Practices for Bank Reconciliations",
+          "https://sao.wa.gov/sites/default/files/2023-05/Best-Practices-for-Bank-Reconciliations.pdf"
+        ],
+        [
+          "Segregation of Duties guide (نسخة 2019 مستضافة لدى Louisiana LLA)",
+          "https://cms.lla.la.gov/assets/documents/Segregation-of-Duties-Handbook-WA.pdf"
+        ]
+      ]
+    },
+    {
+      "k": "OSA مينيسوتا",
+      "type": "body",
+      "m": [
+        "OSA"
+      ],
+      "who": "مكتب مراجع ولاية مينيسوتا",
+      "what": "ضوابط النثريات: أمين مسؤول شخصياً، صندوق مقفول، التسوية من غير المعتمد، النقد مع الإيصالات يساوي العهدة، التعويض بالإيصالات الأصلية، سياسة مكتوبة",
+      "why": "مصدر رسمي مختصر لنظام العهدة الثابتة",
+      "urls": [
+        [
+          "Petty Cash (Imprest) Funds - Part III",
+          "https://www.auditor.state.mn.us/audit-resources/audit-guidance/avoiding-pitfalls-articles/petty-cash-imprest-funds-part-iii/"
+        ]
+      ]
+    },
+    {
+      "k": "ACFE",
+      "type": "body",
+      "m": [
+        "ACFE"
+      ],
+      "who": "جمعية فاحصي الاحتيال المعتمدين",
+      "what": "صفحة تقرير 2026: وجود ضوابط مكافحة الاحتيال يرتبط بخسائر أقل واكتشاف أسرع، مع ذكر المراجعات المفاجئة ومراجعة الإدارة والمراقبة الاستباقية للبيانات؛ بلا أرقام مستخدمة",
+      "why": "سند لضوابط الكشف في سياسة مخاطر الاحتيال",
+      "urls": [
+        [
+          "Occupational Fraud 2026: A Report to the Nations",
+          "https://www.acfe.com/fraud-resources/report-to-the-nations"
+        ]
+      ]
+    },
+    {
+      "k": "CFI",
+      "type": "guide",
+      "m": [
+        "CFI"
+      ],
+      "who": "Corporate Finance Institute، جهة تدريب مالي",
+      "what": "صيغة CCC = DIO + DSO − DPO وتعريف كل مكون",
+      "why": "صيغة ثابتة ومتفق عليها لمؤشر رأس المال العامل",
+      "urls": [
+        [
+          "Cash Conversion Cycle",
+          "https://corporatefinanceinstitute.com/resources/knowledge/finance/cash-conversion-cycle/"
+        ]
+      ]
+    },
+    {
+      "k": "الكود المصري لحوكمة الشركات",
+      "type": "body",
+      "m": [
+        "الكود المصري",
+        "حوكمة الشركات"
+      ],
+      "who": "الهيئة العامة للرقابة المالية (قرار 84 لسنة 2016)",
+      "what": "تحديد الصلاحيات المفوضة ومدتها وتقاريرها، والرقابة الداخلية بفصل المهام (2.4.1)، وتعارض المصالح؛ منقول من التقرير وملاحظات البحث",
+      "why": "السند المحلي لمصفوفة الصلاحيات؛ ملف PDF لم يُستخرج نصه في هذه الجلسة لترميز الخط، فالاعتماد على قراءة التقرير له",
+      "urls": [
+        [
+          "Egyptian Corporate Governance Code (ECGI)",
+          "https://ecgi.global/sites/default/files/codes/documents/egypt_cg_code.pdf"
+        ]
+      ]
+    },
+    {
+      "k": "PwC",
+      "type": "vendor",
+      "m": [
+        "PwC"
+      ],
+      "who": "PwC Worldwide Tax Summaries، مراجعة 17 أغسطس 2026",
+      "what": "نسب وأحكام الضريبة المصرية: القيمة المضافة وموعد إقرارها، الفاتورة الإلكترونية، القانونين 149/2026 و157/2025، رسم التأمين الصحي، ضريبة الشركات ومواعيدها وغراماتها، خصم المنبع، شروط خصم الديون المعدومة، نسب الإهلاك الضريبي، التأمينات الاجتماعية، التزامات صاحب العمل في ضريبة المرتبات",
+      "why": "ملخص ثانوي حديث للنصوص الضريبية؛ لم يُقرأ نص قانوني أصلي",
+      "urls": [
+        [
+          "Other taxes",
+          "https://taxsummaries.pwc.com/egypt/corporate/other-taxes"
+        ],
+        [
+          "Tax administration",
+          "https://taxsummaries.pwc.com/egypt/corporate/tax-administration"
+        ],
+        [
+          "Withholding taxes",
+          "https://taxsummaries.pwc.com/egypt/corporate/withholding-taxes"
+        ],
+        [
+          "Deductions",
+          "https://taxsummaries.pwc.com/egypt/corporate/deductions"
+        ],
+        [
+          "Individual other taxes",
+          "https://taxsummaries.pwc.com/egypt/individual/other-taxes"
+        ],
+        [
+          "Individual tax administration",
+          "https://taxsummaries.pwc.com/egypt/individual/tax-administration"
+        ]
+      ]
+    }
+  ],
+  "yours": [
+    {
+      "k": "معايير المحاسبة المصرية (EAS)",
+      "dept": "finance",
+      "who": "وزير الاستثمار بقرار وزاري بعد لجنة وضع المعايير (قرار رئيس الوزراء 2115/2023)",
+      "what": "إعداد القوائم وفق EAS، ومنع التقرير المزدوج، ومعاملة حصة العاملين في الأرباح كتوزيع؛ EAS 2 و10 و48 و49",
+      "note": "المصدر ملف IFRS Foundation بتاريخ 31 يناير 2024؛ سريان EAS 48 و49 وفئة المنشآت الصغيرة يؤكدها مراقب الحسابات (م24)",
+      "m": [
+        "معايير المحاسبة المصرية",
+        "EAS"
+      ],
+      "urls": [
+        [
+          "IFRS Foundation: Egypt jurisdiction profile",
+          "https://ifrs.org/use-around-the-world/use-of-ifrs-standards-by-jurisdiction/view-jurisdiction/egypt"
+        ]
+      ]
+    },
+    {
+      "k": "قانون الضريبة على القيمة المضافة 67/2016",
+      "dept": "finance",
+      "who": "مجلس النواب، وتطبقه مصلحة الضرائب",
+      "what": "السعر 14%، التسجيل فوق 500,000 جنيه، الإقرار الشهري حتى آخر يوم في الشهر التالي، ضريبة المدخلات بفاتورة إلكترونية أو مستند جمركي",
+      "note": "عبر PwC؛ النص العربي لم يُقرأ",
+      "m": [
+        "67/2016"
+      ],
+      "urls": [
+        [
+          "PwC: Other taxes",
+          "https://taxsummaries.pwc.com/egypt/corporate/other-taxes"
+        ],
+        [
+          "PwC: Tax administration",
+          "https://taxsummaries.pwc.com/egypt/corporate/tax-administration"
+        ]
+      ]
+    },
+    {
+      "k": "القانون 149/2026 والقانون 157/2025",
+      "dept": "finance",
+      "who": "مجلس النواب",
+      "what": "إخضاع إيجار الأماكن غير السكنية وخدمات الإعلان لـ 14%",
+      "note": "أثرها على عقود إيجار الفروع وعقود الإعلان بند للمستشار الضريبي والقانونية (م23)",
+      "m": [
+        "149/2026",
+        "157/2025"
+      ],
+      "urls": [
+        [
+          "PwC: Other taxes",
+          "https://taxsummaries.pwc.com/egypt/corporate/other-taxes"
+        ]
+      ]
+    },
+    {
+      "k": "القرار 188/2020 (الفاتورة الإلكترونية)",
+      "dept": "finance",
+      "who": "مصلحة الضرائب المصرية (اسم الجهة المصدرة غير مذكور في ملخص PwC)",
+      "what": "إلزام الجميع بالفاتورة الإلكترونية منذ يوليو 2023، وهي المستند الوحيد المقبول للتكاليف القابلة للخصم",
+      "note": "عبر PwC؛ غرامات الفاتورة الإلكترونية الحالية لم تُتحقق",
+      "m": [
+        "188/2020"
+      ],
+      "urls": [
+        [
+          "PwC: Other taxes",
+          "https://taxsummaries.pwc.com/egypt/corporate/other-taxes"
+        ],
+        [
+          "PwC: Deductions",
+          "https://taxsummaries.pwc.com/egypt/corporate/deductions"
+        ]
+      ]
+    },
+    {
+      "k": "قرار مصلحة الضرائب 281/2025 (الإيصال الإلكتروني)",
+      "dept": "finance",
+      "who": "مصلحة الضرائب المصرية",
+      "what": "إصدار إيصال إلكتروني للمستهلك النهائي من 15 سبتمبر 2025 للممولين المدرجين بالملحق",
+      "note": "Sovos يذكر أن الملحق لممولي مأموريتي السادس والتجمع الخامس؛ إدراج Le Voile في هذا الملحق أو غيره غير معلوم ويُتحقق منه بالرقم الضريبي (م22)",
+      "m": [
+        "281/2025"
+      ],
+      "urls": [
+        [
+          "Sovos: Egypt extends e-receipt obligations",
+          "https://sovos.com/regulatory-updates/global-vat/egypt-tax-authority-extends-e-receipt-obligations-for-b2c-transactions/"
+        ]
+      ]
+    },
+    {
+      "k": "قانون الضريبة على الدخل",
+      "dept": "finance",
+      "who": "مجلس النواب، وتطبقه مصلحة الضرائب",
+      "what": "ضريبة الشركات 22.5% وإقرارها خلال 4 أشهر، التقادم 5 سنوات و6 عند التهرب، الغرامات، خصم المنبع 1% و3% و5% فوق 300 جنيه، ضريبة المرتبات بالخصم الشهري والنماذج الربع سنوية، شروط الديون المعدومة (م. 28)، نسب الإهلاك الضريبي",
+      "note": "عبر PwC؛ موعد التسوية السنوية للمرتبات متعارض بين المصادر (ت17)",
+      "m": [
+        "قانون الضريبة على الدخل"
+      ],
+      "urls": [
+        [
+          "PwC: Tax administration",
+          "https://taxsummaries.pwc.com/egypt/corporate/tax-administration"
+        ],
+        [
+          "PwC: Withholding taxes",
+          "https://taxsummaries.pwc.com/egypt/corporate/withholding-taxes"
+        ],
+        [
+          "PwC: Deductions",
+          "https://taxsummaries.pwc.com/egypt/corporate/deductions"
+        ],
+        [
+          "PwC: Individual tax administration",
+          "https://taxsummaries.pwc.com/egypt/individual/tax-administration"
+        ]
+      ]
+    },
+    {
+      "k": "القانون 155/2026 (رسم التأمين الصحي)",
+      "dept": "finance",
+      "who": "مجلس النواب",
+      "what": "رسم 0.25% من الإيرادات السنوية، قابل للخصم، يُسدد في موعد إقرار ضريبة الدخل",
+      "note": "عبر PwC",
+      "m": [
+        "155/2026"
+      ],
+      "urls": [
+        [
+          "PwC: Other taxes",
+          "https://taxsummaries.pwc.com/egypt/corporate/other-taxes"
+        ]
+      ]
+    },
+    {
+      "k": "قانون التأمينات الاجتماعية",
+      "dept": "finance",
+      "who": "مجلس النواب، وتطبقه الهيئة القومية للتأمين الاجتماعي",
+      "what": "11% على العامل و18.75% على صاحب العمل، والأجر التأميني بين 2,700 و16,700 جنيه في 2026",
+      "note": "عبر PwC؛ مواعيد السداد وتعديلات مايو 2026 بند للمستشار (م8)",
+      "m": [
+        "قانون التأمينات الاجتماعية"
+      ],
+      "urls": [
+        [
+          "PwC: Individual other taxes",
+          "https://taxsummaries.pwc.com/egypt/individual/other-taxes"
+        ]
+      ]
+    },
+    {
+      "k": "قانون العمل 14/2025",
+      "dept": "finance",
+      "who": "مجلس النواب",
+      "what": "لا جزاء إلا بعد تحقيق كتابي محايد وسماع أقوال العامل، والخصم لا يتجاوز أجر 5 أيام في الشهر، والقواعد تنطبق من 10 عمال، فلا خصم آلي لعجز الخزينة",
+      "note": "أرقام المواد متعارضة: التقرير يذكر 139 إلى 143، ومشروع مجلس الشيوخ 2022 في الأهرام بأرقام 116 إلى 121؛ لم يُقرأ النص النهائي في الجريدة الرسمية، فالأرقام يؤكدها مستشار العمل (م4، م6)",
+      "m": [
+        "قانون العمل"
+      ],
+      "urls": [
+        [
+          "المال: 5 أيام حد أقصى للخصم، قواعد لائحة تنظيم العمل",
+          "https://almalnews.com/2132230/5-أيام-حد-أقصى-للخصم-تعرف-على/"
+        ]
+      ]
+    }
+  ],
+  "dropped": [
+    {
+      "n": "أرقام APQC لأيام الإغلاق (4.8 و6.4 و10 أيام)",
+      "why": "من 2018 ومنقولة ثانوياً وبتعريفات مختلفة؛ لا تصلح مستهدفاً"
+    },
+    {
+      "n": "هدف فروق النقد أقل من 0.1% وأهداف 98% للتسوية في الصفحة القديمة",
+      "why": "مصادرها مدونات موردين؛ القاعدة هنا خط أساس 3 شهور ثم تحدد الجهة الحاكمة"
+    },
+    {
+      "n": "أرقام ACFE لمتوسط الخسارة",
+      "why": "الصفحة المفتوحة لا تعطي المتوسط العام، والتقرير يسجل تعارضاً (ت31)"
+    },
+    {
+      "n": "القرار 361 وموعد 15 نوفمبر 2025 ونافذة 24 ساعة للإيصال",
+      "why": "من أدلة موردين فقط ولم يُتحقق من مصدر رسمي"
+    },
+    {
+      "n": "تنبيه KPMG عن القرار 281/2025",
+      "why": "الرابط يرجع 404 الآن؛ استُبدل بـ Sovos"
+    },
+    {
+      "n": "توصيات GFOA للموازنة والأصول والنقد",
+      "why": "الموقع رفض الجلب (403/حظر) فلم يُقرأ"
+    },
+    {
+      "n": "شرط الإيصال الإلكتروني لكل فرع ونقطة بيع",
+      "why": "صفحة Sovos المفتوحة لا تذكره صراحة؛ تُرك للتحقق من الملحق"
+    },
+    {
+      "n": "أرقام مواد الجزاءات في قانون العمل (139 إلى 143)",
+      "why": "المصادر المفتوحة متعارضة في الترقيم (مشروع 2022 بأرقام 116 إلى 121)، فشيلت الأرقام من src وبقي المبدأ"
+    }
+  ]
+}

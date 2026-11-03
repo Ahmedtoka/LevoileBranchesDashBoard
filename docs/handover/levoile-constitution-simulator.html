@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>سيميوليتر الدستور</title>
+<style>
+:root{--bg:#160d14;--surface:#241923;--raise:#30222e;--ink:#f8f1f6;--muted:#c0afba;--line:#4b3647;--brand:#e27cc6;--brand2:#9d197e;--on:#2a1224;--ok:#6fdcbf;--bad:#ff8f8f;--warn:#f2c46b;--blue:#a6c1f7}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:radial-gradient(circle at 80% 0,#3b0f31 0,var(--bg) 55%);color:var(--ink);font:16px/1.55 "Segoe UI",Tahoma,Arial,sans-serif;display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}button:focus-visible,a:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+header{display:flex;align-items:center;gap:12px;padding:9px 16px 5px}
+header a{color:var(--muted);font-size:.86rem;white-space:nowrap;text-decoration:none}
+.films{display:flex;gap:6px;overflow:auto;flex:1;padding:3px}
+.films button{background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:4px 12px;font-size:.86rem;white-space:nowrap}
+.films button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--on);font-weight:600}
+.rail{display:flex;gap:4px;padding:3px 16px}
+.rail button{flex:1;min-width:0;background:none;border:0;border-top:4px solid var(--line);padding:5px 2px 0;font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:border-color .3s,color .3s}
+.rail button.done{border-color:var(--brand2)}.rail button.now{border-color:var(--brand);color:var(--ink);font-weight:700}
+.say{padding:6px 16px 8px;min-height:92px}
+.say h1{margin:0;font-size:clamp(1.15rem,2.3vw,1.75rem);line-height:1.3}
+.say p{margin:3px 0 0;color:var(--muted);font-size:clamp(.9rem,1.35vw,1.05rem);max-width:1000px}
+.chip{display:inline-block;font-size:.72rem;font-weight:600;border-radius:99px;padding:1px 9px;background:var(--raise);color:var(--warn);margin-inline-start:7px;vertical-align:middle}
+.stage{flex:1;min-height:0;margin:0 16px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:clamp(10px,2vh,22px);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
+.scene{width:100%;max-height:100%;display:flex;gap:clamp(10px,2vw,26px);align-items:center;justify-content:center}
+footer{display:flex;align-items:center;gap:8px;padding:8px 16px 10px}
+footer button{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 15px;white-space:nowrap}
+footer .play{background:var(--brand);border-color:var(--brand);color:var(--on);font-weight:700;min-width:96px}
+.bar{flex:1;height:7px;background:var(--raise);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--brand)}
+.pos{font-size:.84rem;color:var(--muted);white-space:nowrap}
+/* motion */
+@keyframes up{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.4)}70%{transform:scale(1.12)}100%{opacity:1;transform:none}}
+@keyframes stamp{0%{opacity:0;transform:scale(2.6) rotate(-16deg)}100%{opacity:1;transform:rotate(-7deg)}}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(226,124,198,.55)}50%{box-shadow:0 0 0 13px rgba(226,124,198,0)}}
+@keyframes alarm{0%,100%{box-shadow:0 0 0 0 rgba(255,143,143,.6)}50%{box-shadow:0 0 0 15px rgba(255,143,143,0)}}
+@keyframes grow{from{width:0}}@keyframes rise{from{height:0}}
+@keyframes hand{to{transform:rotate(330deg)}}@keyframes blink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes flow{from{left:0;opacity:0}15%{opacity:1}85%{opacity:1}to{left:calc(100% - 14px);opacity:0}}
+@keyframes scan{0%,100%{top:0}50%{top:calc(100% - 3px)}}
+.a{opacity:0;animation:up .55s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--d,0)*1s)}
+.p{opacity:0;animation:pop .45s ease-out forwards;animation-delay:calc(var(--d,0)*1s)}
+.card{background:var(--raise);border:1px solid var(--line);border-radius:13px;padding:clamp(9px,1.6vh,15px) 15px}
+.card small{display:block;color:var(--muted);font-size:.78rem}.card b{font-size:clamp(.92rem,1.4vw,1.1rem)}
+.col{display:flex;flex-direction:column;gap:clamp(6px,1.1vh,10px);flex:1;min-width:0}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1 1 150px}
+/* book */
+.book{flex:0 0 clamp(150px,22vw,300px);aspect-ratio:1.2;background:linear-gradient(135deg,#9d197e,#560d45);border-radius:6px 16px 16px 6px;padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:center;gap:8px;box-shadow:12px 12px 0 rgba(0,0,0,.25);animation:float 4s ease-in-out infinite}
+.book span{font-size:.82rem;opacity:.8}.book b{font-size:clamp(1.05rem,1.9vw,1.5rem)}
+.quote{font-size:clamp(1.05rem,2vw,1.55rem);font-weight:600;line-height:1.5;border-inline-start:5px solid var(--brand);padding-inline-start:15px}
+/* numbered */
+.step{display:flex;align-items:center;gap:11px}.step i{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--brand);color:var(--on);font-style:normal;font-weight:700}
+/* check */
+.check{display:flex;align-items:center;gap:11px;background:var(--raise);border-radius:11px;padding:clamp(7px,1.3vh,12px) 14px;border:1px solid var(--line)}
+.check i{flex:none;width:28px;height:28px;display:grid;place-items:center;border-radius:7px;font-style:normal;font-weight:800}
+.check.ok i{background:var(--ok);color:#06241c}.check.no{border-color:var(--bad);animation:up .55s forwards,shake .45s calc(var(--d)*1s + .55s),alarm 1.4s calc(var(--d)*1s + 1s) 2}.check.no i{background:var(--bad);color:#310a0a}
+/* triage */
+.track{position:relative;background:var(--raise);border:1px solid var(--line);border-radius:11px;padding:9px 13px}.track.pick{border-color:var(--brand);background:#47203f;animation:up .55s forwards,pulse 1.5s calc(var(--d)*1s + .5s) 3}
+.track b{display:block}.track span{font-size:.82rem;color:var(--muted)}
+.wire{position:relative;flex:0 0 clamp(36px,7vw,100px);height:3px;background:var(--line)}.wire::after{content:"";position:absolute;top:-6px;width:14px;height:14px;border-radius:50%;background:var(--brand);animation:flow 1.7s linear infinite;animation-delay:.5s}
+/* task */
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;flex:1;min-width:0}
+.stampbox{position:relative}.stampm{position:absolute;inset-block-end:12px;inset-inline-start:10px;color:var(--ok);border:3px solid var(--ok);border-radius:9px;padding:3px 12px;font-weight:800;opacity:0;animation:stamp .4s forwards;animation-delay:calc(var(--d)*1s);background:var(--surface);z-index:2}
+/* kpi */
+.kpi{flex:1;min-width:0}.meter{height:16px;background:var(--bg);border-radius:9px;overflow:hidden;margin-top:7px}.meter i{display:block;height:100%;background:repeating-linear-gradient(135deg,var(--brand),var(--brand) 8px,var(--brand2) 8px,var(--brand2) 16px);width:45%;animation:grow 1.6s ease-out backwards}
+.spark{display:flex;align-items:flex-end;gap:7px;height:clamp(60px,15vh,120px);margin-top:9px}.spark i{flex:1;background:var(--brand);border-radius:5px 5px 0 0;height:var(--h);animation:rise .8s ease-out backwards;animation-delay:calc(var(--d)*1s);opacity:.85}
+/* audit */
+.stack{position:relative;flex:0 0 clamp(130px,20vw,240px);height:clamp(130px,30vh,240px);background:var(--raise);border:1px solid var(--line);border-radius:13px;overflow:hidden;padding:11px;display:flex;flex-direction:column;gap:6px}
+.stack u{display:block;height:13px;border-radius:5px;background:var(--line);flex:none}.stack u.hit{background:var(--warn)}.stack::after{content:"";position:absolute;inset-inline:0;height:3px;background:var(--ok);box-shadow:0 0 15px var(--ok);animation:scan 3s linear infinite}
+/* clock */
+.clock{flex:none;width:clamp(100px,17vh,160px);height:clamp(100px,17vh,160px);border-radius:50%;background:conic-gradient(var(--warn) var(--c,70%),var(--raise) 0);display:grid;place-items:center;position:relative;border:4px solid var(--line)}.clock::before{content:"";position:absolute;inset:10px;border-radius:50%;background:var(--surface)}.clock i{position:absolute;bottom:50%;left:calc(50% - 2px);width:4px;height:38%;background:var(--ink);border-radius:3px;transform-origin:bottom;animation:hand 5s ease-out forwards}.clock b{position:relative;margin-top:44%;font-size:.8rem}
+/* robot */
+.robot{flex:none;width:clamp(105px,18vw,190px);animation:float 3s ease-in-out infinite}.robot svg{display:block;width:100%;height:auto}.robot .eye{transform-box:fill-box;transform-origin:center;animation:blink 3.6s infinite}.robot .ant{animation:pulse 1.2s infinite}.robot.alert .led{fill:var(--bad)}
+/* ladder */
+.ladder{flex:1;display:flex;flex-direction:column-reverse;gap:8px;min-width:0}.rung{background:var(--raise);border:1px solid var(--line);border-radius:11px;padding:8px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center;opacity:0;animation:up .5s forwards,alarm 1.2s calc(var(--d)*1s + .5s) 1;animation-delay:calc(var(--d)*1s),calc(var(--d)*1s + .5s)}.rung:last-child{border-color:var(--bad)}.rung span{color:var(--muted);font-size:.84rem;text-align:left}
+/* links */
+.map{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;width:100%}.map .card{text-align:center}.map .wide{grid-column:1/-1;text-align:center}.map .key{background:var(--brand2);border-color:var(--brand);color:#fff}.map .key small{color:#ffd9f1}
+.down{grid-column:1/-1;text-align:center;color:var(--brand);font-size:1.25rem;line-height:1}
+.hand{display:flex;flex-wrap:wrap;gap:7px;grid-column:1/-1;justify-content:center}.hand span{background:var(--raise);border:1px solid var(--line);border-radius:99px;padding:3px 11px;font-size:.84rem}
+@media (max-width:760px){body{height:auto;min-height:100dvh;overflow:auto}.stage{flex:none;min-height:420px}.scene{flex-direction:column}.wire{display:none}.book,.stack{flex:none;width:100%}.map{grid-template-columns:1fr 1fr}.rail button{font-size:.66rem}.say{min-height:0}footer{position:sticky;bottom:0;background:var(--bg);flex-wrap:wrap}.bar{order:9;flex-basis:100%}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01s!important;animation-delay:0s!important;animation-iteration-count:1!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header><a href="levoile-constitution.html">→ الدستور</a><div class="films" id="films"></div></header>
+<div class="rail" id="rail"></div>
+<section class="say" aria-live="polite"><h1 id="title"></h1><p id="why"></p></section>
+<main class="stage" id="stage"></main>
+<footer>
+  <button type="button" id="prev">→ السابق</button>
+  <button type="button" class="play" id="play">▶ تشغيل</button>
+  <button type="button" id="next">التالي ←</button>
+  <div class="bar"><i id="bar"></i></div>
+  <span class="pos" id="pos"></span>
+</footer>
+<script>
+const CASES=[
+ {key:'finance',name:'المالية',story:'فاتورة مورد اتسجلت من غير معرف مصلحة الضرائب',art:'التكاليف تثبت بمستند إلكتروني صالح.',law:'الفاتورة الإلكترونية إلزامية، وهي السند المقبول للتكاليف القابلة للخصم.',policy:['لا تسجيل لفاتورة من غير معرف صالح','مدير الضرائب ومسؤول الموردين','فواتير بلا معرف مصلحة الضرائب','إيصالات البوابة وسجل المطابقة'],sop:['استلام الفاتورة','فحص المعرف على البوابة','مطابقة الأمر والاستلام والفاتورة','التسجيل ثم جدولة الدفع'],checks:[['أمر الشراء موجود',1],['إذن الاستلام مطابق',1],['معرف مصلحة الضرائب صالح',0]],viol:['لازم معرف صالح قبل التسجيل','فاتورة مسجلة بلا معرف','خطر فقد خصم التكلفة والضريبة'],track:0,task:['حجز الدفعة وطلب فاتورة بديلة','مسؤول الموردين','تحدده السياسة','فاتورة بمعرف صالح','مدير الضرائب'],kpi:['فواتير بلا معرف صالح','عدد الفواتير بلا معرف ÷ إجمالي الفواتير','الإقرارات في موعدها'],test:'عينة فواتير مسجلة ومقارنتها بالبوابة، وفحص مدفوعات مكررة'},
+ {key:'sc',name:'Supply Chain',story:'شحنة خرجت من المصنع من غير تقرير جودة',art:'الجودة لا تُتجاوز إلا بتنازل مسجل.',law:'من يطلب البضاعة لا يجيز جودتها.',policy:['فحص نهائي مستقل قبل الإفراج، بمستوى قبول تحدده الشركة','الجودة','جداول العينات حسب السياسة','تقرير AQL أو تنازل موقع'],sop:['سحب عينة عشوائية','فحص مستقل عن الإنتاج','تسجيل النتيجة','الإفراج أو الحجز'],checks:[['أمر الإنتاج مطابق للعينة المعتمدة',1],['عدد القطع مطابق',1],['تقرير AQL قبل الإفراج',0]],viol:['لا شحن بلا تقرير أو تنازل','شحنة خرجت بلا تقرير','احتمال عيب يوصل للعميل'],track:0,task:['حجز الشحنة وفحصها وتصحيح السبب','مدير الجودة','تحدده السياسة','تقرير الفحص وقرار الجودة','رئيس Supply Chain'],kpi:['نسبة النجاح الأولى','الدفعات الناجحة أول مرة ÷ إجمالي الدفعات','عدد التنازلات'],test:'مراجعة سجل التنازلات، ومطابقة القص بالشحن، وزيارة مصنع غير معلنة'},
+ {key:'hr',name:'الموارد البشرية',story:'خصم عجز من موظفة من غير تحقيق',art:'الجزاء وفق القانون ولائحة العمل المعتمدة فقط.',law:'المادة 141: إخطار وسماع ومحضر وبدء التحقيق خلال 7 أيام. المادة 143: الخصم لا يتجاوز 5 أيام من الأساسي.',policy:['لا خصم لعجز بلا رقم قضية وتحقيق','الرواتب والقانونية','بحث في مسير الرواتب عن عجز بلا قضية','ملف التحقيق وسند الخصم'],sop:['تسجيل تاريخ الاكتشاف','فتح قضية خلال 7 أيام','إخطار كتابي وسماع ومحضر','قرار مسبب بجزاء من القائمة'],checks:[['الموظفة مسجلة بكشف الراتب',1],['قيمة العجز موثقة',1],['رقم قضية لكل خصم',0]],viol:['لا خصم بلا تحقيق','خصم من العجز بلا قضية','خرق محتمل لقانون العمل'],track:1,task:['رد المبلغ إن لزم وتصحيح المسار','مسؤول الرواتب','فورًا حسب القانونية','رأي القانونية وتسوية الراتب','مدير الموارد البشرية'],kpi:['الخصومات غير المسندة','خصومات بلا رقم قضية في مسير الرواتب','التحقيقات في موعدها'],test:'مراجعة سقف الخصم، وموظفين وهميين، ورواتب لمغادرين'},
+ {key:'ops',name:'التشغيل والمبيعات',story:'بائعة رفضت إرجاع قطعة بعد 5 أيام لأنها من التخفيضات',art:'حق العميل قانون قبل أن يكون خدمة.',law:'المادة 17: إرجاع أو استبدال خلال 14 يومًا. والخصم ليس من الاستثناءات المذكورة، وتأكيد ذلك عند المستشار.',policy:['لا عبارة «لا إرجاع على التخفيضات»، والرفض يذكر استثناءً قانونيًا','خدمة العملاء والقانونية','سجل الرفض ومتسوق خفي','سياسة مكتوبة ورفض مسبب'],sop:['التأكد من تاريخ الشراء','فحص الاستثناءات','رد المبلغ أو الاستبدال','تسجيل الحالة'],checks:[['الطلب خلال 14 يومًا',1],['القطعة ليست من الاستثناءات',1],['الرفض يذكر سندًا',0]],viol:['لا رفض داخل المدة بلا سند','رفض بسبب التخفيض','خرق محتمل وشكوى عميلة'],track:1,task:['الاتصال بالعميلة وتنفيذ حقها وتدريب الفريق','مدير الفرع','تحدده السياسة','سجل الرد وحضور التدريب','مدير المنطقة'],kpi:['رفض الإرجاع غير المسند','حالات الرفض بلا سند ÷ طلبات الإرجاع','زمن حل الشكوى'],test:'عينة حالات رفض، ومتسوق خفي، وصحة بيانات الفواتير'},
+ {key:'it',name:'تقنية المعلومات',story:'موظف ساب الشركة وحسابه على POS لسه شغال',art:'لا دخول بعد الخروج.',law:'البيانات الشخصية محمية، والاختراق يُخطر عنه خلال 72 ساعة.',policy:['إغلاق الحسابات يوم الخروج ومراجعة الصلاحيات دوريًا','التقنية والموارد البشرية','حساب نشط لمغادر','نموذج الإخلاء وسجل الإغلاق'],sop:['إخطار HR بالخروج','إغلاق كل الحسابات','استلام الأجهزة','توقيع إخلاء الطرف'],checks:[['الأجهزة اتسلمت',1],['إخلاء الطرف موقع',1],['الحساب اتقفل يوم الخروج',0]],viol:['لا حساب نشط لمغادر','حساب POS شغال بعد الخروج','خطر معاملات غير مصرح بها'],track:0,task:['إغلاق الحساب وفحص استخدامه بعد الخروج','مسؤول الصلاحيات','فورًا','تقرير الدخول','أمن المعلومات'],kpi:['إغلاق الحسابات في موعده','حسابات مغلقة يوم الخروج ÷ إجمالي الخارجين','حسابات خاملة'],test:'مقارنة كشف الخارجين بالحسابات النشطة، واختبار الاستعادة'}
+];
+const TRACKS=[['م1 تشغيلية','مهمة تصحيح، بلا أثر على الراتب'],['م2 قانونية','تصعيد فوري للقانونية'],['م3 سلوكية','ملف تحقيق وعدّادات قانونية'],['م4 حساسة','قناة مقيدة للمراجعة أو الجهة الحاكمة']];
+const steps=c=>[
+ {r:'الدستور',t:'الدستور بيحط المبدأ',w:c.story+'. ده مثال توضيحي، نبدأه من القاعدة اللي فوق الكل.',f:s=>`<div class="scene"><div class="book"><span>دستور Le Voile</span><b>${c.name}</b></div><div class="col"><div class="quote a" style="--d:.3">${c.art}</div><div class="card a" style="--d:1.2"><small>السند</small><b>${c.law}</b></div></div></div>`},
+ {r:'السياسة',t:'السياسة بتحدد المالك والدليل',w:'المبدأ بيتحول لقاعدة ليها مالك، وطريقة كشف، ودليل.',f:s=>`<div class="scene"><div class="col"><div class="quote a">${c.policy[0]}</div><div class="row">${[['المالك',c.policy[1]],['طريقة الكشف',c.policy[2]],['الدليل',c.policy[3]]].map((x,i)=>`<div class="card p" style="--d:${.7+i*.4}"><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}</div></div></div>`},
+ {r:'الإجراء',t:'الـ SOP بيقول تتنفذ إزاي',w:'خطوات محددة يتدرب عليها الموظف، ويفضل فيها فصل المهام.',f:s=>`<div class="scene"><div class="col">${c.sop.map((x,i)=>`<div class="step card a" style="--d:${i*.55}"><i>${i+1}</i><b>${x}</b></div>`).join('')}</div></div>`},
+ {r:'قائمة الفحص',t:'قائمة الفحص بتكشف الفرق',w:'كل بند إجابته نعم أو لا ومعاه دليل. هنا بند واحد فشل.',f:s=>`<div class="scene"><div class="col">${c.checks.map((x,i)=>`<div class="check ${x[1]?'ok':'no'} a" style="--d:${.3+i*.9}"><i>${x[1]?'✓':'✗'}</i><b>${x[0]}</b></div>`).join('')}</div></div>`},
+ {r:'المخالفة',t:'الفرق بيتفرز بشريًا قبل أي أثر',w:'الفرق حالة مش اتهام. مراجع بشري بيحدد المسار من الأربعة.',f:s=>`<div class="scene"><div class="col"><div class="card a"><small>المعيار</small><b>${c.viol[0]}</b></div><div class="card a" style="--d:.4"><small>الواقع</small><b>${c.viol[1]}</b></div><div class="card a" style="--d:.8"><small>الأثر</small><b>${c.viol[2]}</b></div></div><div class="wire"></div><div class="col">${TRACKS.map((x,i)=>`<div class="track a ${i===c.track?'pick':''}" style="--d:${1.2+i*.2}"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div></div>`},
+ {r:'المهمة',t:'المهمة بتتقفل بدليل',w:'مسؤول واحد وموعد ودليل. والمالك ما يتحققش من إغلاق مهمته.',f:s=>`<div class="scene"><div class="fields stampbox">${[['الإجراء',c.task[0]],['المالك',c.task[1]],['الموعد',c.task[2]],['دليل الإغلاق',c.task[3]],['اللي بيتحقق',c.task[4]]].map((x,i)=>`<div class="card a" style="--d:${i*.45}"><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}<div class="stampm" style="--d:2.8">تم التحقق</div></div></div>`},
+ {r:'المؤشر',t:'المؤشر بيوضح هل المشكلة بتتكرر',w:'السنة الأولى لقياس خط الأساس، ومفيش جزاء آلي من مؤشر. الأعمدة هنا شكل توضيحي من غير أرقام.',f:s=>`<div class="scene"><div class="card kpi a"><small>المؤشر</small><b>${c.kpi[0]}</b><div style="color:var(--muted);font-size:.9rem">${c.kpi[1]}</div><div class="spark">${[80,68,72,55,48,36].map((h,i)=>`<i style="--h:${h}%;--d:${.4+i*.2}"></i>`).join('')}</div></div><div class="col"><div class="card a" style="--d:1.2"><small>يقرأ معه</small><b>${c.kpi[2]}</b></div><div class="card a" style="--d:1.7"><small>المستهدف</small><b>بعد خط الأساس، تحدده الجهة الحاكمة</b></div><div class="card a" style="--d:2.2"><small>لو اتكرر</small><b>نغير السياسة أو الإجراء</b></div></div></div>`},
+ {r:'المراجعة',t:'الأوديت بيختبر إن ده حصل فعلًا',w:'المراجعة ما بتقفلش المهمة. بتاخد عينة، وتعيد الاختبار، وترفع للجهة الحاكمة.',f:s=>`<div class="scene"><div class="stack">${Array.from({length:9},(_,i)=>`<u class="${i===3||i===6?'hit':''}"></u>`).join('')}</div><div class="col"><div class="card a"><small>الاختبار</small><b>${c.test}</b></div><div class="card a" style="--d:.8"><small>المخرج</small><b>ملاحظة بدرجة ورد الإدارة</b></div><div class="card a" style="--d:1.5"><small>الإغلاق</small><b>إعادة اختبار للملاحظات الحرجة والمرتفعة</b></div></div></div>`}
+];
+const robot=(al)=>`<div class="robot ${al?'alert':''}"><svg viewBox="0 0 120 140" role="img" aria-label="الروبوت"><line x1="60" y1="20" x2="60" y2="6" stroke="#c0afba" stroke-width="4"/><circle class="led" cx="60" cy="6" r="6" fill="#6fdcbf"/><rect x="22" y="20" width="76" height="56" rx="15" fill="#e8dbe4"/><rect x="32" y="32" width="56" height="30" rx="10" fill="#241923"/><circle class="eye" cx="48" cy="47" r="6" fill="#6fdcbf"/><circle class="eye" cx="72" cy="47" r="6" fill="#6fdcbf"/><rect x="34" y="82" width="52" height="42" rx="11" fill="#e27cc6"/><circle cx="60" cy="103" r="9" fill="#241923"/><rect x="16" y="85" width="13" height="33" rx="6" fill="#c0afba"/><rect x="91" y="85" width="13" height="33" rx="6" fill="#c0afba"/><rect x="40" y="125" width="14" height="13" rx="4" fill="#c0afba"/><rect x="66" y="125" width="14" height="13" rx="4" fill="#c0afba"/></svg></div>`;
+const ROBOT=[
+ {r:'يقرأ',t:'الروبوت بيقرأ البيانات بس',w:'موقف توضيحي: عجز في يومية فرع اتفتح له مهمة. ده تصور مقترح ولسه مش نظام شغال. صلاحيته قراءة بس.',f:()=>`<div class="scene">${robot()}<div class="col">${[['نقطة البيع','اليومية والمعاملات'],['المهام','المالك والموعد والحالة'],['سجل القواعد','كل قاعدة بإصدار']].map((x,i)=>`<div class="card a" style="--d:${i*.5}"><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}<div class="card a" style="--d:1.8"><small>مستوى أ: تلقائي</small><b>يقرأ ويسجل ويجمع الأدلة، ومعندوش صلاحية كتابة</b></div></div></div>`},
+ {r:'يتابع',t:'بيتابع المهلة دقيقة بدقيقة',w:'المهلة والدرجة تعتمدهم الإدارة. الروبوت بيعدّ الوقت على كل مهمة مفتوحة.',f:()=>`<div class="scene">${robot()}<div class="clock" style="--c:62%"><i></i><b>المهلة</b></div><div class="col"><div class="card a"><small>المهمة</small><b>تسوية عجز اليومية</b></div><div class="card a" style="--d:.5"><small>المالك</small><b>مدير الفرع</b></div><div class="card a" style="--d:1"><small>الحالة</small><b>مفتوحة وبلا رد</b></div></div></div>`},
+ {r:'ينبه',t:'تذكير قبل ما المهلة تخلص',w:'تنبيه للمالك فيه المطلوب بالظبط والدليل الناقص، من غير أي اتهام.',f:()=>`<div class="scene">${robot()}<div class="wire"></div><div class="col"><div class="card p" style="--d:.5"><small>رسالة لمدير الفرع</small><b>مهمتك قربت تتأخر. المطلوب: تفسير الفرق ورفع المحضر.</b></div><div class="card a" style="--d:1.4"><small>النوع</small><b>تذكير تشغيلي، مش مخالفة</b></div></div></div>`},
+ {r:'عدم الرد',t:'المهلة عدت ومفيش رد',w:'عدم الرد نفسه بيتسجل. وتوقف مصدر البيانات بيطلع تنبيه، عشان الصمت ما يتفهمش إن كله سليم.',f:()=>`<div class="scene">${robot(1)}<div class="clock" style="--c:100%;--warn:#ff8f8f"><i></i><b>عدت</b></div><div class="col"><div class="check no a" style="--d:.8"><i>✗</i><b>لا رد من المالك</b></div><div class="card a" style="--d:1.5"><small>يتسجل</small><b>وقت التأخير وآخر تنبيه ومصدر البيانات</b></div></div></div>`},
+ {r:'يحلل',t:'بيحلل ويكتب مسودة',w:'بيدور على نمط ويقترح تفسيرًا ودرجة خطورة. الأعمدة توضيحية من غير أرقام. مراجع بشري بيعتمد قبل الإرسال.',f:()=>`<div class="scene">${robot()}<div class="card kpi a"><small>نمط توضيحي: فروق حسب الوردية</small><div class="spark">${[25,30,28,88,34,27].map((h,i)=>`<i style="--h:${h}%;--d:${.3+i*.2};${h>50?'background:var(--bad)':''}"></i>`).join('')}</div></div><div class="col"><div class="card a" style="--d:1.5"><small>مستوى ب: مسودة</small><b>وردية واحدة مختلفة عن الباقي. هل فيه سبب؟</b></div><div class="card a" style="--d:2.2"><small>الإنسان</small><b>يعتمد أو يعدل أو يغلق بسبب</b></div></div></div>`},
+ {r:'يوجّه',t:'بيوجّه الحالة للمسار الصح',w:'بيقترح الجهة، لكن تسمية مشتبه به وتأكيد الملاحظة قرار بشري.',f:()=>`<div class="scene">${robot()}<div class="wire"></div><div class="col">${TRACKS.map((x,i)=>`<div class="track a ${i===3?'pick':''}" style="--d:${.4+i*.25}"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div></div>`},
+ {r:'يصعّد',t:'تصعيد أوتوماتيك للإدارة العليا',w:'كل مهلة تعدّي من غير رد ترفع الحالة درجة، حسب سلم تعتمده الجهة الحاكمة. التصعيد إبلاغ، مش حكم.',f:()=>`<div class="scene">${robot(1)}<div class="ladder">${[['مالك العملية','تذكير'],['رئيس القسم','مهلة عدت'],['الرئيس التنفيذي','مهلة تانية عدت'],['الجهة الحاكمة','حالة حرجة أو بلا رد']].map((x,i)=>`<div class="rung" style="--d:${.4+i*1}"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div></div>`},
+ {r:'الحدود',t:'الروبوت يتراقب برضه',w:'المراجعة بتختبر الروبوت نفسه، بعينة من التنبيهات المغلقة وقياس الإنذارات الكاذبة.',f:()=>`<div class="scene">${robot()}<div class="fields">${['لا كتابة في الأنظمة','لا أثر وظيفي آلي','لا يعتمد مخرجاته','لا يكتم تنبيهًا بلا قرار بشري مسجل','القضايا الحساسة لقناة مقيدة','كل نتيجة قابلة لإعادة الإنتاج'].map((x,i)=>`<div class="card p" style="--d:${i*.35}"><b>${x}</b></div>`).join('')}</div></div>`}
+];
+const AUDIT=[
+ {r:'الاستقلال',t:'الأوديت يتبع الجهة الحاكمة',w:'ميثاق معتمد، ووصول كامل للبيانات والأشخاص والمواقع، وتأكيد سنوي للاستقلال.',f:()=>`<div class="scene"><div class="col"><div class="card key a" style="background:var(--brand2);color:#fff"><b>الجهة الحاكمة / لجنة الإشراف</b></div><div class="card a" style="--d:.5;border:2px solid var(--brand)"><b>رئيس المراجعة الداخلية</b><small>وظيفيًا للجهة الحاكمة، وإداريًا للرئيس التنفيذي</small></div><div class="row">${['مالية','Supply Chain','HR','تشغيل ومبيعات','تحليلات وIT'].map((x,i)=>`<div class="card p" style="--d:${1+i*.25}"><b>${x}</b></div>`).join('')}</div></div></div>`},
+ {r:'المخاطر',t:'خطة مبنية على المخاطر',w:'كل قسم وموقع وطرف ثالث في عالم المراجعة، وأي مجال مش متغطي يتبلغ. الأعمدة توضيحية.',f:()=>`<div class="scene"><div class="card kpi a"><small>خريطة مخاطر توضيحية</small><div class="spark">${[85,65,50,72,40,58].map((h,i)=>`<i style="--h:${h}%;--d:${.3+i*.2}"></i>`).join('')}</div></div><div class="col"><div class="card a" style="--d:1.3"><b>خطر متأصل × قوة الرقابة</b></div><div class="card a" style="--d:1.8"><b>المعايير تعتمدها الجهة الحاكمة</b></div></div></div>`},
+ {r:'الاختبار',t:'العينة والدليل',w:'تحليل كل البيانات لما تكون موثوقة، وعينات موثقة لما مش موثوقة.',f:()=>`<div class="scene"><div class="stack">${Array.from({length:9},(_,i)=>`<u class="${i%4===1?'hit':''}"></u>`).join('')}</div><div class="col">${['برنامج عمل وحجم عينة','دليل كافٍ وموثوق','مطابقة المستند بالواقع','الفرق: معيار، واقع، سبب، أثر'].map((x,i)=>`<div class="step card a" style="--d:${i*.5}"><i>${i+1}</i><b>${x}</b></div>`).join('')}</div></div>`},
+ {r:'التقييم',t:'درجة الملاحظة بتحدد التصعيد',w:'سلم مقترح، والمهل المالية والزمنية تحددها الجهة الحاكمة.',f:()=>`<div class="scene"><div class="ladder">${[['منخفض','مالك العملية'],['متوسط','رئيس القسم'],['مرتفع','الإدارة العليا'],['حرج','الرئيس التنفيذي والجهة الحاكمة فورًا']].map((x,i)=>`<div class="rung" style="--d:${.3+i*.7}"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('')}</div></div>`},
+ {r:'المتابعة',t:'الملاحظة ما تتقفلش بالكلام',w:'الإدارة ترد بخطة، والمراجعة تعيد الاختبار للدرجات الحرجة والمرتفعة، وقبول الخطر توقيع مسمى.',f:()=>`<div class="scene"><div class="fields stampbox">${[['رد الإدارة','خطة ومالك وموعد'],['الدليل','مستند التصحيح'],['إعادة الاختبار','من المراجعة'],['قبول الخطر','توقيع تنفيذي ويبلغ للجهة الحاكمة']].map((x,i)=>`<div class="card a" style="--d:${i*.5}"><small>${x[0]}</small><b>${x[1]}</b></div>`).join('')}<div class="stampm" style="--d:2.6">أعيد الاختبار</div></div></div>`},
+ {r:'الربط',t:'إزاي كله مربوط ببعضه',w:'الإدارات تملك الضوابط، والخط الثاني يشرف، والمراجعة تؤكد، والنتيجة ترجع تعدّل الدستور والسياسات.',f:()=>`<div class="scene"><div class="map"><div class="card wide key p"><b>الجهة الحاكمة</b><small>تعتمد الدستور والحدود</small></div><div class="down">↓</div>${['المالية','Supply Chain','الموارد البشرية','التشغيل والمبيعات','تقنية المعلومات'].map((x,i)=>`<div class="card p" style="--d:${.4+i*.2}"><b>${x}</b></div>`).join('')}<div class="hand a" style="--d:1.6"><span>مشتريات ← مطابقة مالية</span><span>مرفوض الجودة ← خصم مورد</span><span>عجز فرع ← تحقيق</span><span>خروج موظف ← قفل حساب</span><span>رفض إرجاع ← قانونية</span></div><div class="down">↓</div><div class="card wide a" style="--d:2.2;border:2px solid var(--brand)"><b>المراجعة الداخلية والروبوت</b><small>تحت مراجعة بشرية</small></div><div class="down a" style="--d:2.7">↺ الأنماط ترجع لتقييم المخاطر وتعديل الدستور</div></div></div>`}
+];
+const FILMS=[...CASES.map(c=>({key:c.key,name:c.name,steps:steps(c)})),{key:'audit',name:'إدارة الأوديت',steps:AUDIT},{key:'robot',name:'🤖 الروبوت',steps:ROBOT}];
+const STEP_MS=11000;
+const $=id=>document.getElementById(id);
+let f=0,s=0,playing=false,raf=0,t0=0;
+$('films').innerHTML=FILMS.map((x,i)=>`<button type="button" data-i="${i}">${x.name}</button>`).join('');
+function render(){
+ const fi=FILMS[f],st=fi.steps[s];
+ [...$('films').children].forEach((b,i)=>b.setAttribute('aria-pressed',i===f));
+ $('rail').innerHTML=fi.steps.map((x,i)=>`<button type="button" data-i="${i}" class="${i<s?'done':i===s?'now':''}">${i+1}. ${x.r}</button>`).join('');
+ $('title').innerHTML=st.t+'<span class="chip">سيناريو توضيحي</span>';$('why').textContent=st.w;
+ $('stage').innerHTML=st.f();
+ $('pos').textContent=`${fi.name} · ${s+1}/${fi.steps.length}`;
+ history.replaceState(null,'',`#${fi.key}/${s+1}`);
+ t0=performance.now();$('bar').style.width='0';
+}
+function go(ff,ss){f=(ff+FILMS.length)%FILMS.length;s=ss;render()}
+function next(){const n=FILMS[f].steps.length;if(s<n-1)go(f,s+1);else if(f<FILMS.length-1)go(f+1,0);else setPlay(false)}
+function prev(){if(s>0)go(f,s-1);else{const g=(f-1+FILMS.length)%FILMS.length;go(g,FILMS[g].steps.length-1)}}
+function tick(now){if(!playing)return;const p=(now-t0)/STEP_MS;$('bar').style.width=Math.min(p*100,100)+'%';if(p>=1)next();raf=requestAnimationFrame(tick)}
+function setPlay(v){playing=v;$('play').textContent=v?'⏸ إيقاف':'▶ تشغيل';cancelAnimationFrame(raf);if(v){t0=performance.now();raf=requestAnimationFrame(tick)}}
+$('films').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(+b.dataset.i,0)});
+$('rail').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(f,+b.dataset.i)});
+$('next').onclick=next;$('prev').onclick=prev;$('play').onclick=()=>setPlay(!playing);
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft')next();else if(e.key==='ArrowRight')prev();else if(e.key===' '&&e.target.tagName!=='BUTTON'){e.preventDefault();setPlay(!playing)}});
+const h=location.hash.slice(1).split('/');const fh=FILMS.findIndex(x=>x.key===h[0]);if(fh>=0){f=fh;s=Math.min(Math.max((+h[1]||1)-1,0),FILMS[f].steps.length-1)}
+render();
+</script>
+</body>
+</html>

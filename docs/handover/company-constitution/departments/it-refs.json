@@ -1,0 +1,320 @@
+{
+  "std": [
+    {
+      "k": "CIS Controls",
+      "type": "body",
+      "m": [
+        "CIS"
+      ],
+      "who": "مركز أمن الإنترنت (Center for Internet Security)، جهة غير ربحية تصدر ضوابط الأمن السيبراني.",
+      "what": "صفحة IG1 (56 إجراءً)، وقائمة الضوابط 18، ونصوص الإجراءات الحمائية للضوابط 1، 3، 4، 5، 6، 7، 8، 11، 12، 14، 15، 17 من مواصفات التقييم v8 بأرقامها ومدده (45 يوماً للحسابات الخاملة، 90 يوماً للسجلات، نسخ أسبوعي واستعادة ربع سنوية، تحديثات شهرية، فحص ربع سنوي، تمرين سنوي).",
+      "why": "خط أساس عملي منشور بأرقام صريحة لشركة متوسطة بفريق تقنية محدود.",
+      "urls": [
+        [
+          "CIS IG1",
+          "https://www.cisecurity.org/controls/implementation-groups/ig1"
+        ],
+        [
+          "CIS Controls List",
+          "https://www.cisecurity.org/controls/cis-controls-list"
+        ],
+        [
+          "Control 5",
+          "https://cas8.docs.cisecurity.org/en/latest/source/Controls5/"
+        ],
+        [
+          "Control 6",
+          "https://cas8.docs.cisecurity.org/en/latest/source/Controls6/"
+        ],
+        [
+          "Control 8",
+          "https://cas8.docs.cisecurity.org/en/latest/source/Controls8/"
+        ],
+        [
+          "Control 11",
+          "https://cas8.docs.cisecurity.org/en/latest/source/Controls11/"
+        ],
+        [
+          "Control 17",
+          "https://cas8.docs.cisecurity.org/en/latest/source/Controls17/"
+        ]
+      ]
+    },
+    {
+      "k": "NIST CSF",
+      "type": "body",
+      "m": [
+        "NIST CSF"
+      ],
+      "who": "المعهد الوطني الأمريكي للمعايير والتقنية.",
+      "what": "نص CSF 2.0 بتاريخ 26 فبراير 2024: الوظائف الست، والفئات ID.AM-01/02 وPR.AA-01/05 وPR.DS-11 وPR.PS-01/04 وGV.SC وRS.MA.",
+      "why": "إطار يربط الحوكمة بالضوابط ويعطي لغة مشتركة مع المراجعة الداخلية.",
+      "urls": [
+        [
+          "NIST CSWP 29",
+          "https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.29.pdf"
+        ],
+        [
+          "NIST CSF",
+          "https://www.nist.gov/cyberframework"
+        ]
+      ]
+    },
+    {
+      "k": "NIST SP 800-61",
+      "type": "body",
+      "m": [
+        "NIST SP 800-61"
+      ],
+      "who": "المعهد الوطني الأمريكي للمعايير والتقنية.",
+      "what": "صفحة الإصدار الثالث (أبريل 2025) كملف مجتمعي لـ CSF 2.0؛ الملخص فقط، لا الخطوات التفصيلية.",
+      "why": "مرجع الاستجابة للحوادث الحالي بدل إصدار 2012.",
+      "urls": [
+        [
+          "SP 800-61r3",
+          "https://csrc.nist.gov/pubs/sp/800/61/r3/final"
+        ]
+      ]
+    },
+    {
+      "k": "PCI DSS",
+      "type": "guide",
+      "m": [
+        "PCI DSS"
+      ],
+      "who": "مجلس معايير أمن صناعة بطاقات الدفع (PCI SSC)؛ قُرئ عبر ملخص Open Security Architecture.",
+      "what": "ملخصات المتطلبات 8.2.2، 8.2.6، 8.2.8، 8.3.4، 8.4.2، 9.5.1.x، 10.5.1، 11.3.1، 12.8، 12.10 بأرقامها (90 يوماً، 15 دقيقة، 10 محاولات، 12 شهراً).",
+      "why": "المرجع العالمي لبيئة البطاقات وأجهزة الدفع في الفروع.",
+      "urls": [
+        [
+          "OSA PCI DSS v4.0.1",
+          "https://opensecurityarchitecture.org/frameworks/pci-dss-v4"
+        ]
+      ]
+    },
+    {
+      "k": "ISO 27001",
+      "type": "guide",
+      "m": [
+        "ISO 27001"
+      ],
+      "who": "المنظمة الدولية للتقييس واللجنة الكهروتقنية الدولية؛ قُرئ عبر مواقع شارحة لأن النص مدفوع.",
+      "what": "عدد ضوابط الملحق أ (93 في 4 موضوعات) وعناوين 5.9، 5.15 إلى 5.28، 5.34، 7.4، 8.2، 8.5، 8.13، 8.15، 8.32.",
+      "why": "إطار نظام إدارة أمن المعلومات وبيان قابلية التطبيق.",
+      "urls": [
+        [
+          "ISMS.online Annex A",
+          "https://www.isms.online/iso-27001/annex-a/"
+        ],
+        [
+          "Scrut ISO 27001 controls",
+          "https://www.scrut.io/iso-27001/iso-27001-controls/"
+        ]
+      ]
+    },
+    {
+      "k": "ITIL",
+      "type": "guide",
+      "m": [
+        "ITIL"
+      ],
+      "who": "إطار إدارة خدمات التقنية (PeopleCert/AXELOS)؛ قُرئ عبر IT Process Maps المبني على ITIL V3 مع إشارة لـ ITIL 4.",
+      "what": "أنواع التغيير (قياسي، عادي، طارئ)، طلب التغيير، لجنة الطوارئ المصغرة، مراجعة ما بعد التنفيذ، ومراحل إدارة الحوادث والحادث الكبير.",
+      "why": "خطوات منشورة للتغيير والحوادث يُبنى عليها الإجراء.",
+      "urls": [
+        [
+          "Change Management",
+          "https://wiki.en.it-processmaps.com/index.php/Change_Management"
+        ],
+        [
+          "Incident Management",
+          "https://wiki.en.it-processmaps.com/index.php/Incident_Management"
+        ]
+      ]
+    },
+    {
+      "k": "NIST AI RMF",
+      "type": "body",
+      "m": [
+        "NIST AI RMF"
+      ],
+      "who": "المعهد الوطني الأمريكي للمعايير والتقنية.",
+      "what": "AI RMF 1.0 (26 يناير 2023): GOVERN 1.6 سجل الأنظمة، MAP 3.5 الإشراف البشري، MEASURE 2.5 الصلاحية، MANAGE 2.4 الإيقاف، MANAGE 4.1 المراقبة بعد التشغيل؛ وملف الذكاء التوليدي AI 600-1 (26 يوليو 2024).",
+      "why": "إطار حوكمة مخاطر الذكاء الاصطناعي لسيستم فرز الملاحظات.",
+      "urls": [
+        [
+          "NIST AI 100-1",
+          "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf"
+        ],
+        [
+          "NIST AI RMF page",
+          "https://www.nist.gov/itl/ai-risk-management-framework"
+        ]
+      ]
+    },
+    {
+      "k": "ISO 42001",
+      "type": "guide",
+      "m": [
+        "ISO 42001"
+      ],
+      "who": "المنظمة الدولية للتقييس؛ صفحة iso.org رفضت الوصول فقُرئ عبر موقع شارح.",
+      "what": "الملحق أ: 9 أهداف و38 ضابطاً، ومنها تقييم الأثر A.5 والتشغيل والمراقبة A.6.2.6 وسجلات الأحداث A.6.2.8 والاستخدام المسؤول A.9.",
+      "why": "نظام إدارة للذكاء الاصطناعي يكمل NIST AI RMF.",
+      "urls": [
+        [
+          "TCSA ISO 42001 controls",
+          "https://www.tcsa.in/frameworks/iso-42001/controls"
+        ]
+      ]
+    },
+    {
+      "k": "OWASP",
+      "type": "body",
+      "m": [
+        "OWASP"
+      ],
+      "who": "مؤسسة OWASP لأمن التطبيقات.",
+      "what": "قائمة Top 10 لتطبيقات النماذج اللغوية 2025: LLM01 حقن التعليمات، LLM06 الصلاحيات الزائدة.",
+      "why": "مخاطر حقن التعليمات عبر المستندات وصلاحيات الوكيل.",
+      "urls": [
+        [
+          "OWASP LLM Top 10",
+          "https://genai.owasp.org/llm-top-10/"
+        ]
+      ]
+    },
+    {
+      "k": "الميثاق المصري للذكاء الاصطناعي المسؤول",
+      "type": "body",
+      "m": [
+        "الميثاق المصري"
+      ],
+      "who": "المجلس الوطني للذكاء الاصطناعي في مصر (2023، الإصدار 1.0)؛ نسخة مستضافة على موقع جامعة القاهرة.",
+      "what": "المبادئ العامة، ومنها المبدأ 11 «القرار البشري النهائي» والمبدأ 4 حق الاعتراض على المخرج والمبدأ 7 خضوع دورة حياة النظام لقوانين حماية البيانات وجرائم تقنية المعلومات.",
+      "why": "مرجع مصري رسمي غير ملزم يدعم قاعدة «الذكاء الاصطناعي يقترح والإنسان يقرر».",
+      "urls": [
+        [
+          "Egyptian Charter for Responsible AI v1.0",
+          "https://cu.edu.eg/cu.ai/EgyptianCharterForResponsibleAIEnglish-v1.0.pdf"
+        ]
+      ]
+    }
+  ],
+  "yours": [
+    {
+      "k": "قانون حماية البيانات الشخصية 151/2020",
+      "dept": "it",
+      "m": [
+        "151/2020"
+      ],
+      "who": "مجلس النواب، رئاسة الجمهورية؛ نُفذ عبر مركز حماية البيانات الشخصية التابع لوزير الاتصالات.",
+      "what": "م. 6 من مواد الإصدار (مهلة سنة من اللائحة)، م. 1 (البيانات المالية والبيومترية حساسة)، م. 2، 3، 4، 5، 7 (72 ساعة و3 أيام عمل)، 8، 9، 10، 12، 14، 16، 17، 18 (3 سنوات)، 26، 27، 32 (6 أيام عمل)، والعقوبات 36 إلى 47.",
+      "note": "قُرئت ترجمة Andersen الإنجليزية غير الرسمية لا الجريدة الرسمية؛ مطابقة الأرقام بالنص العربي بند للمستشار (م12).",
+      "urls": [
+        [
+          "Law No. 151 of 2020 and Decree 816/2025 (Andersen translation)",
+          "https://eg.andersen.com/wp-content/uploads/2026/02/Law-No.-151-of-2020.pdf"
+        ],
+        [
+          "CMS summary",
+          "https://cms.law/en/are/legal-updates/egypt-s-pdpl-executive-regulations-issued-one-year-compliance-countdown-begins"
+        ]
+      ]
+    },
+    {
+      "k": "اللائحة التنفيذية 816/2025",
+      "dept": "it",
+      "m": [
+        "816/2025"
+      ],
+      "who": "قرار وزير الاتصالات وتكنولوجيا المعلومات رقم 816 لسنة 2025 (يحسم ت5: وزير الاتصالات حسب نص القرار المترجم).",
+      "what": "م. 3 (السجلات المؤمنة)، م. 5 (الإخطار بالاختراق)، م. 10 (إخطار 15 يوماً قبل إنهاء المسؤول)، م. 12 (التقرير السنوي)، م. 24، 26 (النقل للخارج و90 يوم عمل)، م. 31 (المراقبة المرئية في الأماكن العامة ورسومها)، وجدول الرسوم (إعفاء حتى 100,000 سجل).",
+      "note": "انطباق م. 31 على كاميرات داخل المحل يتوقف على تفسير «الأماكن العامة» (ت6)؛ الموقف المؤقت معاملتها كمشمولة. مهلة التوفيق انتهت 1 نوفمبر 2026 على القراءة الحرفية.",
+      "urls": [
+        [
+          "Decree 816/2025 within Andersen translation",
+          "https://eg.andersen.com/wp-content/uploads/2026/02/Law-No.-151-of-2020.pdf"
+        ],
+        [
+          "shandpartners.com briefing",
+          "https://www.shandpartners.com/insights/briefings/telecoms-media-technology/the-issuance-of-the-executive-regulations-of-the-data-protection-law-and-the-establishment-of-the-data-protection-centre/"
+        ],
+        [
+          "Clyde & Co update",
+          "https://www.clydeco.com/en/insights/2026/01/egypt-regulatory-update-on-data-privacy"
+        ]
+      ]
+    },
+    {
+      "k": "قانون مكافحة جرائم تقنية المعلومات 175/2018",
+      "dept": "it",
+      "m": [
+        "175/2018"
+      ],
+      "who": "مجلس النواب، رئاسة الجمهورية.",
+      "what": "م. 14 الدخول غير المشروع، م. 15 تجاوز حدود الصلاحية، م. 23 بيانات البطاقات، م. 29 مسؤولية مدير النظام عن الإهمال في احتياطات الأمان، م. 35 عدم إبلاغ المدير الفعلي عن جريمة على أنظمة الكيان.",
+      "note": "م. 2 (حفظ السجلات 180 يوماً) تخص مقدمي خدمة الاتصالات لا الشركة. احتياطات الأمان في م. 29 محالة للائحة التنفيذية التي لم تُقرأ.",
+      "urls": [
+        [
+          "Law No. 175 of 2018 (Andersen translation)",
+          "https://eg.andersen.com/wp-content/uploads/2025/06/Law-No.-175-of-2018-Concerning-Information-Technology-Crimes.pdf"
+        ]
+      ]
+    },
+    {
+      "k": "منظومة الإيصال الإلكتروني (مصلحة الضرائب المصرية)",
+      "dept": "it",
+      "m": [
+        "الإيصال الإلكتروني"
+      ],
+      "who": "مصلحة الضرائب المصرية، بوابة SDK الرسمية.",
+      "what": "تفعيل جهاز POS قبل الإرسال، UUID مبني على محتوى الإيصال والإيصال السابق من نفس الجهاز، الإيصال المرتجع، رفض الإرسال المكرر خلال 10 دقائق، خطأ تجاوز الحجم.",
+      "note": "السند القانوني للإلزام وانضمام Le Voile للملحق لم يُقرأ (بند م22 للمستشار الضريبي)، ولا توجد في الصفحات المقروءة مهلة للإرسال بعد انقطاع الإنترنت.",
+      "urls": [
+        [
+          "ETA eReceipt API",
+          "https://sdk.invoicing.eta.gov.eg/ereceiptapi/"
+        ],
+        [
+          "ETA Submit Receipt",
+          "https://sdk.invoicing.eta.gov.eg/ereceiptapi/02-submit-receipt/"
+        ],
+        [
+          "ETA UUID",
+          "https://sdk.invoicing.eta.gov.eg/toolkitapi/04-uuid/"
+        ]
+      ]
+    }
+  ],
+  "dropped": [
+    {
+      "n": "أرقام SLA P1 إلى P4 ونسبة 95% وتشغيل POS 99.5% من الصفحة القديمة",
+      "why": "مصادر موردين وممارسة غير منشورة؛ الأهداف تُترك للجهة الحاكمة بعد خط الأساس."
+    },
+    {
+      "n": "نطاق غرامات 200 ألف إلى 5 ملايين جنيه كرقم عام (Clyde & Co)",
+      "why": "استُبدل بالمواد المحددة في القانون نفسه (36 إلى 45)."
+    },
+    {
+      "n": "طول كلمة المرور 12 حرفاً وتغييرها كل 90 يوماً (PCI DSS 8.3.6/8.3.9)",
+      "why": "الملخص المقروء لم يذكر الرقم؛ استُخدم رقم CIS 5.2 المقروء نصاً."
+    },
+    {
+      "n": "مهلة إرسال الإيصال الإلكتروني بعد العمل دون اتصال",
+      "why": "لم ترد في صفحات SDK المقروءة."
+    },
+    {
+      "n": "مدة حفظ تسجيلات الكاميرات",
+      "why": "لا نص مصري مقروء يحددها؛ تُترك للجهة الحاكمة والمستشار."
+    },
+    {
+      "n": "تعريفات وأهداف ITIL الرسمية لمعدل نجاح التغيير",
+      "why": "لم يُقرأ منشور AXELOS/PeopleCert؛ الصفحة المقروءة لا تذكر مؤشرات."
+    },
+    {
+      "n": "صفحة iso.org لـ ISO/IEC 42001",
+      "why": "أعادت 403؛ استُخدم موقع شارح ووُسمت البنود [~]."
+    }
+  ]
+}

@@ -7,6 +7,7 @@ use App\Exceptions\TicketTransitionDenied;
 use App\Models\ChecklistQuestion;
 use App\Models\Department;
 use App\Models\Notification;
+use App\Models\Observation;
 use App\Models\Ticket;
 use App\Models\TicketUpdate;
 use App\Models\User;
@@ -125,11 +126,28 @@ class TicketService
      * May this user move the ticket to closed: its creator, super_admin / ops_manager, the branch's
      * store manager, the area manager of the branch, or the manager of the ticket's department.
      */
+    /**
+     * A ticket raised from a desk review (CCTV cameras, finance documents): nothing on site to photograph, so
+     * closing needs no after photo and the reporter's approval is the verification (2026-11-03).
+     */
+    public static function fromDeskReview(Ticket $ticket): bool
+    {
+        return $ticket->observation_id !== null
+            && Observation::whereKey($ticket->observation_id)
+                ->whereHas('visit', fn ($q) => $q->where('type', 'desk'))->exists();
+    }
+
     public function canClose(Ticket $ticket, User $user): bool
     {
         $userId = (int) $user->id;
 
         if ($ticket->created_by !== null && (int) $ticket->created_by === $userId) {
+            return true;
+        }
+
+        // The manager of the department that reported the problem approves its solution.
+        if ($user->is_department_manager && $user->department_id !== null && $ticket->observation_id !== null
+            && (int) Observation::whereKey($ticket->observation_id)->value('reporting_department_id') === (int) $user->department_id) {
             return true;
         }
 
@@ -238,7 +256,7 @@ class TicketService
             $hasAfterEvidence = TicketUpdate::where('ticket_id', $ticket->id)
                 ->where('evidence_kind', 'after')
                 ->exists();
-            if (! $hasAfterEvidence) {
+            if (! $hasAfterEvidence && ! self::fromDeskReview($ticket)) {
                 throw TicketTransitionDenied::afterEvidenceRequired();
             }
         }

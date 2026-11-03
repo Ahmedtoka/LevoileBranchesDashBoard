@@ -51,6 +51,23 @@
                         "risk": "high"
                     }
                 ]
+            },
+            {
+                "code": "CCTV-OPEN-LOCKED",
+                "label_ar": "غلق باب الفرع وعدم استقبال العملاء في الميعاد",
+                "label_en": "Branch door kept locked after opening time",
+                "keywords": [
+                    "غلق الباب",
+                    "بالمفتاح",
+                    "الفرع مقفول",
+                    "locked",
+                    "door"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
             }
         ]
     },
@@ -127,6 +144,73 @@
                 "cc": [
                     "lp"
                 ],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-CASH-SAFE",
+                "label_ar": "ترك التقفيل أو فلوس العهدة خارج الخزينة",
+                "label_en": "Day close or float left outside the safe",
+                "keywords": [
+                    "الخزينة",
+                    "التقفيل",
+                    "العهدة",
+                    "safe"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-CASH-DRAWER-NO-SLIP",
+                "label_ar": "إخراج فلوس من درج الكاش بدون ورقة",
+                "label_en": "Cash taken from the drawer without a slip",
+                "keywords": [
+                    "درج الكاش",
+                    "فلوس",
+                    "بدون ورقة",
+                    "cash drawer"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-CASH-CUSTOMER-DATA",
+                "label_ar": "تسجيل بيانات العملاء غلط على السيستم",
+                "label_en": "Customer data entered incorrectly on the POS",
+                "keywords": [
+                    "بيانات العملاء",
+                    "رقم الموبايل",
+                    "customer data"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-FOOD",
+                "label_ar": "دخول أكل في منطقة الكاش أو الاستوك",
+                "label_en": "Food brought into the cash or stock area",
+                "keywords": [
+                    "أكل",
+                    "ماكولات",
+                    "كشري",
+                    "food"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
                 "extra_fields": []
             }
         ]
@@ -212,6 +296,144 @@
                 "responsible": "operation",
                 "cc": [],
                 "extra_fields": []
+            },
+            {
+                "code": "CCTV-FLOOR-NO-UNIFORM",
+                "label_ar": "عدم ارتداء اليونيفورم",
+                "label_en": "Not wearing the uniform",
+                "keywords": [
+                    "يونيفورم",
+                    "uniform"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-FLOOR-UNIFORM-EARLY",
+                "label_ar": "تغيير اليونيفورم قبل انتهاء وقت العمل",
+                "label_en": "Changing out of uniform before shift end",
+                "keywords": [
+                    "تغيير اليونيفورم",
+                    "قبل انتهاء",
+                    "uniform",
+                    "early"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": [
+                    {
+                        "key": "minutes",
+                        "type": "number",
+                        "label_ar": "عدد الدقائق",
+                        "label_en": "Minutes",
+                        "required": false
+                    }
+                ]
+            },
+            {
+                "code": "CCTV-FLOOR-BREAK",
+                "label_ar": "مخالفة وقت البريك (خروج بعد وقته أو تأخير بعده)",
+                "label_en": "Break time breach (late start or late return)",
+                "keywords": [
+                    "بريك",
+                    "break"
+                ],
+                "kind": "issue",
+                "risk": "low",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": [
+                    {
+                        "key": "minutes",
+                        "type": "number",
+                        "label_ar": "عدد الدقائق",
+                        "label_en": "Minutes",
+                        "required": false
+                    }
+                ]
+            },
+            {
+                "code": "CCTV-FLOOR-SHELVES",
+                "label_ar": "الوقوف على الشيلفات",
+                "label_en": "Standing on the shelves",
+                "keywords": [
+                    "شيلفات",
+                    "رفوف",
+                    "shelves"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-FLOOR-CONDUCT",
+                "label_ar": "سلوك غير لائق وقت العمل (هزار، تصوير، مشاهدة ماتش)",
+                "label_en": "Misconduct during work (horseplay, filming, watching a match)",
+                "keywords": [
+                    "هزار",
+                    "تيك توك",
+                    "ماتش",
+                    "misconduct"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-FLOOR-CLOSING",
+                "label_ar": "عدم هندلة الفرع قبل المغادرة (نور، كمبيوتر، ترتيب)",
+                "label_en": "Branch not closed down properly (lights, computer, tidying)",
+                "keywords": [
+                    "هندلة",
+                    "غلق النور",
+                    "الكمبيوتر",
+                    "closing"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-FLOOR-LEFT-POST",
+                "label_ar": "ترك الفرع أو ترك موظف بمفرده وقت العمل",
+                "label_en": "Leaving the branch or a colleague alone during work",
+                "keywords": [
+                    "ترك الفرع",
+                    "بمفرده",
+                    "خارج الفرع",
+                    "left post"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-FLOOR-CUSTOMER-CONDUCT",
+                "label_ar": "التعامل مع العميل بأسلوب غير لائق",
+                "label_en": "Improper conduct towards a customer",
+                "keywords": [
+                    "العميلة",
+                    "اسلوب",
+                    "customer"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
             }
         ]
     },
@@ -288,6 +510,21 @@
                     "stockroom",
                     "team",
                     "floor empty"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "CCTV-STOCK-LAPTOP-MISUSE",
+                "label_ar": "استخدام لاب توب الفرع لغير الشغل",
+                "label_en": "Branch laptop used for non-work",
+                "keywords": [
+                    "لاب توب",
+                    "يوتيوب",
+                    "laptop"
                 ],
                 "kind": "issue",
                 "risk": "medium",
@@ -682,9 +919,9 @@
     {
         "department": "finance",
         "category": {
-            "slug": "financial_compliance",
-            "name_ar": "الالتزام المالي",
-            "name_en": "Financial compliance",
+            "slug": "returns",
+            "name_ar": "المرتجعات بدون فواتير أو ميل أو اكسكلوزيف",
+            "name_en": "Returns without invoice, email or exclusive voucher",
             "default_kind": "issue",
             "risk": "high",
             "responsible": "operation",
@@ -695,14 +932,14 @@
         "items": [
             {
                 "code": "FIN-RETURNS-NO-INVOICE",
-                "label_ar": "مرتجعات بدون فواتير",
-                "label_en": "Returns without invoices",
+                "label_ar": "مرتجع بدون فاتورة وبدون ميل",
+                "label_en": "Return without invoice or email",
                 "keywords": [
                     "مرتجع",
-                    "مرتجعات",
-                    "فاتورة",
-                    "returns",
-                    "invoice"
+                    "بدون فاتورة",
+                    "بدون مستند",
+                    "ميل",
+                    "return"
                 ],
                 "kind": "issue",
                 "risk": "high",
@@ -713,15 +950,13 @@
                 "extra_fields": []
             },
             {
-                "code": "FIN-JOURNALS-NEGLECTED",
-                "label_ar": "إهمال اليوميات",
-                "label_en": "Daily journals neglected",
+                "code": "FIN-RETURN-LATE",
+                "label_ar": "مرتجع بعد 14 يوم بدون موافقة",
+                "label_en": "Return after 14 days without approval",
                 "keywords": [
-                    "يوميات",
-                    "يومية",
-                    "إهمال",
-                    "journal",
-                    "daily report"
+                    "14 يوم",
+                    "موافقة",
+                    "مرتجع"
                 ],
                 "kind": "issue",
                 "risk": "high",
@@ -732,15 +967,12 @@
                 "extra_fields": []
             },
             {
-                "code": "FIN-EMAILS-NOT-SENT",
-                "label_ar": "عدم إرسال الإيميلات",
-                "label_en": "Required emails not sent",
+                "code": "FIN-RETURN-LOST",
+                "label_ar": "مرتجع مفقود",
+                "label_en": "Missing return",
                 "keywords": [
-                    "إيميل",
-                    "ايميلات",
-                    "إرسال",
-                    "email",
-                    "not sent"
+                    "مرتجع مفقود",
+                    "مفقود"
                 ],
                 "kind": "issue",
                 "risk": "high",
@@ -748,9 +980,402 @@
                 "cc": [
                     "lp"
                 ],
+                "extra_fields": [
+                    {
+                        "key": "amount",
+                        "type": "number",
+                        "label_ar": "المبلغ (جنيه)",
+                        "label_en": "Amount (EGP)",
+                        "required": false
+                    }
+                ]
+            },
+            {
+                "code": "FIN-EXCLUSIVE-VOUCHER",
+                "label_ar": "عدم إرفاق فاوتشر أو إيصال اكسكلوزيف",
+                "label_en": "Exclusive voucher or receipt not attached",
+                "keywords": [
+                    "اكسكلوزيف",
+                    "فاوتشر",
+                    "كوبون"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
                 "extra_fields": []
             }
         ]
+    },
+    {
+        "department": "finance",
+        "category": {
+            "slug": "float",
+            "name_ar": "تسوية العهدة",
+            "name_en": "Float settlement",
+            "default_kind": "issue",
+            "risk": "high",
+            "responsible": "operation",
+            "cc": [
+                "lp"
+            ]
+        },
+        "items": [
+            {
+                "code": "FIN-FLOAT-UNSETTLED",
+                "label_ar": "عهدة مش متسوّية",
+                "label_en": "Float not settled",
+                "keywords": [
+                    "العهدة",
+                    "تسوية"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": [
+                    {
+                        "key": "amount",
+                        "type": "number",
+                        "label_ar": "المبلغ (جنيه)",
+                        "label_en": "Amount (EGP)",
+                        "required": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "department": "finance",
+        "category": {
+            "slug": "cash_variance",
+            "name_ar": "العجز والزيادة",
+            "name_en": "Cash shortage and overage",
+            "default_kind": "issue",
+            "risk": "critical",
+            "responsible": "operation",
+            "cc": [
+                "lp"
+            ]
+        },
+        "items": [
+            {
+                "code": "FIN-CASH-SHORTAGE",
+                "label_ar": "عجز باليومية",
+                "label_en": "Shortage in the day close",
+                "keywords": [
+                    "عجز"
+                ],
+                "kind": "issue",
+                "risk": "critical",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": [
+                    {
+                        "key": "amount",
+                        "type": "number",
+                        "label_ar": "المبلغ (جنيه)",
+                        "label_en": "Amount (EGP)",
+                        "required": false
+                    }
+                ]
+            },
+            {
+                "code": "FIN-CASH-OVERAGE",
+                "label_ar": "زيادة باليومية",
+                "label_en": "Overage in the day close",
+                "keywords": [
+                    "زيادة"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": [
+                    {
+                        "key": "amount",
+                        "type": "number",
+                        "label_ar": "المبلغ (جنيه)",
+                        "label_en": "Amount (EGP)",
+                        "required": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "department": "finance",
+        "category": {
+            "slug": "freezes",
+            "name_ar": "التجميدات",
+            "name_en": "Cash freezes (deposits)",
+            "default_kind": "issue",
+            "risk": "high",
+            "responsible": "operation",
+            "cc": [
+                "lp"
+            ]
+        },
+        "items": [
+            {
+                "code": "FIN-FREEZE-MISMATCH",
+                "label_ar": "تجميد اليومية مختلف عن إيصال التجميد",
+                "label_en": "Day freeze differs from the freeze receipt",
+                "keywords": [
+                    "تجميد",
+                    "ايصال التجميد"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": [
+                    {
+                        "key": "amount",
+                        "type": "number",
+                        "label_ar": "المبلغ (جنيه)",
+                        "label_en": "Amount (EGP)",
+                        "required": false
+                    }
+                ]
+            },
+            {
+                "code": "FIN-FREEZE-ISSUE",
+                "label_ar": "مشكلة في التجميدات",
+                "label_en": "Freeze problem",
+                "keywords": [
+                    "تجميد",
+                    "التجميدات"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "finance",
+        "category": {
+            "slug": "journals",
+            "name_ar": "تقفيل اليوميات والمستندات",
+            "name_en": "Day-close journals and documents",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "FIN-JOURNALS-NEGLECTED",
+                "label_ar": "إهمال تقفيل اليوميات وإرسالها",
+                "label_en": "Day closes neglected or sent late",
+                "keywords": [
+                    "اليوميات",
+                    "تقفيل",
+                    "اهمال"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "FIN-ZREPORT",
+                "label_ar": "نسيان تقفيل Z report",
+                "label_en": "Z report not closed",
+                "keywords": [
+                    "zreport",
+                    "z report",
+                    "زد ريبورت"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "FIN-JOURNAL-SERIAL-SKIP",
+                "label_ar": "إسقاط سريال يومية",
+                "label_en": "Day-close serial skipped",
+                "keywords": [
+                    "سريال",
+                    "اسقاط"
+                ],
+                "kind": "issue",
+                "risk": "high",
+                "responsible": "operation",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": []
+            },
+            {
+                "code": "FIN-VISA-CLOSE",
+                "label_ar": "عدم إرسال تقفيل ماكينة الفيزا مع اليومية",
+                "label_en": "Card terminal close not sent with the day close",
+                "keywords": [
+                    "الفيزا",
+                    "ماكينة"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "finance",
+        "category": {
+            "slug": "expenses",
+            "name_ar": "توجيهات المصاريف",
+            "name_en": "Expense instructions",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "FIN-EXPENSE-INSTRUCTIONS",
+                "label_ar": "عدم الالتزام بتعليمات صرف المصروفات",
+                "label_en": "Expense instructions not followed",
+                "keywords": [
+                    "المصروفات",
+                    "المصاريف",
+                    "تعليمات"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "FIN-CASH-PERSONAL-PAYMENT",
+                "label_ar": "سداد مبلغ شخصي من الموظف على مصروف الفرع",
+                "label_en": "Employee paid a branch expense personally",
+                "keywords": [
+                    "سداد",
+                    "شخصي"
+                ],
+                "kind": "issue",
+                "risk": "critical",
+                "responsible": "lp",
+                "cc": [
+                    "lp"
+                ],
+                "extra_fields": [
+                    {
+                        "key": "amount",
+                        "type": "number",
+                        "label_ar": "المبلغ (جنيه)",
+                        "label_en": "Amount (EGP)",
+                        "required": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "department": "finance",
+        "category": {
+            "slug": "emails",
+            "name_ar": "الإيميلات المطلوبة",
+            "name_en": "Required emails",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "FIN-EMAILS-NOT-SENT",
+                "label_ar": "عدم إرسال الإيميلات المطلوبة",
+                "label_en": "Required emails not sent",
+                "keywords": [
+                    "ايميل",
+                    "الإيميلات",
+                    "ميل"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "finance",
+        "category": {
+            "slug": "documents",
+            "name_ar": "مستندات اليومية وإيصالات المصاريف",
+            "name_en": "Day-close documents and expense receipts",
+            "default_kind": "issue",
+            "risk": "medium",
+            "responsible": "operation",
+            "cc": []
+        },
+        "items": [
+            {
+                "code": "FIN-DOCS-MISSING",
+                "label_ar": "مستندات ناقصة في اليومية",
+                "label_en": "Documents missing from the day close",
+                "keywords": [
+                    "مستندات",
+                    "ناقصه"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            },
+            {
+                "code": "FIN-EXPENSE-RECEIPTS-MISSING",
+                "label_ar": "إيصالات مصاريف ناقصة",
+                "label_en": "Expense receipts missing",
+                "keywords": [
+                    "ايصالات",
+                    "مصاريف"
+                ],
+                "kind": "issue",
+                "risk": "medium",
+                "responsible": "operation",
+                "cc": [],
+                "extra_fields": []
+            }
+        ]
+    },
+    {
+        "department": "finance",
+        "category": {
+            "slug": "financial_compliance",
+            "name_ar": "الالتزام المالي",
+            "name_en": "Financial compliance",
+            "default_kind": "issue",
+            "risk": "high",
+            "responsible": "operation",
+            "cc": [
+                "lp"
+            ],
+            "active": false
+        },
+        "items": []
     },
     {
         "department": "finance",
@@ -760,45 +1385,11 @@
             "name_en": "Cash violation",
             "default_kind": "issue",
             "risk": "critical",
-            "responsible": "lp",
-            "cc": []
+            "responsible": "operation",
+            "cc": [],
+            "active": false
         },
-        "items": [
-            {
-                "code": "FIN-CASH-PERSONAL-PAYMENT",
-                "label_ar": "سداد شخصي من الموظف",
-                "label_en": "Personal payment by the employee",
-                "keywords": [
-                    "سداد",
-                    "شخصي",
-                    "دفع",
-                    "personal payment",
-                    "cash"
-                ],
-                "kind": "issue",
-                "risk": "critical",
-                "responsible": "lp",
-                "cc": [],
-                "extra_fields": []
-            },
-            {
-                "code": "FIN-CASH-SHORTAGE",
-                "label_ar": "عجز نقدية",
-                "label_en": "Cash shortage",
-                "keywords": [
-                    "عجز",
-                    "نقدية",
-                    "كاش",
-                    "shortage",
-                    "cash"
-                ],
-                "kind": "issue",
-                "risk": "critical",
-                "responsible": "lp",
-                "cc": [],
-                "extra_fields": []
-            }
-        ]
+        "items": []
     },
     {
         "department": "finance",

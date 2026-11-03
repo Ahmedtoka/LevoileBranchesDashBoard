@@ -48,7 +48,7 @@ class ReportsTest extends TestCase
         // Wednesday 28 Oct 2026: the week is Sat 24 Oct -> Fri 30 Oct; the previous one Sat 17 -> Fri 23.
         Carbon::setTestNow('2026-10-28 10:00:00');
 
-        $this->cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $this->cctv = Seeds::department('vm', ['is_reporting' => true]);
         $this->stock = Seeds::department('stock_control', ['is_reporting' => true]);
         $this->operation = Seeds::department('operation', ['is_reporting' => true]);
         $this->zayed = Seeds::branch('Sheikh Zayed');

@@ -39,7 +39,7 @@ class ReviewTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $this->cctv = Seeds::department('vm', ['is_reporting' => true]);
         $this->operation = Seeds::department('operation');
         $this->maintenance = Seeds::department('maintenance');
         $this->branch = Seeds::branch('Saraya Mall');

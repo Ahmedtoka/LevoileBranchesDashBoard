@@ -28,7 +28,7 @@ class Observation extends Model
         'classification_status', 'classification_reviewed_by', 'classification_reviewed_at',
         'repeat_count', 'escalated_from_risk_level_id', 'created_by', 'import_source', 'import_row',
         'last_overdue_notified_at', 'close_reason', 'closed_by', 'closed_at',
-        'employee_name', 'penalty', 'follow_up_at',
+        'employee_name', 'penalty', 'follow_up_at', 'employee_id',
     ];
 
     protected $casts = [
@@ -73,6 +73,11 @@ class Observation extends Model
     public function visit(): BelongsTo
     {
         return $this->belongsTo(ObservationVisit::class, 'observation_visit_id');
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
     }
 
     public function branch(): BelongsTo

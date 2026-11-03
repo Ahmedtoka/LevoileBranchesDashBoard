@@ -9,8 +9,8 @@ class AdminNavTest extends TestCase
 {
     public function test_sidebar_links_follow_the_catalog_policy(): void
     {
-        $cctv = Seeds::department('cctv', ['is_reporting' => true]);
-        $hr = Seeds::department('hr', ['is_reporting' => false]);
+        $cctv = Seeds::department('vm', ['is_reporting' => true]);
+        $hr = Seeds::department('marketing', ['is_reporting' => false]);
 
         // super_admin: every admin link.
         $this->actingAs(Seeds::user('super_admin'))->get('/dashboard')->assertOk()

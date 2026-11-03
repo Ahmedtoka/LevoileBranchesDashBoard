@@ -23,7 +23,7 @@ class DashboardTest extends TestCase
     {
         parent::setUp();
 
-        $this->cctv = Seeds::department('cctv', ['is_reporting' => true]);
+        $this->cctv = Seeds::department('vm', ['is_reporting' => true]);
         $this->creator = Seeds::user('department_employee', ['department_id' => $this->cctv->id]);
     }
 
@@ -109,7 +109,7 @@ class DashboardTest extends TestCase
 
     public function test_department_manager_dashboard_scoped_to_their_department(): void
     {
-        $vm = Seeds::department('vm', ['is_reporting' => true]);
+        $vm = Seeds::department('hr', ['is_reporting' => true]);
         $manager = Seeds::user('department_manager', ['department_id' => $this->cctv->id, 'is_department_manager' => true]);
         $branch = Seeds::branch('Alpha');
         $this->observation($branch);

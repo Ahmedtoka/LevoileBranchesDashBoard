@@ -46,12 +46,25 @@
     $canKpi = $kpiOps || $dm;
     $deptSlug = optional(auth()->user()->department)->slug;
     $purcAdmin = in_array(optional(auth()->user()->role)->slug, ['super_admin', 'ops_manager', 'branch_director'], true) || in_array($deptSlug, ['purchasing', 'finance'], true);
+    $homeModule = \App\Support\DepartmentHome::prefixFor(auth()->user());
 @endphp
 <nav class="sidebar p-3">
     <div class="brand fs-5 mb-3"><i class="bi bi-shop"></i> LeVoile</div>
+    @if($homeModule)
+    {{-- A CCTV / finance member: their department's menu only --}}
+    @include('dashboard.'.$homeModule.'.partials.nav')
+    @include('dashboard.tasks.partials.nav')
+    @else
     <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="bi bi-grid me-2"></i>{{ t('nav.overview','نظرة عامة') }}</a>
+    @if(\App\Support\ViolationsBoard::canView(auth()->user()))
+        <a href="{{ route('board.index') }}" class="{{ request()->routeIs('board.*') ? 'active' : '' }}"><i class="bi bi-grid-3x3-gap me-2"></i>{{ dt('لوحة المخالفات', 'Violations board') }}</a>
+    @endif
     <a href="{{ route('tickets.index') }}" class="{{ request()->routeIs('tickets.index') ? 'active' : '' }}"><i class="bi bi-ticket-detailed me-2"></i>{{ t('nav.tickets','التذاكر') }}</a>
+    @include('dashboard.tasks.partials.nav')
 
+    @include('dashboard.cctv.partials.nav')
+    @include('dashboard.finance.partials.nav')
+    @include('dashboard.hr.partials.nav')
     @include('dashboard.observations.partials.nav')
     @include('dashboard.observations.partials.admin-nav')
 
@@ -100,6 +113,7 @@
         <a href="{{ route('purchasing.kpis') }}" class="{{ request()->routeIs('purchasing.kpis') ? 'active' : '' }}"><i class="bi bi-graph-up-arrow me-2"></i>{{ dt('مؤشرات المشتريات','Purchasing KPIs') }}</a>
     @endif
     </details>
+    @endif
 
     <hr class="text-secondary">
     <div class="small text-secondary px-2">
